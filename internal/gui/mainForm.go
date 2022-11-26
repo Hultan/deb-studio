@@ -3,9 +3,13 @@ package gui
 import (
 	"fmt"
 	"os"
+	"os/user"
+	"path"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gotk3/gotk3/gtk"
 
+	"github.com/hultan/deb-studio/internal/config"
 	builder "github.com/hultan/deb-studio/internal/gtk"
 )
 
@@ -55,27 +59,50 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 	statusBar := m.builder.GetObject("mainWindow_StatusBar").(*gtk.Statusbar)
 	statusBar.Push(statusBar.GetContextId("debstudio"), m.getApplicationString())
 
-	// Open form button
-	openFormButton := m.builder.GetObject("mainWindow_OpenExtraFormButton").(*gtk.Button)
-	openFormButton.Connect(
-		"clicked", func() {
-			openExtraForm()
-		},
-	)
-
-	// Open dialog button
-	openDialogButton := m.builder.GetObject("mainWindow_OpenSettingsDialogButton").(*gtk.Button)
-	openDialogButton.Connect(
-		"clicked", func() {
-			openSettingsDialog(m.window)
-		},
-	)
-
 	// Menu
 	m.setupMenu()
 
 	// Show the main window
 	m.window.ShowAll()
+
+	path := getConfigPath()
+
+	c, err := config.Load(path)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	fmt.Printf("%+v\n", c)
+
+	// Modify the indent level of the ConfigState only.  The global
+	// configuration is not modified.
+	scs := spew.ConfigState{
+		Indent:                  "\t",
+		DisableCapacities:       true,
+		DisableMethods:          true,
+		DisablePointerMethods:   true,
+		DisablePointerAddresses: true,
+	}
+	scs.Dump(c)
+
+	// c := &config.Config{}
+	// c.Control.Package = "debStudio"
+	// c.Control.Source = "source"
+	// c.Control.Version = "1.0.0"
+	// c.Control.Section = "section"
+	// c.Control.Priority = "high"
+	// c.Control.Architecture = "amd64"
+	// c.Control.Essential = true
+	// c.Control.Depends = "dpkg"
+	// c.Control.InstalledSize = "1024"
+	// c.Control.Maintainer = "Per Hultqvist"
+	// c.Control.Description = "A deb file creator"
+	// c.Control.Homepage = "www.softteam.se"
+	// c.Control.BuiltUsing = "debStudio"
+	// err = c.Save(path)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
 }
 
 func (m *MainForm) getApplicationString() string {
@@ -99,4 +126,23 @@ func (m *MainForm) setupMenu() {
 			m.openAboutDialog()
 		},
 	)
+}
+
+// Get path to the config file
+// Mode = "test" returns test config path
+// otherwise returns normal config path
+func getConfigPath() string {
+	home := getHomeDirectory()
+
+	return path.Join(home, "deb-studio/test.json")
+}
+
+// Get current users home directory
+func getHomeDirectory() string {
+	u, err := user.Current()
+	if err != nil {
+		errorMessage := fmt.Sprintf("Failed to get user home directory : %s", err)
+		panic(errorMessage)
+	}
+	return u.HomeDir
 }
