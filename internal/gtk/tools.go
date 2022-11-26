@@ -1,4 +1,4 @@
-package gtkBuilder
+package gtk
 
 import (
 	"os"

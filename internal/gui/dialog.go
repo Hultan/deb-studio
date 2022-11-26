@@ -1,14 +1,14 @@
-package debstudio
+package gui
 
 import (
 	"github.com/gotk3/gotk3/gtk"
 
-	"github.com/hultan/deb-studio/internal/gtkBuilder"
+	builder "github.com/hultan/deb-studio/internal/gtk"
 )
 
 func openSettingsDialog(parent gtk.IWindow) {
 	// Create a new softBuilder
-	builder, err := gtkBuilder.Create("main.glade")
+	builder, err := builder.Create("main.glade")
 	if err != nil {
 		panic(err)
 	}

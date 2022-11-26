@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	debStudio "github.com/hultan/deb-studio/internal/debstudio"
+	debStudio "github.com/hultan/deb-studio/internal/gui"
 
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"

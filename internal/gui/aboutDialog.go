@@ -1,10 +1,10 @@
-package debstudio
+package gui
 
 import (
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 
-	"github.com/hultan/deb-studio/internal/gtkBuilder"
+	builder "github.com/hultan/deb-studio/internal/gtk"
 )
 
 func (m *MainForm) openAboutDialog() {
@@ -15,7 +15,7 @@ func (m *MainForm) openAboutDialog() {
 	about.SetComments("Create deb packages for debian based linux distributions.")
 	about.SetVersion(applicationVersion)
 	about.SetCopyright(applicationCopyRight)
-	image, err := gdk.PixbufNewFromFile(gtkBuilder.GetResourcePath("debstudio_256.png"))
+	image, err := gdk.PixbufNewFromFile(builder.GetResourcePath("debstudio_256.png"))
 	if err == nil {
 		about.SetLogo(image)
 	}

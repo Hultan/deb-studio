@@ -1,4 +1,4 @@
-package gtkBuilder
+package gtk
 
 import (
 	"errors"
@@ -8,12 +8,12 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-type GtkBuilder struct {
+type Builder struct {
 	Builder *gtk.Builder
 }
 
-// Create : Creates a GtkBuilder
-func Create(fileNameOrPath string) (*GtkBuilder, error) {
+// Create : Creates a Builder
+func Create(fileNameOrPath string) (*Builder, error) {
 	if !fileExists(fileNameOrPath) {
 		fileNameOrPath = GetResourcePath(fileNameOrPath)
 	}
@@ -23,11 +23,11 @@ func Create(fileNameOrPath string) (*GtkBuilder, error) {
 		return nil, err
 	}
 
-	return &GtkBuilder{builder}, nil
+	return &Builder{builder}, nil
 }
 
 // GetObject : Gets a gtk object by name
-func (g *GtkBuilder) GetObject(name string) glib.IObject {
+func (g *Builder) GetObject(name string) glib.IObject {
 	if g.Builder == nil {
 		panic(errors.New("need to manually set gtk.Builder or call gtkBuilder.Create() first"))
 	}

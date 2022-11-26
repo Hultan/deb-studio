@@ -1,4 +1,4 @@
-package debstudio
+package gui
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/gotk3/gotk3/gtk"
 
-	"github.com/hultan/deb-studio/internal/gtkBuilder"
+	builder "github.com/hultan/deb-studio/internal/gtk"
 )
 
 const applicationTitle = "Deb Studio"
@@ -15,7 +15,7 @@ const applicationCopyRight = "©SoftTeam AB, 2022"
 
 type MainForm struct {
 	window  *gtk.ApplicationWindow
-	builder *gtkBuilder.GtkBuilder
+	builder *builder.Builder
 }
 
 // NewMainForm : Creates a new MainForm object
@@ -30,7 +30,7 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 	gtk.Init(&os.Args)
 
 	// Create a new softBuilder
-	builder, err := gtkBuilder.Create("main.glade")
+	builder, err := builder.Create("main.glade")
 	if err != nil {
 		panic(err)
 	}
