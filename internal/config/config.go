@@ -1,21 +1,20 @@
-package applicationConfig
+package config
 
 import (
 	"encoding/json"
 	"os"
 )
 
-type Application struct {
-	Versions []ApplicationVersion `json:"versions"`
+type Config struct {
+	WorkingFolders []WorkingFolder `json:"workingFolders"`
 }
 
-type ApplicationVersion struct {
-	Description string `json:"description"`
-	Version     string `json:"version"`
+type WorkingFolder struct {
+	Path string `json:"path"`
 }
 
-// Load : Load a deb-studio application configuration file
-func Load(path string) (*Application, error) {
+// Load : Loads a deb-studio config file
+func Load(path string) (*Config, error) {
 	// Make sure the file exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return nil, err
@@ -28,7 +27,7 @@ func Load(path string) (*Application, error) {
 	}
 
 	// Parse the JSON document
-	av := &Application{}
+	av := &Config{}
 	jsonParser := json.NewDecoder(configFile)
 	err = jsonParser.Decode(av)
 	if err != nil {
@@ -43,8 +42,8 @@ func Load(path string) (*Application, error) {
 	return av, nil
 }
 
-// Save : Saves a deb-studio application configuration file
-func (av *Application) Save(path string) error {
+// Save : Saves a deb-studio config file
+func (c *Config) Save(path string) error {
 	// Open config file
 	configFile, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {
@@ -52,7 +51,7 @@ func (av *Application) Save(path string) error {
 	}
 
 	// Create JSON from config object
-	data, err := json.MarshalIndent(av, "", "\t")
+	data, err := json.MarshalIndent(c, "", "\t")
 	if err != nil {
 		return err
 	}

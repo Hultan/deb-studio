@@ -34,6 +34,7 @@ type File struct {
 	CopyFromPath string `json:"copyFromPath"`
 }
 
+// Load : Loads a deb-studio application version configuration file
 func Load(path string) (*ApplicationVersion, error) {
 	// Make sure the file exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -62,7 +63,7 @@ func Load(path string) (*ApplicationVersion, error) {
 	return av, nil
 }
 
-// Save : Saves a SoftTube configuration file
+// Save : Saves a deb-studio application version configuration file
 func (av *ApplicationVersion) Save(path string) error {
 	// Open config file
 	configFile, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
