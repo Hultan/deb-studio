@@ -65,44 +65,47 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 	// Show the main window
 	m.window.ShowAll()
 
+	load := true
 	path := getConfigPath()
+	av := &config.ApplicationVersion{}
 
-	c, err := config.Load(path)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	if load {
+		err = av.Load(path)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Printf("%+v\n", av)
+
+		// Modify the indent level of the ConfigState only.  The global
+		// configuration is not modified.
+		scs := spew.ConfigState{
+			Indent:                  "\t",
+			DisableCapacities:       true,
+			DisableMethods:          true,
+			DisablePointerMethods:   true,
+			DisablePointerAddresses: true,
+		}
+		scs.Dump(av)
+	} else {
+		av.Control.Package = "debStudio"
+		av.Control.Source = "source"
+		av.Control.Version = "1.0.0"
+		av.Control.Section = "section"
+		av.Control.Priority = "high"
+		av.Control.Architecture = "amd64"
+		av.Control.Essential = true
+		av.Control.Depends = "dpkg"
+		av.Control.InstalledSize = "1024"
+		av.Control.Maintainer = "Per Hultqvist"
+		av.Control.Description = "A deb file creator"
+		av.Control.Homepage = "www.softteam.se"
+		av.Control.BuiltUsing = "debStudio"
+		err = av.Save(path)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
-	fmt.Printf("%+v\n", c)
-
-	// Modify the indent level of the ConfigState only.  The global
-	// configuration is not modified.
-	scs := spew.ConfigState{
-		Indent:                  "\t",
-		DisableCapacities:       true,
-		DisableMethods:          true,
-		DisablePointerMethods:   true,
-		DisablePointerAddresses: true,
-	}
-	scs.Dump(c)
-
-	// c := &config.Config{}
-	// c.Control.Package = "debStudio"
-	// c.Control.Source = "source"
-	// c.Control.Version = "1.0.0"
-	// c.Control.Section = "section"
-	// c.Control.Priority = "high"
-	// c.Control.Architecture = "amd64"
-	// c.Control.Essential = true
-	// c.Control.Depends = "dpkg"
-	// c.Control.InstalledSize = "1024"
-	// c.Control.Maintainer = "Per Hultqvist"
-	// c.Control.Description = "A deb file creator"
-	// c.Control.Homepage = "www.softteam.se"
-	// c.Control.BuiltUsing = "debStudio"
-	// err = c.Save(path)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
 }
 
 func (m *MainForm) getApplicationString() string {
