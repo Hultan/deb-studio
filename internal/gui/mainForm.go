@@ -9,7 +9,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/gotk3/gotk3/gtk"
 
-	"github.com/hultan/deb-studio/internal/config"
+	"github.com/hultan/deb-studio/internal/applicationVersionConfig"
 	builder "github.com/hultan/deb-studio/internal/gtk"
 )
 
@@ -67,10 +67,9 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 
 	load := true
 	path := getConfigPath()
-	av := &config.ApplicationVersion{}
 
 	if load {
-		err = av.Load(path)
+		av, err := applicationVersionConfig.Load(path)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -88,6 +87,7 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 		}
 		scs.Dump(av)
 	} else {
+		av := &applicationVersionConfig.ApplicationVersion{}
 		av.Control.Package = "debStudio"
 		av.Control.Source = "source"
 		av.Control.Version = "1.0.0"

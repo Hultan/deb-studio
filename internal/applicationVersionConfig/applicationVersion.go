@@ -1,4 +1,4 @@
-package config
+package applicationVersionConfig
 
 import (
 	"encoding/json"
@@ -10,12 +10,6 @@ type ApplicationVersion struct {
 	PreInstall  string                    `json:"preInstall"`
 	Files       []File                    `json:"files"`
 	PostInstall string                    `json:"postInstall"`
-}
-
-type File struct {
-	Path     string `json:"path"`
-	Copy     bool   `json:"copy"`
-	CopyPath string `json:"copyPath"`
 }
 
 type ApplicationVersionControl struct {
@@ -34,31 +28,38 @@ type ApplicationVersionControl struct {
 	BuiltUsing    string `json:"built-using"`
 }
 
-func (av *ApplicationVersion) Load(path string) error {
+type File struct {
+	Path         string `json:"path"`
+	Copy         bool   `json:"copy"`
+	CopyFromPath string `json:"copyFromPath"`
+}
+
+func Load(path string) (*ApplicationVersion, error) {
 	// Make sure the file exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return err
+		return nil, err
 	}
 
 	// Open config file
 	configFile, err := os.Open(path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Parse the JSON document
+	av := &ApplicationVersion{}
 	jsonParser := json.NewDecoder(configFile)
 	err = jsonParser.Decode(av)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = configFile.Close()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return av, nil
 }
 
 // Save : Saves a SoftTube configuration file
