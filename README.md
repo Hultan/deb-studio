@@ -1,4 +1,4 @@
-# DEB STUDIO
+# DEB STUDIO [Work In Progress]
 
 An application that creates deb packages for debian based linux distributions.
 
