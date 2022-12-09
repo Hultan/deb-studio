@@ -1,0 +1,136 @@
+package gui
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/gotk3/gotk3/gtk"
+)
+
+type addFileDialog struct {
+	builder            *Builder
+	dialog             *gtk.Dialog
+	filePath           *gtk.Entry
+	installPath        *gtk.Entry
+	staticRadioButton  *gtk.RadioButton
+	dynamicRadioButton *gtk.RadioButton
+	runScriptCheckbox  *gtk.CheckButton
+	runScriptTextView  *gtk.TextView
+}
+
+func (m *MainForm) newAddFileDialog() *addFileDialog {
+	dlg := &addFileDialog{builder: m.builder}
+
+	// Get the dialog window from glade
+	dialog := m.builder.GetObject("addFileDialog").(*gtk.Dialog)
+
+	dialog.SetTitle("Add file dialog...")
+	dialog.SetTransientFor(m.window)
+	dialog.SetModal(true)
+
+	dlg.dialog = dialog
+	dlg.setupAddFileDialog()
+	dlg.staticRadioButton.SetActive(true)
+
+	return dlg
+}
+
+func (a *addFileDialog) setupAddFileDialog() {
+	btn := a.builder.GetObject("addFile_filePathButton").(*gtk.Button)
+	btn.Connect("clicked", a.filePathButtonClicked)
+
+	btn = a.builder.GetObject("addFile_installPathButton").(*gtk.Button)
+	btn.Connect("clicked", a.installPathButtonClicked)
+
+	a.filePath = a.builder.GetObject("addFile_filePathEntry").(*gtk.Entry)
+	a.installPath = a.builder.GetObject("addFile_installPathEntry").(*gtk.Entry)
+	a.staticRadioButton = a.builder.GetObject("addFile_staticRadioButton").(*gtk.RadioButton)
+	a.dynamicRadioButton = a.builder.GetObject("addFile_dynamicRadioButton").(*gtk.RadioButton)
+	a.runScriptCheckbox = a.builder.GetObject("addFile_runScriptCheckbox").(*gtk.CheckButton)
+	a.runScriptTextView = a.builder.GetObject("addFile_scriptEntry").(*gtk.TextView)
+
+	a.dynamicRadioButton.Connect("toggled", a.radioDynamicToggled)
+}
+
+func (a *addFileDialog) openForNewFile(filePath string) {
+	a.prepareForNew(filePath)
+
+	// Show the dialog
+	responseId := a.dialog.Run()
+	if responseId == gtk.RESPONSE_ACCEPT {
+		// Save settings
+	}
+
+	a.dialog.Hide()
+}
+
+func (a *addFileDialog) prepareForNew(filePath string) {
+	a.filePath.SetText(filePath)
+	a.installPath.SetText("")
+	a.installPath.GrabFocus()
+	buf, err := a.runScriptTextView.GetBuffer()
+	if err != nil {
+		_,_ = fmt.Fprintln(os.Stderr,"failed to get textview buffer")
+		_,_ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(exitCodeGtkError)
+	}
+	buf.SetText("")
+	a.staticRadioButton.SetActive(true)
+	a.runScriptCheckbox.SetActive(false)
+}
+
+func (a *addFileDialog) filePathButtonClicked() {
+	dlg, err := gtk.FileChooserDialogNewWith2Buttons(
+		"Choose file to install...",
+		a.dialog,
+		gtk.FILE_CHOOSER_ACTION_OPEN,
+		"Ok",
+		gtk.RESPONSE_OK,
+		"Cancel",
+		gtk.RESPONSE_CLOSE,
+	)
+	if err != nil {
+		_,_ = fmt.Fprintln(os.Stderr,"failed to create file path dialog")
+		_,_ = fmt.Fprintln(os.Stderr,err)
+		os.Exit(exitCodeGtkError)
+	}
+
+	// Show the dialog
+	responseId := dlg.Run()
+	if responseId == gtk.RESPONSE_OK {
+		a.filePath.SetText(dlg.GetFilename())
+	}
+
+	dlg.Hide()
+}
+
+func (a *addFileDialog) installPathButtonClicked() {
+	dlg, err := gtk.FileChooserDialogNewWith2Buttons(
+		"Choose file to install...",
+		a.dialog,
+		gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+		"Ok",
+		gtk.RESPONSE_OK,
+		"Cancel",
+		gtk.RESPONSE_CLOSE,
+	)
+	if err != nil {
+		_,_ = fmt.Fprintln(os.Stderr,"failed to create install path dialog")
+		_,_ = fmt.Fprintln(os.Stderr,err)
+		os.Exit(exitCodeGtkError)
+	}
+
+	// Show the dialog
+	responseId := dlg.Run()
+	if responseId == gtk.RESPONSE_OK {
+		a.installPath.SetText(dlg.GetFilename())
+	}
+
+	dlg.Hide()
+}
+
+func (a *addFileDialog) radioDynamicToggled(btn *gtk.RadioButton) {
+	enabled := btn.GetActive()
+	a.runScriptCheckbox.SetSensitive(enabled)
+	a.runScriptTextView.SetEditable(enabled)
+}
