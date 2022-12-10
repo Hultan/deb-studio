@@ -5,6 +5,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
+// openAboutDialog: Opens the help/about dialog
 func (m *MainForm) openAboutDialog() {
 	about := m.builder.GetObject("aboutDialog").(*gtk.AboutDialog)
 	about.SetDestroyWithParent(true)

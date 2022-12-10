@@ -10,6 +10,7 @@ import (
 	"github.com/hultan/deb-studio/internal/applicationVersionConfig"
 )
 
+// MainForm : Struct for the main form
 type MainForm struct {
 	builder       *Builder
 	window        *gtk.ApplicationWindow
@@ -22,40 +23,37 @@ func NewMainForm() *MainForm {
 	return mainForm
 }
 
-// OpenMainForm : Opens the MainForm window
-func (m *MainForm) OpenMainForm(app *gtk.Application) {
+// Open : Opens the MainForm window
+func (m *MainForm) Open(app *gtk.Application) {
 	// Initialize gtk and create a builder
 	gtk.Init(&os.Args)
-	m.builder = createBuilder()
+	m.builder = newBuilder()
 
 	// Main window
 	m.window = m.builder.GetObject("mainWindow").(*gtk.ApplicationWindow)
-	m.window.SetIcon(createPixBufFromBytes(applicationIcon))
+	m.window.SetIcon(createPixBufFromBytes(applicationIcon, "application"))
 	m.window.SetApplication(app)
 	m.window.SetTitle(getApplicationName())
 	m.window.SetPosition(gtk.WIN_POS_CENTER)
 	m.window.Connect("destroy", m.window.Close)
-
-	// AddFileButton
-	btn := m.builder.GetObject("addFileButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.addFile)
 
 	// Toolbar & menu
 	m.setupStatusBar()
 	m.setupToolbar()
 	m.setupMenu()
 
-	// Set images on control tab
-	setControlImages(m.builder)
+	// Setup pages
+	m.setupInstallPage()
+	m.setupControlPage()
 
 	// Show the main window
 	m.window.ShowAll()
 
-	configPath := getConfigPath()
-
 	//
 	// Save
 	//
+
+	configPath := getConfigPath()
 
 	av := &applicationVersionConfig.ApplicationVersion{}
 	av.Version = "1.0.0"
@@ -113,6 +111,7 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 	scs.Dump(av)
 }
 
+// setupMenu: Set up the menu bar
 func (m *MainForm) setupMenu() {
 	menuQuit := m.builder.GetObject("menu_FileQuit").(*gtk.MenuItem)
 	menuQuit.Connect("activate", m.window.Close)
@@ -132,6 +131,7 @@ func (m *MainForm) setupMenu() {
 	)
 }
 
+// setupToolbar: Set up the toolbar
 func (m *MainForm) setupToolbar() {
 	// Toolbar quit button
 	btn := m.builder.GetObject("toolbar_quitButton").(*gtk.ToolButton)
@@ -141,17 +141,19 @@ func (m *MainForm) setupToolbar() {
 
 	// Toolbar save button
 	btn = m.builder.GetObject("toolbar_saveButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.Save)
+	btn.Connect("clicked", m.save)
 	btn.SetIsImportant(true)
 	btn.SetIconWidget(createImageFromBytes(saveIcon, "save"))
 }
 
+// setupStatusBar: Set up the status bar
 func (m *MainForm) setupStatusBar() {
 	// Status bar
 	statusBar := m.builder.GetObject("mainWindow_StatusBar").(*gtk.Statusbar)
 	statusBar.Push(statusBar.GetContextId("debstudio"), getApplicationName())
 }
 
+// addFile: Handler for the add file button clicked signal
 func (m *MainForm) addFile() {
 	if m.addFileDialog == nil {
 		m.addFileDialog = m.newAddFileDialog()
@@ -159,6 +161,7 @@ func (m *MainForm) addFile() {
 	m.addFileDialog.openForNewFile("/home/per/temp/dragon.ply")
 }
 
-func (m *MainForm) Save() {
-	// TODO : Save here
+// save: Handler for the save button clicked signal
+func (m *MainForm) save() {
+	// TODO : save here
 }

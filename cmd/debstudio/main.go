@@ -23,7 +23,7 @@ func main() {
 
 	mainForm := debStudio.NewMainForm()
 	// Hook up the activate event handler
-	application.Connect("activate", mainForm.OpenMainForm)
+	application.Connect("activate", mainForm.Open)
 	if err != nil {
 		panic("Failed to connect Application.Activate event : " + err.Error())
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
+// addFileDialog: Struct for the add file dialog
 type addFileDialog struct {
 	builder            *Builder
 	dialog             *gtk.Dialog
@@ -18,8 +19,9 @@ type addFileDialog struct {
 	runScriptTextView  *gtk.TextView
 }
 
+// newAddFileDialog: Constructor for the add file dialog
 func (m *MainForm) newAddFileDialog() *addFileDialog {
-	dlg := &addFileDialog{builder: m.builder}
+	d := &addFileDialog{builder: m.builder}
 
 	// Get the dialog window from glade
 	dialog := m.builder.GetObject("addFileDialog").(*gtk.Dialog)
@@ -28,13 +30,13 @@ func (m *MainForm) newAddFileDialog() *addFileDialog {
 	dialog.SetTransientFor(m.window)
 	dialog.SetModal(true)
 
-	dlg.dialog = dialog
-	dlg.setupAddFileDialog()
-	dlg.staticRadioButton.SetActive(true)
+	d.dialog = dialog
+	d.setupAddFileDialog()
 
-	return dlg
+	return d
 }
 
+// setupAddFileDialog: Set up the add file dialog
 func (a *addFileDialog) setupAddFileDialog() {
 	btn := a.builder.GetObject("addFile_filePathButton").(*gtk.Button)
 	btn.Connect("clicked", a.filePathButtonClicked)
@@ -52,8 +54,9 @@ func (a *addFileDialog) setupAddFileDialog() {
 	a.dynamicRadioButton.Connect("toggled", a.radioDynamicToggled)
 }
 
+// openForNewFile: Opens the add file dialog for a new file
 func (a *addFileDialog) openForNewFile(filePath string) {
-	a.prepareForNew(filePath)
+	a.setupForNewFile(filePath)
 
 	// Show the dialog
 	responseId := a.dialog.Run()
@@ -64,7 +67,8 @@ func (a *addFileDialog) openForNewFile(filePath string) {
 	a.dialog.Hide()
 }
 
-func (a *addFileDialog) prepareForNew(filePath string) {
+// setupForNewFile: Set up the add file dialog for a new file
+func (a *addFileDialog) setupForNewFile(filePath string) {
 	a.filePath.SetText(filePath)
 	a.installPath.SetText("")
 	a.installPath.GrabFocus()
@@ -79,6 +83,7 @@ func (a *addFileDialog) prepareForNew(filePath string) {
 	a.runScriptCheckbox.SetActive(false)
 }
 
+// filePathButtonClicked: Handles the file path button clicked signal
 func (a *addFileDialog) filePathButtonClicked() {
 	dlg, err := gtk.FileChooserDialogNewWith2Buttons(
 		"Choose file to install...",
@@ -87,8 +92,9 @@ func (a *addFileDialog) filePathButtonClicked() {
 		"Ok",
 		gtk.RESPONSE_OK,
 		"Cancel",
-		gtk.RESPONSE_CLOSE,
+		gtk.RESPONSE_CANCEL,
 	)
+
 	if err != nil {
 		_,_ = fmt.Fprintln(os.Stderr,"failed to create file path dialog")
 		_,_ = fmt.Fprintln(os.Stderr,err)
@@ -104,6 +110,7 @@ func (a *addFileDialog) filePathButtonClicked() {
 	dlg.Hide()
 }
 
+// installPathButtonClicked: Handles the install path button clicked signal
 func (a *addFileDialog) installPathButtonClicked() {
 	dlg, err := gtk.FileChooserDialogNewWith2Buttons(
 		"Choose file to install...",
@@ -112,8 +119,9 @@ func (a *addFileDialog) installPathButtonClicked() {
 		"Ok",
 		gtk.RESPONSE_OK,
 		"Cancel",
-		gtk.RESPONSE_CLOSE,
+		gtk.RESPONSE_CANCEL,
 	)
+
 	if err != nil {
 		_,_ = fmt.Fprintln(os.Stderr,"failed to create install path dialog")
 		_,_ = fmt.Fprintln(os.Stderr,err)
@@ -129,8 +137,9 @@ func (a *addFileDialog) installPathButtonClicked() {
 	dlg.Hide()
 }
 
+// radioDynamicToggled: Handles the toggled signal of the dynamic radio button
 func (a *addFileDialog) radioDynamicToggled(btn *gtk.RadioButton) {
-	enabled := btn.GetActive()
-	a.runScriptCheckbox.SetSensitive(enabled)
-	a.runScriptTextView.SetEditable(enabled)
+	// Enable/disable the run script checkbox and textview
+	a.runScriptCheckbox.SetSensitive(btn.GetActive())
+	a.runScriptTextView.SetEditable(btn.GetActive())
 }

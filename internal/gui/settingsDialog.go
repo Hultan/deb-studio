@@ -4,6 +4,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
+// openSettingsDialog: Open the settings dialog
 func (m *MainForm) openSettingsDialog() {
 	// Get the dialog window from glade
 	dialog := m.builder.GetObject("settingsDialog").(*gtk.Dialog)
