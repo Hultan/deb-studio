@@ -24,14 +24,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Create the main form
 	mainForm := debStudio.NewMainForm()
-	// Hook up the activate event handler
 	application.Connect("activate", mainForm.Open)
-	if err != nil {
-		_,_ = fmt.Fprintln(os.Stderr,"failed to connect Application.Activate event")
-		_,_ = fmt.Fprintln(os.Stderr,err)
-		os.Exit(1)
-	}
 
 	// Start the application (and exit when it is done)
 	os.Exit(application.Run(nil))
