@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	debStudio "github.com/hultan/deb-studio/internal/gui"
@@ -18,14 +19,18 @@ func main() {
 	// Create a new application
 	application, err := gtk.ApplicationNew(ApplicationId, ApplicationFlags)
 	if err != nil {
-		panic("Failed to create GTK Application : " + err.Error())
+		_,_ = fmt.Fprintln(os.Stderr,"failed to create GTK Application")
+		_,_ = fmt.Fprintln(os.Stderr,err)
+		os.Exit(1)
 	}
 
 	mainForm := debStudio.NewMainForm()
 	// Hook up the activate event handler
 	application.Connect("activate", mainForm.Open)
 	if err != nil {
-		panic("Failed to connect Application.Activate event : " + err.Error())
+		_,_ = fmt.Fprintln(os.Stderr,"failed to connect Application.Activate event")
+		_,_ = fmt.Fprintln(os.Stderr,err)
+		os.Exit(1)
 	}
 
 	// Start the application (and exit when it is done)
