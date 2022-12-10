@@ -6,10 +6,13 @@ import (
 )
 
 type ApplicationVersion struct {
-	Control     ApplicationVersionControl `json:"control"`
-	PreInstall  string                    `json:"preInstall"`
-	Files       []File                    `json:"files"`
-	PostInstall string                    `json:"postInstall"`
+	Version      string                    `json:"version"`
+	Architecture string                    `json:"architecture"`
+	Control      ApplicationVersionControl `json:"control"`
+	PreInstall   string                    `json:"preInstall"`
+	Files        []File                    `json:"files"`
+	PostInstall  string                    `json:"postInstall"`
+	CopyRight    string                    `json:"copyRight"`
 }
 
 type ApplicationVersionControl struct {
@@ -29,9 +32,11 @@ type ApplicationVersionControl struct {
 }
 
 type File struct {
-	Path         string `json:"path"`
-	Copy         bool   `json:"copy"`
-	CopyFromPath string `json:"copyFromPath"`
+	FilePath    string `json:"filePath"`
+	InstallPath string `json:"installPath"`
+	Static      bool   `json:"static"`
+	RunScript   bool   `json:"runScript"`
+	Script      string `json:"script"`
 }
 
 // Load : Loads a deb-studio application version configuration file

@@ -1,7 +1,7 @@
 package gui
 
 const applicationTitle = "Deb Studio"
-const applicationVersion = "v 0.01"
+const applicationVersion = "v 0.02"
 const applicationCopyRight = "©SoftTeam AB, 2022"
 
 const exitCodeSetupError = 1

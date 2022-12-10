@@ -51,48 +51,66 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 	// Show the main window
 	m.window.ShowAll()
 
-	load := true
 	configPath := getConfigPath()
 
-	if load {
-		av, err := applicationVersionConfig.Load(configPath)
-		if err != nil {
-			_, _ = fmt.Fprintln(os.Stderr, err)
-			os.Exit(exitCodeSetupError)
-		}
-		fmt.Printf("%+v\n", av)
+	//
+	// Save
+	//
 
-		// Modify the indent level of the ConfigState only.  The global
-		// configuration is not modified.
-		scs := spew.ConfigState{
-			Indent:                  "\t",
-			DisableCapacities:       true,
-			DisableMethods:          true,
-			DisablePointerMethods:   true,
-			DisablePointerAddresses: true,
-		}
-		scs.Dump(av)
-	} else {
-		av := &applicationVersionConfig.ApplicationVersion{}
-		av.Control.Package = "debStudio"
-		av.Control.Source = "source"
-		av.Control.Version = "1.0.0"
-		av.Control.Section = "section"
-		av.Control.Priority = "high"
-		av.Control.Architecture = "amd64"
-		av.Control.Essential = true
-		av.Control.Depends = "dpkg"
-		av.Control.InstalledSize = "1024"
-		av.Control.Maintainer = "Per Hultqvist"
-		av.Control.Description = "A deb file creator"
-		av.Control.Homepage = "www.softteam.se"
-		av.Control.BuiltUsing = "debStudio"
-		err := av.Save(configPath)
-		if err != nil {
-			_, _ = fmt.Fprintln(os.Stderr, err)
-			os.Exit(exitCodeSetupError)
-		}
+	av := &applicationVersionConfig.ApplicationVersion{}
+	av.Version = "1.0.0"
+	av.Architecture="amd64"
+
+	av.Control.Package = "debStudio"
+	av.Control.Source = "source"
+	av.Control.Version = "1.0.0"
+	av.Control.Section = "section"
+	av.Control.Priority = "high"
+	av.Control.Architecture = "amd64"
+	av.Control.Essential = true
+	av.Control.Depends = "dpkg"
+	av.Control.InstalledSize = "1024"
+	av.Control.Maintainer = "Per Hultqvist"
+	av.Control.Description = "A deb file creator"
+	av.Control.Homepage = "www.softteam.se"
+	av.Control.BuiltUsing = "debStudio"
+
+	file := applicationVersionConfig.File{}
+	file.FilePath="/home/per/temp/dragon.ply"
+	file.InstallPath="/usr/bin"
+	file.Static=false
+	file.RunScript=true
+	file.Script="go build /home/per/code"
+
+	av.Files = append(av.Files, file)
+
+	err := av.Save(configPath)
+	if err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(exitCodeSetupError)
 	}
+
+	//
+	// Load
+	//
+
+	av, err = applicationVersionConfig.Load(configPath)
+	if err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(exitCodeSetupError)
+	}
+	fmt.Printf("%+v\n", av)
+
+	// Modify the indent level of the ConfigState only.  The global
+	// configuration is not modified.
+	scs := spew.ConfigState{
+		Indent:                  "\t",
+		DisableCapacities:       true,
+		DisableMethods:          true,
+		DisablePointerMethods:   true,
+		DisablePointerAddresses: true,
+	}
+	scs.Dump(av)
 }
 
 func (m *MainForm) setupMenu() {
