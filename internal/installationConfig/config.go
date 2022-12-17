@@ -1,21 +1,21 @@
-package applicationVersionConfig
+package installationConfig
 
 import (
 	"encoding/json"
 	"os"
 )
 
-type ApplicationVersion struct {
-	Version      string                    `json:"version"`
-	Architecture string                    `json:"architecture"`
-	Control      ApplicationVersionControl `json:"control"`
-	PreInstall   string                    `json:"preInstall"`
-	Files        []File                    `json:"files"`
-	PostInstall  string                    `json:"postInstall"`
-	CopyRight    string                    `json:"copyRight"`
+type InstallationConfig struct {
+	Version      string         `json:"version"`
+	Architecture string         `json:"architecture"`
+	Control      ControlSection `json:"control"`
+	PreInstall   string         `json:"preInstall"`
+	Files        []FileSection  `json:"files"`
+	PostInstall  string         `json:"postInstall"`
+	CopyRight    string         `json:"copyRight"`
 }
 
-type ApplicationVersionControl struct {
+type ControlSection struct {
 	Package       string `json:"package"`
 	Source        string `json:"source"`
 	Version       string `json:"version"`
@@ -31,7 +31,7 @@ type ApplicationVersionControl struct {
 	BuiltUsing    string `json:"built-using"`
 }
 
-type File struct {
+type FileSection struct {
 	FilePath    string `json:"filePath"`
 	InstallPath string `json:"installPath"`
 	Static      bool   `json:"static"`
@@ -40,7 +40,7 @@ type File struct {
 }
 
 // Load : Loads a deb-studio application version configuration file
-func Load(path string) (*ApplicationVersion, error) {
+func Load(path string) (*InstallationConfig, error) {
 	// Make sure the file exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return nil, err
@@ -53,7 +53,7 @@ func Load(path string) (*ApplicationVersion, error) {
 	}
 
 	// Parse the JSON document
-	av := &ApplicationVersion{}
+	av := &InstallationConfig{}
 	jsonParser := json.NewDecoder(configFile)
 	err = jsonParser.Decode(av)
 	if err != nil {
@@ -69,7 +69,7 @@ func Load(path string) (*ApplicationVersion, error) {
 }
 
 // Save : Saves a deb-studio application version configuration file
-func (av *ApplicationVersion) Save(path string) error {
+func (av *InstallationConfig) Save(path string) error {
 	// Open config file
 	configFile, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {

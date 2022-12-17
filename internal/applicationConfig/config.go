@@ -1,11 +1,11 @@
-package config
+package applicationConfig
 
 import (
 	"encoding/json"
 	"os"
 )
 
-type Config struct {
+type ApplicationConfig struct {
 	WorkingFolders []WorkingFolder `json:"workingFolders"`
 }
 
@@ -14,7 +14,7 @@ type WorkingFolder struct {
 }
 
 // Load : Loads a deb-studio config file
-func Load(path string) (*Config, error) {
+func Load(path string) (*ApplicationConfig, error) {
 	// Make sure the file exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return nil, err
@@ -27,7 +27,7 @@ func Load(path string) (*Config, error) {
 	}
 
 	// Parse the JSON document
-	av := &Config{}
+	av := &ApplicationConfig{}
 	jsonParser := json.NewDecoder(configFile)
 	err = jsonParser.Decode(av)
 	if err != nil {
@@ -43,7 +43,7 @@ func Load(path string) (*Config, error) {
 }
 
 // Save : Saves a deb-studio config file
-func (c *Config) Save(path string) error {
+func (c *ApplicationConfig) Save(path string) error {
 	// Open config file
 	configFile, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {

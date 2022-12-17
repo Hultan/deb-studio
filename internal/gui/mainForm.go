@@ -1,19 +1,22 @@
 package gui
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"path"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gotk3/gotk3/gtk"
 
-	"github.com/hultan/deb-studio/internal/applicationVersionConfig"
+	"github.com/hultan/deb-studio/internal/engine"
+	logger2 "github.com/hultan/deb-studio/internal/logger"
 )
 
 // MainForm : Struct for the main form
 type MainForm struct {
 	builder       *Builder
 	window        *gtk.ApplicationWindow
+	logger        *logger2.Logger
 	addFileDialog *addFileDialog
 }
 
@@ -25,8 +28,12 @@ func NewMainForm() *MainForm {
 
 // Open : Opens the MainForm window
 func (m *MainForm) Open(app *gtk.Application) {
+	// TODO : Move log path to config
+	m.startLogging()
+
 	// Initialize gtk and create a builder
 	gtk.Init(&os.Args)
+
 	m.builder = newBuilder()
 
 	// Main window
@@ -35,7 +42,7 @@ func (m *MainForm) Open(app *gtk.Application) {
 	m.window.SetApplication(app)
 	m.window.SetTitle(getApplicationName())
 	m.window.SetPosition(gtk.WIN_POS_CENTER)
-	m.window.Connect("destroy", m.window.Close)
+	m.window.Connect("destroy", m.shutDown)
 
 	// Toolbar & menu
 	m.setupStatusBar()
@@ -43,72 +50,144 @@ func (m *MainForm) Open(app *gtk.Application) {
 	m.setupMenu()
 
 	// Setup pages
+	m.setupMainPage()
 	m.setupInstallPage()
 	m.setupControlPage()
 
 	// Show the main window
 	m.window.ShowAll()
 
-	//
-	// Save
-	//
-
-	configPath := getConfigPath()
-
-	av := &applicationVersionConfig.ApplicationVersion{}
-	av.Version = "1.0.0"
-	av.Architecture="amd64"
-
-	av.Control.Package = "debStudio"
-	av.Control.Source = "source"
-	av.Control.Version = "1.0.0"
-	av.Control.Section = "section"
-	av.Control.Priority = "high"
-	av.Control.Architecture = "amd64"
-	av.Control.Essential = true
-	av.Control.Depends = "dpkg"
-	av.Control.InstalledSize = "1024"
-	av.Control.Maintainer = "Per Hultqvist"
-	av.Control.Description = "A deb file creator"
-	av.Control.Homepage = "www.softteam.se"
-	av.Control.BuiltUsing = "debStudio"
-
-	file := applicationVersionConfig.File{}
-	file.FilePath="/home/per/temp/dragon.ply"
-	file.InstallPath="/usr/bin"
-	file.Static=false
-	file.RunScript=true
-	file.Script="go build /home/per/code"
-
-	av.Files = append(av.Files, file)
-
-	err := av.Save(configPath)
+	w, err := engine.Open("/home/per/installs/softtube")
 	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(exitCodeSetupError)
+		switch {
+		case errors.Is(err, engine.ErrorNewWorkspaceFolder):
+			w, err = m.setupWorkspaceFolder("/home/per/installs/softtube")
+			if err != nil {
+				m.logger.Error.Println("failure during setup")
+				m.logger.Error.Println(err)
+				os.Exit(1)
+			}
+		default:
+			m.logger.Error.Println("failure during setup")
+			m.logger.Error.Println(err)
+			os.Exit(1)
+		}
 	}
 
-	//
-	// Load
-	//
+	fmt.Printf("Program %s contains %d versions:\n", w.ProgramName, len(w.Versions))
+	for _, version := range w.Versions {
+		architectures := ""
+		if len(version.Architectures) > 0 {
+			architectures = version.Architectures[0].Name
+			for i := 1; i < len(version.Architectures); i++ {
+				architectures += "," + version.Architectures[i].Name
+			}
+		}
+		fmt.Printf("    %s (for architectures: %s)\n", version.Name, architectures)
+	}
 
-	av, err = applicationVersionConfig.Load(configPath)
+	// //
+	// // Save
+	// //
+	//
+	// configPath := getConfigPath()
+	//
+	// av := &installationConfig.InstallationConfig{}
+	// av.Version = "1.0.0"
+	// av.Architecture = "amd64"
+	//
+	// av.Control.Package = "debStudio"
+	// av.Control.Source = "source"
+	// av.Control.Version = "1.0.0"
+	// av.Control.Section = "section"
+	// av.Control.Priority = "high"
+	// av.Control.Architecture = "amd64"
+	// av.Control.Essential = true
+	// av.Control.Depends = "dpkg"
+	// av.Control.InstalledSize = "1024"
+	// av.Control.Maintainer = "Per Hultqvist"
+	// av.Control.Description = "A deb file creator"
+	// av.Control.Homepage = "www.softteam.se"
+	// av.Control.BuiltUsing = "debStudio"
+	//
+	// file := installationConfig.FileSection{}
+	// file.FilePath = "/home/per/temp/dragon.ply"
+	// file.InstallPath = "/usr/bin"
+	// file.Static = false
+	// file.RunScript = true
+	// file.Script = "go build /home/per/code"
+	//
+	// av.Files = append(av.Files, file)
+	//
+	// err = av.Save(configPath)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	//
+	// //
+	// // Load
+	// //
+	//
+	// av, err = installationConfig.Load(configPath)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Printf("%+v\n", av)
+	//
+	// // Modify the indent level of the ConfigState only.  The global
+	// // configuration is not modified.
+	// scs := spew.ConfigState{
+	// 	Indent:                  "\t",
+	// 	DisableCapacities:       true,
+	// 	DisableMethods:          true,
+	// 	DisablePointerMethods:   true,
+	// 	DisablePointerAddresses: true,
+	// }
+	// scs.Dump(av)
+}
+
+func (m *MainForm) startLogging() {
+	logPath := "/home/per/.softteam/debstudio"
+	logFile := "debstudio.log"
+	fullLogPath := path.Join(logPath, logFile)
+
+	// Create log path if it does not exist
+	if _, err := os.Stat(logPath); os.IsNotExist(err) {
+		err = os.MkdirAll(logPath, 0755)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "Failed to create log path at %s\n", logPath)
+			_, _ = fmt.Fprintf(os.Stderr, "Continuing without logging...\n")
+			return
+		}
+	}
+
+	// Create log file if it does not exist
+	if _, err := os.Stat(fullLogPath); os.IsNotExist(err) {
+		_, err = os.OpenFile(fullLogPath, os.O_CREATE|os.O_APPEND, 0755)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "Failed to create log file at %s\n", fullLogPath)
+			_, _ = fmt.Fprintf(os.Stderr, "Continuing without logging...\n")
+			return
+		}
+	}
+
+	logger, err := logger2.NewStandardLogger(fullLogPath)
 	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(exitCodeSetupError)
+		_, _ = fmt.Fprintf(os.Stderr, "Failed to create log at %s\n", logPath)
+		_, _ = fmt.Fprintf(os.Stderr, "Continuing without logging...\n")
+		return
 	}
-	fmt.Printf("%+v\n", av)
+	m.logger = logger
+}
 
-	// Modify the indent level of the ConfigState only.  The global
-	// configuration is not modified.
-	scs := spew.ConfigState{
-		Indent:                  "\t",
-		DisableCapacities:       true,
-		DisableMethods:          true,
-		DisablePointerMethods:   true,
-		DisablePointerAddresses: true,
+// shutDown : shuts down the application
+func (m *MainForm) shutDown() {
+	if m.logger != nil {
+		m.logger.Close()
 	}
-	scs.Dump(av)
+	if m.window != nil {
+		m.window.Close()
+	}
 }
 
 // setupMenu: Set up the menu bar
@@ -164,4 +243,20 @@ func (m *MainForm) addFile() {
 // save: Handler for the save button clicked signal
 func (m *MainForm) save() {
 	// TODO : save here
+}
+
+func (m *MainForm) setupWorkspaceFolder(s string) (*engine.Workspace, error) {
+	// Open setup dialog
+	result, err := m.openSetupDialog()
+	if err != nil {
+		return nil, err
+	}
+
+	// Create program file
+	w, err := engine.SetupWorkspaceFolder(s, result.name)
+	if err != nil {
+		return nil, err
+	}
+
+	return w, nil
 }
