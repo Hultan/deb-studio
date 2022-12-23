@@ -20,6 +20,8 @@ type MainForm struct {
 	addFileDialog *addFileDialog
 }
 
+var currentProject *engine.Workspace
+
 // NewMainForm : Creates a new MainForm object
 func NewMainForm() *MainForm {
 	mainForm := new(MainForm)
@@ -57,21 +59,18 @@ func (m *MainForm) Open(app *gtk.Application) {
 	// Show the main window
 	m.window.ShowAll()
 
-	w, err := engine.Open("/home/per/installs/softtube")
-	if err != nil {
-		switch {
-		case errors.Is(err, engine.ErrorNewWorkspaceFolder):
-			w, err = m.setupWorkspaceFolder("/home/per/installs/softtube")
-			if err != nil {
-				m.logger.Error.Println("failure during setup")
-				m.logger.Error.Println(err)
-				os.Exit(1)
-			}
-		default:
+	w, err := engine.Open("/home/per/installs/test1")
+	if errors.Is(err, engine.ErrorNewWorkspaceFolder) {
+		w, err = engine.SetupWorkspaceFolder("/home/per/installs/test1", "test")
+		if err != nil {
 			m.logger.Error.Println("failure during setup")
 			m.logger.Error.Println(err)
 			os.Exit(1)
 		}
+	} else if err != nil {
+		m.logger.Error.Println("failure during setup")
+		m.logger.Error.Println(err)
+		os.Exit(1)
 	}
 
 	fmt.Printf("Program %s contains %d versions:\n", w.ProgramName, len(w.Versions))
@@ -212,17 +211,29 @@ func (m *MainForm) setupMenu() {
 
 // setupToolbar: Set up the toolbar
 func (m *MainForm) setupToolbar() {
-	// Toolbar quit button
-	btn := m.builder.GetObject("toolbar_quitButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.window.Close)
+	// Toolbar new button
+	btn := m.builder.GetObject("toolbar_newButton").(*gtk.ToolButton)
+	btn.Connect("clicked", m.new)
 	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(exitIcon, "quit"))
+	btn.SetIconWidget(createImageFromBytes(newIcon, "new"))
+
+	// Toolbar open button
+	btn = m.builder.GetObject("toolbar_openButton").(*gtk.ToolButton)
+	btn.Connect("clicked", m.open)
+	btn.SetIsImportant(true)
+	btn.SetIconWidget(createImageFromBytes(openIcon, "open"))
 
 	// Toolbar save button
 	btn = m.builder.GetObject("toolbar_saveButton").(*gtk.ToolButton)
 	btn.Connect("clicked", m.save)
 	btn.SetIsImportant(true)
 	btn.SetIconWidget(createImageFromBytes(saveIcon, "save"))
+
+	// Toolbar quit button
+	btn = m.builder.GetObject("toolbar_quitButton").(*gtk.ToolButton)
+	btn.Connect("clicked", m.window.Close)
+	btn.SetIsImportant(true)
+	btn.SetIconWidget(createImageFromBytes(exitIcon, "quit"))
 }
 
 // setupStatusBar: Set up the status bar
@@ -240,23 +251,32 @@ func (m *MainForm) addFile() {
 	m.addFileDialog.openForNewFile("/home/per/temp/dragon.ply")
 }
 
-// save: Handler for the save button clicked signal
-func (m *MainForm) save() {
-	// TODO : save here
-}
-
-func (m *MainForm) setupWorkspaceFolder(s string) (*engine.Workspace, error) {
+// new: Handler for the new button clicked signal
+func (m *MainForm) new() {
+	// TODO : new project here
 	// Open setup dialog
 	result, err := m.openSetupDialog()
 	if err != nil {
-		return nil, err
+		// TODO : Error handling
+		return
 	}
 
 	// Create program file
-	w, err := engine.SetupWorkspaceFolder(s, result.name)
+	currentProject, err := engine.SetupWorkspaceFolder(result.path, result.name)
 	if err != nil {
-		return nil, err
+		// TODO : Error handling
+		return
 	}
 
-	return w, nil
+	return
+}
+
+// open: Handler for the open button clicked signal
+func (m *MainForm) open() {
+	// TODO : open project here
+}
+
+// save: Handler for the save button clicked signal
+func (m *MainForm) save() {
+	// TODO : save project here
 }

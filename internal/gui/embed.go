@@ -1,6 +1,6 @@
 package gui
 
-import 	_ "embed"
+import _ "embed"
 
 //go:embed assets/main.glade
 var mainGlade string
@@ -17,9 +17,14 @@ var recommendedIcon []byte
 //go:embed assets/optional.png
 var optionalIcon []byte
 
+//go:embed assets/new.png
+var newIcon []byte
+
+//go:embed assets/open.png
+var openIcon []byte
+
 //go:embed assets/save.png
 var saveIcon []byte
 
 //go:embed assets/exit.png
 var exitIcon []byte
-

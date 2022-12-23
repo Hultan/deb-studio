@@ -5,6 +5,7 @@ import (
 )
 
 type setup struct {
+	path string
 	name string
 }
 
@@ -14,6 +15,7 @@ func (m *MainForm) openSetupDialog() (*setup, error) {
 
 	// Get the dialog window from glade
 	dialog := m.builder.GetObject("setupDialog").(*gtk.Dialog)
+	locationFileChooser := m.builder.GetObject("setupDialog_locationFileChooser").(*gtk.FileChooserButton)
 	programNameEntry := m.builder.GetObject("setupDialog_programNameEntry").(*gtk.Entry)
 	dialog.SetTitle("Setup dialog")
 	dialog.SetTransientFor(m.window)
@@ -28,11 +30,12 @@ func (m *MainForm) openSetupDialog() (*setup, error) {
 	switch responseId {
 	case gtk.RESPONSE_ACCEPT:
 		// Save setup information
-		name, err := programNameEntry.GetText()
+		p := locationFileChooser.GetFilename()
+		n, err := programNameEntry.GetText()
 		if err != nil {
 			return nil, err
 		}
-		result = &setup{name: name}
+		result = &setup{name: n, path: p}
 		return result, nil
 	default:
 		return nil, userCancelError

@@ -38,21 +38,12 @@ func Open(workspacePath string) (*Workspace, error) {
 		Path:        workspacePath,
 	}
 
-	err = w.scanFolder()
+	err = w.scanVersions()
 	if err != nil {
 		return nil, err
 	}
 
 	return w, nil
-}
-
-func (w *Workspace) scanFolder() error {
-	err := w.findVersions()
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func SetupWorkspaceFolder(workspacePath, programName string) (*Workspace, error) {
@@ -66,7 +57,7 @@ func SetupWorkspaceFolder(workspacePath, programName string) (*Workspace, error)
 	return &Workspace{ProgramName: programName}, nil
 }
 
-func (w *Workspace) findVersions() error {
+func (w *Workspace) scanVersions() error {
 	// Open workspace path
 	f, err := os.Open(w.Path)
 	if err != nil {
@@ -95,7 +86,7 @@ func (w *Workspace) findVersions() error {
 		v := &Version{Name: version, Path: path.Join(w.Path, dir)}
 		w.Versions = append(w.Versions, v)
 
-		err = w.findArchitectures(v)
+		err = w.scanArchitectures(v)
 		if err != nil {
 			return err
 		}
@@ -104,7 +95,7 @@ func (w *Workspace) findVersions() error {
 	return nil
 }
 
-func (w *Workspace) findArchitectures(v *Version) error {
+func (w *Workspace) scanArchitectures(v *Version) error {
 	// Open version path
 	f, err := os.Open(v.Path)
 	if err != nil {
