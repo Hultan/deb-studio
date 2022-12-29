@@ -4,18 +4,21 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/hultan/deb-studio/internal/logger"
 )
+
+const projectFileName = ".project"
 
 type engine struct {
 	log *logger.Logger
 }
 
 type Project struct {
-	Path        string
-	ProgramName string
-	Versions    []*Version
+	Path     string
+	Name     string
+	Versions []*Version
 }
 
 type Version struct {
@@ -33,19 +36,19 @@ func NewEngine(log *logger.Logger) *engine {
 	return &engine{log: log}
 }
 
-func newProject(projectPath, programName string) *Project {
+func newProject(projectPath, projectName string) *Project {
 	return &Project{
-		ProgramName: programName,
-		Path:        projectPath,
+		Name: projectName,
+		Path: projectPath,
 	}
 }
 
 func (e *engine) IsProjectFolder(projectPath string) bool {
-	// Check if .program file exists...
-	p := path.Join(projectPath, ".program")
+	// Check if .project file exists...
+	p := path.Join(projectPath, projectFileName)
 	_, err := os.Stat(p)
 	if err != nil {
-		// File .program does not exist, or possibly a permission error...
+		// File .project does not exist, or possibly a permission error...
 		return false
 	}
 	return true
@@ -57,12 +60,12 @@ func (e *engine) OpenProject(projectPath string) (*Project, error) {
 		return nil, ErrorProjectFolderMissing
 	}
 
-	programName, err := getProgramName(projectPath)
+	projectName, err := getProjectName(projectPath)
 	if err != nil {
 		return nil, ErrorNewProjectFolder
 	}
 
-	w := newProject(projectPath, programName)
+	w := newProject(projectPath, projectName)
 
 	// err = w.scanVersions()
 	err = w.scanFolder(nil)
@@ -73,107 +76,94 @@ func (e *engine) OpenProject(projectPath string) (*Project, error) {
 	return w, nil
 }
 
-func (e *engine) SetupProject(projectPath, programName string) (*Project, error) {
+func (e *engine) SetupProject(projectPath, projectName string) (*Project, error) {
 	// Make sure that directory exists
 	if !doesDirectoryExist(projectPath) {
 		return nil, ErrorProjectFolderMissing
 	}
 
-	// Create program file
-	filePath := path.Join(projectPath, ".program")
-	content := fmt.Sprintf("PROGRAM=%s", programName)
+	// Create project file
+	filePath := path.Join(projectPath, projectFileName)
+	content := fmt.Sprintf("PROJECT=%s", projectName)
 	err := createTextFile(filePath, content)
 	if err != nil {
 		return nil, err
 	}
 
-	return newProject(projectPath, programName), nil
+	return newProject(projectPath, projectName), nil
 }
 
-//
-// func (w *Project) scanVersions() error {
-// 	// Open project path
-// 	f, err := os.Open(w.Path)
-// 	if err != nil {
-// 		return fmt.Errorf("failed to find versions : %w", err)
-// 	}
-//
-// 	dirs, err := f.Readdirnames(-1)
-// 	if err != nil {
-// 		return fmt.Errorf("failed to find versions : %w", err)
-// 	}
-//
-// 	for _, dir := range dirs {
-// 		p := path.Join(w.Path, dir, ".version")
-// 		if _, err = os.Stat(p); err != nil {
-// 			continue
-// 		}
-// 		text, err := readAllText(p)
-// 		if err != nil {
-// 			return fmt.Errorf("failed to find versions : %w", err)
-// 		}
-// 		version, err := getFirstLine(text, "VERSION=", " \t\n")
-// 		if err != nil {
-// 			return fmt.Errorf("failed to find versions : %w", err)
-// 		}
-// 		// We found a version folder
-// 		v := &Version{Name: version, Path: path.Join(w.Path, dir)}
-// 		w.Versions = append(w.Versions, v)
-//
-// 		err = w.scanArchitectures(v)
-// 		if err != nil {
-// 			return err
-// 		}
-// 	}
-//
-// 	return nil
-// }
-//
-// func (w *Project) scanArchitectures(v *Version) error {
-// 	// Open version path
-// 	f, err := os.Open(v.Path)
-// 	if err != nil {
-// 		return fmt.Errorf("failed to find architectures : %w", err)
-// 	}
-//
-// 	// Get names of all files and folders
-// 	// Use readdir instead?
-// 	dirs, err := f.Readdirnames(-1)
-// 	if err != nil {
-// 		return fmt.Errorf("failed to find architectures : %w", err)
-// 	}
-//
-// 	for _, dir := range dirs {
-// 		p := path.Join(v.Path, dir, ".architecture")
-// 		if _, err = os.Stat(p); err != nil {
-// 			continue
-// 		}
-// 		text, err := readAllText(p)
-// 		if err != nil {
-// 			return fmt.Errorf("failed to find architectures : %w", err)
-// 		}
-// 		version, err := getFirstLine(text, "ARCHITECTURE=", " \t\n")
-// 		if err != nil {
-// 			return fmt.Errorf("failed to find architectures : %w", err)
-// 		}
-// 		// We found an architecture folder
-// 		a := &Architecture{Name: version, Path: p}
-// 		v.Architectures = append(v.Architectures, a)
-// 	}
-//
-// 	return nil
-// }
-
-func getProgramName(projectPath string) (string, error) {
-	p := path.Join(projectPath, ".program")
+func getProjectName(projectPath string) (string, error) {
+	p := path.Join(projectPath, projectFileName)
 	text, err := readAllText(p)
 	if err != nil {
-		return "", fmt.Errorf("failed to find program name : %w", err)
+		return "", fmt.Errorf("failed to find project name : %w", err)
 	}
-	name, err := getFirstLine(text, "PROGRAM=", "\t\n")
+	name, err := getFirstLine(text, "PROJECT=", "\t\n")
 	if err != nil {
-		return "", fmt.Errorf("failed to find program name : %w", err)
+		return "", fmt.Errorf("failed to find project name : %w", err)
 	}
 
 	return name, nil
+}
+
+func (w *Project) scanFolder(version *Version) error {
+	typeName := "version"
+	scanPath := w.Path
+	if version != nil {
+		typeName = "architecture"
+		scanPath = version.Path
+	}
+
+	// Open path to scan
+	f, err := os.Open(scanPath)
+	if err != nil {
+		return fmt.Errorf("failed to find %ss : %w", typeName, err)
+	}
+
+	dirs, err := f.Readdirnames(-1)
+	if err != nil {
+		return fmt.Errorf("failed to find %ss : %w", typeName, err)
+	}
+
+	var text, content string
+
+	for _, dir := range dirs {
+		// Find file .version or .architecture
+		p := path.Join(scanPath, dir, fmt.Sprintf(".%s", typeName))
+		if _, err = os.Stat(p); err != nil {
+			continue
+		}
+		text, err = readAllText(p)
+		if err != nil {
+			return fmt.Errorf("failed to find %ss : %w", typeName, err)
+		}
+		// Create prefix, i e "VERSION=" or "ARCHITECTURE="
+		prefix := fmt.Sprintf("%s=", strings.ToUpper(typeName))
+		content, err = getFirstLine(text, prefix, " \t\n")
+		if err != nil {
+			return fmt.Errorf("failed to find %ss : %w", typeName, err)
+		}
+
+		switch version == nil {
+		case true:
+			// We are scanning for versions
+			v := &Version{Name: content, Path: path.Join(w.Path, dir)}
+			w.Versions = append(w.Versions, v)
+
+			if version == nil {
+				// Scan architecture folders
+				err = w.scanFolder(v)
+				if err != nil {
+					return err
+				}
+			}
+		case false:
+			// We are scanning for architectures
+			a := &Architecture{Name: content, Path: p}
+			version.Architectures = append(version.Architectures, a)
+		}
+	}
+
+	return nil
 }

@@ -5,4 +5,4 @@ import (
 )
 
 var ErrorProjectFolderMissing = errors.New("missing project folder")
-var ErrorNewProjectFolder = errors.New("missing .program file")
+var ErrorNewProjectFolder = errors.New("missing .project file")

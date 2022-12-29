@@ -58,15 +58,15 @@ func (m *MainForm) Open(app *gtk.Application) {
 	// Show the main window
 	m.window.ShowAll()
 
-	projectFolder := "/home/per/installs/test1"
-	programName := "test"
+	projectFolder := "/home/per/installs/softtube"
+	projectName := "softtube"
 
 	var err error
 	e := engine.NewEngine(m.log)
 	if e.IsProjectFolder(projectFolder) {
 		currentProject, err = e.OpenProject(projectFolder)
 	} else {
-		currentProject, err = e.SetupProject(projectFolder, programName)
+		currentProject, err = e.SetupProject(projectFolder, projectName)
 	}
 	if err != nil {
 		m.log.Error.Println("failure during setup")
@@ -75,8 +75,8 @@ func (m *MainForm) Open(app *gtk.Application) {
 	}
 
 	fmt.Printf(
-		"Program %s contains %d versions:\n",
-		currentProject.ProgramName,
+		"Project %s contains %d versions:\n",
+		currentProject.Name,
 		len(currentProject.Versions),
 	)
 
@@ -267,7 +267,7 @@ func (m *MainForm) new() {
 	// 	return
 	// }
 	//
-	// // Create program file
+	// // Create project file
 	// currentProject, err := engine.SetupProject(result.path, result.name)
 	// if err != nil {
 	// 	// TODO : Error handling

@@ -17,14 +17,14 @@ func Test_getFirstLine(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		{"empty", args{"", "PROGRAM=", "\n"}, "", true},
-		{"test", args{"test", "PROGRAM=", "\n"}, "", true},
-		{"correct", args{"PROGRAM=softtube", "PROGRAM=", "\n"}, "softtube", false},
-		{"extra enter", args{"PROGRAM=softtube\n", "PROGRAM=", "\n"}, "softtube", false},
-		{"extra text", args{"PROGRAM=softtube\nsdkajsdlkjasd\n", "PROGRAM=", "\n"}, "softtube", false},
-		{"extra spaces", args{"PROGRAM=softtube    \nsdkajsdlkjasd\n", "PROGRAM=", "\n"}, "softtube", false},
+		{"empty", args{"", "PROJECT=", "\n"}, "", true},
+		{"test", args{"test", "PROJECT=", "\n"}, "", true},
+		{"correct", args{"PROJECT=softtube", "PROJECT=", "\n"}, "softtube", false},
+		{"extra enter", args{"PROJECT=softtube\n", "PROJECT=", "\n"}, "softtube", false},
+		{"extra text", args{"PROJECT=softtube\nsdkajsdlkjasd\n", "PROJECT=", "\n"}, "softtube", false},
+		{"extra spaces", args{"PROJECT=softtube    \nsdkajsdlkjasd\n", "PROJECT=", "\n"}, "softtube", false},
 		{
-			"extra tabs", args{"PROGRAM=softtube 2	\t		\nsdkajsdlkjasd\n", "PROGRAM=", "\n"}, "softtube 2",
+			"extra tabs", args{"PROJECT=softtube 2	\t		\nsdkajsdlkjasd\n", "PROJECT=", "\n"}, "softtube 2",
 			false,
 		},
 		{"empty", args{"", "VERSION=", " \t\n"}, "", true},

@@ -16,7 +16,7 @@ func (m *MainForm) openSetupDialog() (*setup, error) {
 	// Get the dialog window from glade
 	dialog := m.builder.GetObject("setupDialog").(*gtk.Dialog)
 	locationFileChooser := m.builder.GetObject("setupDialog_locationFileChooser").(*gtk.FileChooserButton)
-	programNameEntry := m.builder.GetObject("setupDialog_programNameEntry").(*gtk.Entry)
+	projectNameEntry := m.builder.GetObject("setupDialog_programNameEntry").(*gtk.Entry)
 	dialog.SetTitle("Setup dialog")
 	dialog.SetTransientFor(m.window)
 	dialog.SetModal(true)
@@ -31,7 +31,7 @@ func (m *MainForm) openSetupDialog() (*setup, error) {
 	case gtk.RESPONSE_ACCEPT:
 		// Save setup information
 		p := locationFileChooser.GetFilename()
-		n, err := programNameEntry.GetText()
+		n, err := projectNameEntry.GetText()
 		if err != nil {
 			return nil, err
 		}

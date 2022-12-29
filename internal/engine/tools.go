@@ -58,7 +58,7 @@ func getUserHomeDirectory() string {
 
 // createTextFile : creates a text file containing the string in the argument content
 func createTextFile(filePath, content string) error {
-	// Create version file
+	// Create file
 	filePath, err := filepath.Abs(filePath)
 	if err != nil {
 		return err
@@ -69,7 +69,7 @@ func createTextFile(filePath, content string) error {
 	}
 	defer f.Close()
 
-	// Write program file contents
+	// Write file contents
 	_, err = f.WriteString(content)
 	if err != nil {
 		return err
