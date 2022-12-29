@@ -1,7 +1,6 @@
 package gui
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -9,18 +8,18 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 
 	"github.com/hultan/deb-studio/internal/engine"
-	logger2 "github.com/hultan/deb-studio/internal/logger"
+	"github.com/hultan/deb-studio/internal/logger"
 )
 
 // MainForm : Struct for the main form
 type MainForm struct {
 	builder       *Builder
 	window        *gtk.ApplicationWindow
-	logger        *logger2.Logger
+	log           *logger.Logger
 	addFileDialog *addFileDialog
 }
 
-var currentProject *engine.Workspace
+var currentProject *engine.Project
 
 // NewMainForm : Creates a new MainForm object
 func NewMainForm() *MainForm {
@@ -59,22 +58,29 @@ func (m *MainForm) Open(app *gtk.Application) {
 	// Show the main window
 	m.window.ShowAll()
 
-	w, err := engine.Open("/home/per/installs/test1")
-	if errors.Is(err, engine.ErrorNewWorkspaceFolder) {
-		w, err = engine.SetupWorkspaceFolder("/home/per/installs/test1", "test")
-		if err != nil {
-			m.logger.Error.Println("failure during setup")
-			m.logger.Error.Println(err)
-			os.Exit(1)
-		}
-	} else if err != nil {
-		m.logger.Error.Println("failure during setup")
-		m.logger.Error.Println(err)
+	projectFolder := "/home/per/installs/test1"
+	programName := "test"
+
+	var err error
+	e := engine.NewEngine(m.log)
+	if e.IsProjectFolder(projectFolder) {
+		currentProject, err = e.OpenProject(projectFolder)
+	} else {
+		currentProject, err = e.SetupProject(projectFolder, programName)
+	}
+	if err != nil {
+		m.log.Error.Println("failure during setup")
+		m.log.Error.Println(err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("Program %s contains %d versions:\n", w.ProgramName, len(w.Versions))
-	for _, version := range w.Versions {
+	fmt.Printf(
+		"Program %s contains %d versions:\n",
+		currentProject.ProgramName,
+		len(currentProject.Versions),
+	)
+
+	for _, version := range currentProject.Versions {
 		architectures := ""
 		if len(version.Architectures) > 0 {
 			architectures = version.Architectures[0].Name
@@ -170,19 +176,19 @@ func (m *MainForm) startLogging() {
 		}
 	}
 
-	logger, err := logger2.NewStandardLogger(fullLogPath)
+	logger, err := logger.NewDebugLogger(fullLogPath)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Failed to create log at %s\n", logPath)
 		_, _ = fmt.Fprintf(os.Stderr, "Continuing without logging...\n")
 		return
 	}
-	m.logger = logger
+	m.log = logger
 }
 
 // shutDown : shuts down the application
 func (m *MainForm) shutDown() {
-	if m.logger != nil {
-		m.logger.Close()
+	if m.log != nil {
+		m.log.Close()
 	}
 	if m.window != nil {
 		m.window.Close()
@@ -253,22 +259,22 @@ func (m *MainForm) addFile() {
 
 // new: Handler for the new button clicked signal
 func (m *MainForm) new() {
-	// TODO : new project here
-	// Open setup dialog
-	result, err := m.openSetupDialog()
-	if err != nil {
-		// TODO : Error handling
-		return
-	}
-
-	// Create program file
-	currentProject, err := engine.SetupWorkspaceFolder(result.path, result.name)
-	if err != nil {
-		// TODO : Error handling
-		return
-	}
-
-	return
+	// // TODO : new project here
+	// // Open setup dialog
+	// result, err := m.openSetupDialog()
+	// if err != nil {
+	// 	// TODO : Error handling
+	// 	return
+	// }
+	//
+	// // Create program file
+	// currentProject, err := engine.SetupProject(result.path, result.name)
+	// if err != nil {
+	// 	// TODO : Error handling
+	// 	return
+	// }
+	//
+	// return
 }
 
 // open: Handler for the open button clicked signal

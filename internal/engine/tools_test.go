@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"path"
+	"os"
 	"testing"
 )
 
@@ -23,7 +23,10 @@ func Test_getFirstLine(t *testing.T) {
 		{"extra enter", args{"PROGRAM=softtube\n", "PROGRAM=", "\n"}, "softtube", false},
 		{"extra text", args{"PROGRAM=softtube\nsdkajsdlkjasd\n", "PROGRAM=", "\n"}, "softtube", false},
 		{"extra spaces", args{"PROGRAM=softtube    \nsdkajsdlkjasd\n", "PROGRAM=", "\n"}, "softtube", false},
-		{"extra tabs", args{"PROGRAM=softtube 2	\t		\nsdkajsdlkjasd\n", "PROGRAM=", "\n"}, "softtube 2", false},
+		{
+			"extra tabs", args{"PROGRAM=softtube 2	\t		\nsdkajsdlkjasd\n", "PROGRAM=", "\n"}, "softtube 2",
+			false,
+		},
 		{"empty", args{"", "VERSION=", " \t\n"}, "", true},
 		{"test", args{"test", "VERSION=", " \t\n"}, "", true},
 		{"correct", args{"VERSION=2.6.9", "VERSION=", " \t\n"}, "2.6.9", false},
@@ -37,7 +40,10 @@ func Test_getFirstLine(t *testing.T) {
 		{"extra enter", args{"ARCHITECTURE=amd64\n", "ARCHITECTURE=", " \t\n"}, "amd64", false},
 		{"extra text", args{"ARCHITECTURE=amd64\nsdkajsdlkjasd\n", "ARCHITECTURE=", " \t\n"}, "amd64", false},
 		{"extra spaces", args{"ARCHITECTURE=amd64    \nsdkajsdlkjasd\n", "ARCHITECTURE=", " \t\n"}, "amd64", false},
-		{"extra tabs", args{"ARCHITECTURE=amd64			\nsdkajsdlkjasd\n", "ARCHITECTURE=", " \t\n"}, "amd64", false},
+		{
+			"extra tabs", args{"ARCHITECTURE=amd64			\nsdkajsdlkjasd\n", "ARCHITECTURE=", " \t\n"}, "amd64",
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(
@@ -57,25 +63,55 @@ func Test_getFirstLine(t *testing.T) {
 
 func Test_doesDirectoryExist(t *testing.T) {
 	type args struct {
-		workspacePath string
+		projectPath string
 	}
 	tests := []struct {
 		name string
 		args args
 		want bool
 	}{
-		{"dir exists", args{""}, true},
-		{"exists, but file", args{".bashrc"}, false},
-		{"dir does not exist", args{".bashrcX"}, false},
+		{"empty path", args{""}, false},
+		{"dir exists", args{"/home"}, true},
+		{"exists, but file", args{"/etc/fstab"}, false},
+		{"dir does not exist", args{"/home2"}, false},
 	}
 	for _, tt := range tests {
 		t.Run(
 			tt.name, func(t *testing.T) {
-				p := path.Join(getUserHomeDirectory(), tt.args.workspacePath)
-				if got := doesDirectoryExist(p); got != tt.want {
+				if got := doesDirectoryExist(tt.args.projectPath); got != tt.want {
 					t.Errorf("doesDirectoryExist() = %v, want %v", got, tt.want)
 				}
 			},
 		)
+	}
+}
+
+func Test_getUserHomeDirectory(t *testing.T) {
+	got := getUserHomeDirectory()
+	if got != "/home/per" {
+		t.Errorf("Invalid user home path, got %s, want %s", got, "/home/per")
+	}
+}
+
+func Test_files(t *testing.T) {
+	const filePath = "./../../test/testFile"
+	err := createTextFile(filePath, "TEST content\nmore content")
+	if err != nil {
+		t.Errorf("createTextFile() returned an error: %s", err)
+	}
+	text, err := readAllText(filePath)
+	if err != nil {
+		t.Errorf("readAllText() returned an error: %s", err)
+	}
+	got, err := getFirstLine(text, "TEST", "\t\n")
+	if err != nil {
+		t.Errorf("getFirstLine() returned an error: %s", err)
+	}
+	if got != "content" {
+		t.Errorf("getFirstLine() failed, got %s, want %s", got, "content")
+	}
+	err = os.Remove(filePath)
+	if err != nil {
+		t.Errorf("failed to clean up after test")
 	}
 }

@@ -4,5 +4,5 @@ import (
 	"errors"
 )
 
-var ErrorWorkspaceFolderMissing = errors.New("missing workspace folder")
-var ErrorNewWorkspaceFolder = errors.New("missing .program file")
+var ErrorProjectFolderMissing = errors.New("missing project folder")
+var ErrorNewProjectFolder = errors.New("missing .program file")

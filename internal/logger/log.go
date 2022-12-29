@@ -32,6 +32,20 @@ func NewStandardLogger(path string) (*Logger, error) {
 	return logger, nil
 }
 
+func NewDebugLogger(path string) (*Logger, error) {
+	logger := &Logger{Path: path}
+
+	logFile, err := logger.getLogFile()
+	if err != nil {
+		return nil, err
+	}
+
+	logger.initLogging(logFile, logFile, logFile, logFile)
+	logger.logFile = logFile
+
+	return logger, nil
+}
+
 func (l *Logger) Close() {
 	_ = l.logFile.Close()
 }

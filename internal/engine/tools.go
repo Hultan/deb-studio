@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 	"os/user"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -36,9 +36,11 @@ func getFirstLine(text string, prefix string, sep string) (string, error) {
 }
 
 // doesDirectoryExist : Check if a directory exists
-func doesDirectoryExist(workspacePath string) bool {
-	folderInfo, err := os.Stat(workspacePath)
-	if os.IsNotExist(err) {
+func doesDirectoryExist(projectPath string) bool {
+	folderInfo, err := os.Stat(projectPath)
+	if err != nil {
+		// Directory does not exist, or user does not
+		// have permissions, or ...
 		return false
 	}
 	return folderInfo.IsDir()
@@ -55,10 +57,13 @@ func getUserHomeDirectory() string {
 }
 
 // createTextFile : creates a text file containing the string in the argument content
-func createTextFile(filePath, fileName, content string) error {
+func createTextFile(filePath, content string) error {
 	// Create version file
-	p := path.Join(filePath, fileName)
-	f, err := os.Create(p)
+	filePath, err := filepath.Abs(filePath)
+	if err != nil {
+		return err
+	}
+	f, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
