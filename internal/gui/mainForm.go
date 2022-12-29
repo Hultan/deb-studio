@@ -63,18 +63,19 @@ func (m *MainForm) Open(app *gtk.Application) {
 	projectName := "softtube"
 
 	var err error
-	var mode string
 	e := engine.NewEngine(m.log)
 	if e.IsProjectFolder(projectFolder) {
 		currentProject, err = e.OpenProject(projectFolder)
-		mode = "opening"
+		if err != nil {
+			m.log.Error.Printf("failure during opening of '%s': %s", projectFolder, err)
+			os.Exit(1)
+		}
 	} else {
 		currentProject, err = e.SetupProject(projectFolder, projectName)
-		mode = "setup"
-	}
-	if err != nil {
-		m.log.Error.Printf("failure during %s of '%s': %s", mode, projectFolder, err)
-		os.Exit(1)
+		if err != nil {
+			m.log.Error.Printf("failure during setup of '%s': %s", projectFolder, err)
+			os.Exit(1)
+		}
 	}
 
 	m.printTraceInfo()
