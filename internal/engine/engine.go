@@ -113,6 +113,14 @@ func (e *Engine) SetupProject(projectPath, projectName string) (*Project, error)
 	return newProject(projectPath, projectName), nil
 }
 
+func (p *Project) AddVersion(versionName string) {
+
+}
+
+func (v *Version) AddArchitecture(architectureName string) {
+
+}
+
 func getProjectName(projectPath string) (string, error) {
 	log.Trace.Println("Entering getProjectName...")
 	defer log.Trace.Println("Exiting getProjectName...")
@@ -132,12 +140,12 @@ func getProjectName(projectPath string) (string, error) {
 	return name, nil
 }
 
-func (w *Project) scanProjectPath(version *Version) error {
+func (p *Project) scanProjectPath(version *Version) error {
 	log.Trace.Println("Entering scanProjectPath...")
 	defer log.Trace.Println("Exiting scanProjectPath...")
 
 	typeName := "version"
-	scanPath := w.Path
+	scanPath := p.Path
 	if version != nil {
 		typeName = "architecture"
 		scanPath = version.Path
@@ -159,41 +167,43 @@ func (w *Project) scanProjectPath(version *Version) error {
 	var text, content string
 
 	for _, dir := range dirs {
+		scanDir := path.Join(scanPath, dir)
+
 		// Find file .version or .architecture
-		p := path.Join(scanPath, dir, fmt.Sprintf(".%s", typeName))
-		if _, err = os.Stat(p); err != nil {
+		filePath := path.Join(scanDir, fmt.Sprintf(".%s", typeName))
+		if _, err = os.Stat(filePath); err != nil {
 			continue
 		}
-		text, err = readAllText(p)
+		text, err = readAllText(filePath)
 		if err != nil {
-			log.Error.Printf("Failed to read all text of path '%s': %s\n", p, err)
+			log.Error.Printf("Failed to read all text of path '%s': %s\n", filePath, err)
 			return err
 		}
 		// Create prefix, i e "VERSION=" or "ARCHITECTURE="
 		prefix := fmt.Sprintf("%s=", strings.ToUpper(typeName))
 		content, err = getFirstLine(text, prefix, " \t\n")
 		if err != nil {
-			log.Error.Printf("Failed to get first line of path '%s': %s\n", p, err)
+			log.Error.Printf("Failed to get first line of path '%s': %s\n", filePath, err)
 			return err
 		}
 
 		switch version == nil {
 		case true:
 			// We are scanning for versions
-			v := &Version{Name: content, Path: path.Join(w.Path, dir)}
-			w.Versions = append(w.Versions, v)
+			v := &Version{Name: content, Path: scanDir}
+			p.Versions = append(p.Versions, v)
 
 			if version == nil {
 				// Scan architecture folders
-				err = w.scanProjectPath(v)
+				err = p.scanProjectPath(v)
 				if err != nil {
-					log.Error.Printf("Failed to scan path '%s': %s\n", p, err)
+					log.Error.Printf("Failed to scan path '%s': %s\n", filePath, err)
 					return err
 				}
 			}
 		case false:
 			// We are scanning for architectures
-			a := &Architecture{Name: content, Path: p}
+			a := &Architecture{Name: content, Path: scanDir}
 			version.Architectures = append(version.Architectures, a)
 		}
 	}

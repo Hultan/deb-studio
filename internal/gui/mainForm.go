@@ -148,14 +148,12 @@ func (m *MainForm) printTraceInfo() {
 	)
 
 	for _, version := range currentProject.Versions {
-		architectures := ""
+		m.log.Info.Printf("\tVersion: %s (path: %s)\n", version.Name, version.Path)
 		if len(version.Architectures) > 0 {
-			architectures = version.Architectures[0].Name
-			for i := 1; i < len(version.Architectures); i++ {
-				architectures += "," + version.Architectures[i].Name
+			for _, architecture := range version.Architectures {
+				m.log.Info.Printf("\t\tArchitecture: %s (path: %s)\n", architecture.Name, architecture.Path)
 			}
 		}
-		m.log.Info.Printf("\t%s (for architectures: %s)\n", version.Name, architectures)
 	}
 }
 
