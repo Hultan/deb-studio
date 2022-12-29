@@ -11,8 +11,9 @@ import (
 
 const projectFileName = ".project"
 
-type engine struct {
-	log *logger.Logger
+var log *logger.Logger
+
+type Engine struct {
 }
 
 type Project struct {
@@ -32,8 +33,9 @@ type Architecture struct {
 	Name string
 }
 
-func NewEngine(log *logger.Logger) *engine {
-	return &engine{log: log}
+func NewEngine(l *logger.Logger) *Engine {
+	log = l
+	return &Engine{}
 }
 
 func newProject(projectPath, projectName string) *Project {
@@ -43,50 +45,68 @@ func newProject(projectPath, projectName string) *Project {
 	}
 }
 
-func (e *engine) IsProjectFolder(projectPath string) bool {
+func (e *Engine) IsProjectFolder(projectPath string) bool {
+	log.Trace.Println("Entering IsProjectFolder...")
+	defer log.Trace.Println("Exiting IsProjectFolder...")
+
 	// Check if .project file exists...
 	p := path.Join(projectPath, projectFileName)
 	_, err := os.Stat(p)
 	if err != nil {
 		// File .project does not exist, or possibly a permission error...
+		log.Info.Println(err)
 		return false
 	}
 	return true
 }
 
-func (e *engine) OpenProject(projectPath string) (*Project, error) {
+func (e *Engine) OpenProject(projectPath string) (*Project, error) {
+	log.Trace.Println("Entering OpenProject...")
+	defer log.Trace.Println("Exiting OpenProject...")
+
 	// Make sure that directory exists
 	if !doesDirectoryExist(projectPath) {
+		log.Error.Printf("Path %s is missing!", projectPath)
 		return nil, ErrorProjectFolderMissing
 	}
 
+	log.Info.Printf("Opening project : %s\n", projectPath)
+
 	projectName, err := getProjectName(projectPath)
 	if err != nil {
-		return nil, ErrorNewProjectFolder
+		log.Error.Printf("Failed to get project name from path '%s': %s\n", projectPath, err)
+		return nil, err
 	}
 
 	w := newProject(projectPath, projectName)
 
-	// err = w.scanVersions()
-	err = w.scanFolder(nil)
+	err = w.scanProjectPath(nil)
 	if err != nil {
+		log.Error.Printf("Failed to scan project path '%s'\n", projectPath)
 		return nil, err
 	}
 
 	return w, nil
 }
 
-func (e *engine) SetupProject(projectPath, projectName string) (*Project, error) {
+func (e *Engine) SetupProject(projectPath, projectName string) (*Project, error) {
+	log.Trace.Println("Entering SetupProject...")
+	defer log.Trace.Println("Exiting SetupProject...")
+
 	// Make sure that directory exists
 	if !doesDirectoryExist(projectPath) {
+		log.Error.Printf("Path %s is missing!", projectPath)
 		return nil, ErrorProjectFolderMissing
 	}
+
+	log.Info.Printf("Setting up new project at : %s\n", projectPath)
 
 	// Create project file
 	filePath := path.Join(projectPath, projectFileName)
 	content := fmt.Sprintf("PROJECT=%s", projectName)
 	err := createTextFile(filePath, content)
 	if err != nil {
+		log.Error.Printf("Failed to write .project file to path '%s': %s\n", projectPath, err)
 		return nil, err
 	}
 
@@ -94,20 +114,28 @@ func (e *engine) SetupProject(projectPath, projectName string) (*Project, error)
 }
 
 func getProjectName(projectPath string) (string, error) {
+	log.Trace.Println("Entering getProjectName...")
+	defer log.Trace.Println("Exiting getProjectName...")
+
 	p := path.Join(projectPath, projectFileName)
 	text, err := readAllText(p)
 	if err != nil {
-		return "", fmt.Errorf("failed to find project name : %w", err)
+		log.Error.Printf("Failed to read .project file '%s': %s\n", p, err)
+		return "", err
 	}
 	name, err := getFirstLine(text, "PROJECT=", "\t\n")
 	if err != nil {
-		return "", fmt.Errorf("failed to find project name : %w", err)
+		log.Error.Printf("Failed to get first line of file '%s': %s\n", p, err)
+		return "", err
 	}
 
 	return name, nil
 }
 
-func (w *Project) scanFolder(version *Version) error {
+func (w *Project) scanProjectPath(version *Version) error {
+	log.Trace.Println("Entering scanProjectPath...")
+	defer log.Trace.Println("Exiting scanProjectPath...")
+
 	typeName := "version"
 	scanPath := w.Path
 	if version != nil {
@@ -118,12 +146,14 @@ func (w *Project) scanFolder(version *Version) error {
 	// Open path to scan
 	f, err := os.Open(scanPath)
 	if err != nil {
-		return fmt.Errorf("failed to find %ss : %w", typeName, err)
+		log.Error.Printf("Failed to open path '%s': %s\n", scanPath, err)
+		return err
 	}
 
 	dirs, err := f.Readdirnames(-1)
 	if err != nil {
-		return fmt.Errorf("failed to find %ss : %w", typeName, err)
+		log.Error.Printf("Failed to read dir names of path '%s': %s\n", scanPath, err)
+		return err
 	}
 
 	var text, content string
@@ -136,13 +166,15 @@ func (w *Project) scanFolder(version *Version) error {
 		}
 		text, err = readAllText(p)
 		if err != nil {
-			return fmt.Errorf("failed to find %ss : %w", typeName, err)
+			log.Error.Printf("Failed to read all text of path '%s': %s\n", p, err)
+			return err
 		}
 		// Create prefix, i e "VERSION=" or "ARCHITECTURE="
 		prefix := fmt.Sprintf("%s=", strings.ToUpper(typeName))
 		content, err = getFirstLine(text, prefix, " \t\n")
 		if err != nil {
-			return fmt.Errorf("failed to find %ss : %w", typeName, err)
+			log.Error.Printf("Failed to get first line of path '%s': %s\n", p, err)
+			return err
 		}
 
 		switch version == nil {
@@ -153,8 +185,9 @@ func (w *Project) scanFolder(version *Version) error {
 
 			if version == nil {
 				// Scan architecture folders
-				err = w.scanFolder(v)
+				err = w.scanProjectPath(v)
 				if err != nil {
+					log.Error.Printf("Failed to scan path '%s': %s\n", p, err)
 					return err
 				}
 			}

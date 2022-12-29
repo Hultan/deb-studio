@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/gotk3/gotk3/gtk"
 
@@ -62,34 +63,21 @@ func (m *MainForm) Open(app *gtk.Application) {
 	projectName := "softtube"
 
 	var err error
+	var mode string
 	e := engine.NewEngine(m.log)
 	if e.IsProjectFolder(projectFolder) {
 		currentProject, err = e.OpenProject(projectFolder)
+		mode = "opening"
 	} else {
 		currentProject, err = e.SetupProject(projectFolder, projectName)
+		mode = "setup"
 	}
 	if err != nil {
-		m.log.Error.Println("failure during setup")
-		m.log.Error.Println(err)
+		m.log.Error.Printf("failure during %s of '%s': %s", mode, projectFolder, err)
 		os.Exit(1)
 	}
 
-	fmt.Printf(
-		"Project %s contains %d versions:\n",
-		currentProject.Name,
-		len(currentProject.Versions),
-	)
-
-	for _, version := range currentProject.Versions {
-		architectures := ""
-		if len(version.Architectures) > 0 {
-			architectures = version.Architectures[0].Name
-			for i := 1; i < len(version.Architectures); i++ {
-				architectures += "," + version.Architectures[i].Name
-			}
-		}
-		fmt.Printf("    %s (for architectures: %s)\n", version.Name, architectures)
-	}
+	m.printTraceInfo()
 
 	// //
 	// // Save
@@ -151,13 +139,34 @@ func (m *MainForm) Open(app *gtk.Application) {
 	// scs.Dump(av)
 }
 
+func (m *MainForm) printTraceInfo() {
+	m.log.Info.Printf(
+		"Project %s contains %d versions:\n",
+		currentProject.Name,
+		len(currentProject.Versions),
+	)
+
+	for _, version := range currentProject.Versions {
+		architectures := ""
+		if len(version.Architectures) > 0 {
+			architectures = version.Architectures[0].Name
+			for i := 1; i < len(version.Architectures); i++ {
+				architectures += "," + version.Architectures[i].Name
+			}
+		}
+		m.log.Info.Printf("    %s (for architectures: %s)\n", version.Name, architectures)
+	}
+}
+
 func (m *MainForm) startLogging() {
 	logPath := "/home/per/.softteam/debstudio"
 	logFile := "debstudio.log"
 	fullLogPath := path.Join(logPath, logFile)
 
+	var err error
+
 	// Create log path if it does not exist
-	if _, err := os.Stat(logPath); os.IsNotExist(err) {
+	if _, err = os.Stat(logPath); os.IsNotExist(err) {
 		err = os.MkdirAll(logPath, 0755)
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "Failed to create log path at %s\n", logPath)
@@ -167,7 +176,7 @@ func (m *MainForm) startLogging() {
 	}
 
 	// Create log file if it does not exist
-	if _, err := os.Stat(fullLogPath); os.IsNotExist(err) {
+	if _, err = os.Stat(fullLogPath); os.IsNotExist(err) {
 		_, err = os.OpenFile(fullLogPath, os.O_CREATE|os.O_APPEND, 0755)
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "Failed to create log file at %s\n", fullLogPath)
@@ -176,13 +185,18 @@ func (m *MainForm) startLogging() {
 		}
 	}
 
-	logger, err := logger.NewDebugLogger(fullLogPath)
+	var log *logger.Logger
+	if isTraceMode() {
+		log, err = logger.NewDebugLogger(fullLogPath)
+	} else {
+		log, err = logger.NewStandardLogger(fullLogPath)
+	}
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Failed to create log at %s\n", logPath)
 		_, _ = fmt.Fprintf(os.Stderr, "Continuing without logging...\n")
 		return
 	}
-	m.log = logger
+	m.log = log
 }
 
 // shutDown : shuts down the application
@@ -285,4 +299,8 @@ func (m *MainForm) open() {
 // save: Handler for the save button clicked signal
 func (m *MainForm) save() {
 	// TODO : save project here
+}
+
+func isTraceMode() bool {
+	return len(os.Args) >= 2 && strings.HasPrefix(os.Args[1], "-t")
 }

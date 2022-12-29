@@ -103,13 +103,13 @@ func (l *Logger) initLogging(traceHandle, infoHandle, warningHandle, errorHandle
 
 	l.Info = log.New(
 		infoHandle,
-		"[INFO]  ",
+		"[INFO ] ",
 		log.Ldate|log.Ltime|log.Lshortfile,
 	)
 
 	l.Warning = log.New(
 		warningHandle,
-		"[WARN]  ",
+		"[WARN ] ",
 		log.Ldate|log.Ltime|log.Lshortfile,
 	)
 

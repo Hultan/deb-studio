@@ -86,13 +86,6 @@ func Test_doesDirectoryExist(t *testing.T) {
 	}
 }
 
-func Test_getUserHomeDirectory(t *testing.T) {
-	got := getUserHomeDirectory()
-	if got != "/home/per" {
-		t.Errorf("Invalid user home path, got %s, want %s", got, "/home/per")
-	}
-}
-
 func Test_files(t *testing.T) {
 	const filePath = "./../../test/testFile"
 	err := createTextFile(filePath, "TEST content\nmore content")

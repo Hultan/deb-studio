@@ -2,30 +2,37 @@ package engine
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"os"
-	"os/user"
 	"path/filepath"
 	"strings"
 )
 
 func readAllText(path string) (string, error) {
+	log.Trace.Println("Entering readAllText...")
+	defer log.Trace.Println("Exiting readAllText...")
+
 	f, err := os.Open(path)
 	if err != nil {
-		return "", fmt.Errorf("failed to readAllText : %w", err)
+		log.Error.Printf("Failed to open path '%s': %s\n", path, err)
+		return "", err
 	}
 	b, err := io.ReadAll(f)
 	if err != nil {
-		return "", fmt.Errorf("failed to readAllText : %w", err)
+		log.Error.Printf("Failed to read all text of path '%s': %s\n", path, err)
+		return "", err
 	}
 	return string(b), nil
 }
 
 // getFirstLine : gets the first line of the text, ignoring the prefix
 func getFirstLine(text string, prefix string, sep string) (string, error) {
+	log.Trace.Println("Entering getFirstLine...")
+	defer log.Trace.Println("Exiting getFirstLine...")
+
 	if !strings.HasPrefix(text, prefix) {
-		return "", errors.New("does not contain prefix")
+		log.Error.Printf("Text does not contain the prefix: %s\n", prefix)
+		return "", errors.New("does not contain prefix '" + prefix + "'")
 	}
 	truncated := text[len(prefix):]
 	i := strings.IndexAny(truncated, sep)
@@ -36,8 +43,11 @@ func getFirstLine(text string, prefix string, sep string) (string, error) {
 }
 
 // doesDirectoryExist : Check if a directory exists
-func doesDirectoryExist(projectPath string) bool {
-	folderInfo, err := os.Stat(projectPath)
+func doesDirectoryExist(path string) bool {
+	log.Trace.Println("Entering doesDirectoryExist...")
+	defer log.Trace.Println("Exiting doesDirectoryExist...")
+
+	folderInfo, err := os.Stat(path)
 	if err != nil {
 		// Directory does not exist, or user does not
 		// have permissions, or ...
@@ -46,32 +56,34 @@ func doesDirectoryExist(projectPath string) bool {
 	return folderInfo.IsDir()
 }
 
-// getUserHomeDirectory : Get current users home directory
-func getUserHomeDirectory() string {
-	u, err := user.Current()
-	if err != nil {
-		errorMessage := fmt.Sprintf("Failed to get user home directory : %s", err)
-		panic(errorMessage)
-	}
-	return u.HomeDir
-}
-
 // createTextFile : creates a text file containing the string in the argument content
 func createTextFile(filePath, content string) error {
+	log.Trace.Println("Entering createTextFile...")
+	defer log.Trace.Println("Exiting createTextFile...")
+
 	// Create file
 	filePath, err := filepath.Abs(filePath)
 	if err != nil {
+		log.Error.Printf("Failed to get absolute path of path '%s': %s\n", filePath, err)
 		return err
 	}
 	f, err := os.Create(filePath)
 	if err != nil {
+		log.Error.Printf("Failed to create file '%s': %s\n", filePath, err)
 		return err
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			log.Error.Printf("Failed to create file '%s': %s\n", filePath, err)
+		}
+	}(f)
 
 	// Write file contents
 	_, err = f.WriteString(content)
 	if err != nil {
+		log.Error.Printf("Failed to write content to file '%s': %s\n", filePath, err)
+		log.Error.Printf("Content '%s'\n", content)
 		return err
 	}
 
