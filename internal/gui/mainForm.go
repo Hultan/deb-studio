@@ -154,7 +154,7 @@ func (m *MainForm) printTraceInfo() {
 				architectures += "," + version.Architectures[i].Name
 			}
 		}
-		m.log.Info.Printf("    %s (for architectures: %s)\n", version.Name, architectures)
+		m.log.Info.Printf("\t%s (for architectures: %s)\n", version.Name, architectures)
 	}
 }
 
