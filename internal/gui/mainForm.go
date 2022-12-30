@@ -59,8 +59,8 @@ func (m *MainForm) Open(app *gtk.Application) {
 	// Show the main window
 	m.window.ShowAll()
 
-	projectFolder := "/home/per/installs/softtube"
-	projectName := "softtube"
+	projectFolder := "/home/per/installs/test"
+	projectName := "test"
 
 	var err error
 	e := engine.NewEngine(m.log)
@@ -79,6 +79,25 @@ func (m *MainForm) Open(app *gtk.Application) {
 	}
 
 	m.printTraceInfo()
+
+	v, err := currentProject.AddVersion("testVersion1.0.0")
+	if err != nil {
+		m.log.Error.Printf("failed to add version")
+		os.Exit(1)
+	}
+	a, err := v.AddArchitecture("amd75")
+	if err != nil {
+		m.log.Error.Printf("failed to add architecture")
+		os.Exit(1)
+	}
+	fmt.Println(a.Name)
+
+	err = a.AddFile("/home/per/temp/", "empty", "/usr/bin/", false)
+	if err != nil {
+		m.log.Error.Printf("failed to add file")
+		os.Exit(1)
+	}
+	fmt.Println("file added successfully!")
 
 	// //
 	// // Save

@@ -11,7 +11,7 @@ type Project struct {
 	Versions []*Version
 }
 
-func (p *Project) AddVersion(versionName string) error {
+func (p *Project) AddVersion(versionName string) (*Version, error) {
 	log.Trace.Println("Entering AddVersion...")
 	defer log.Trace.Println("Exiting AddVersion...")
 
@@ -19,13 +19,13 @@ func (p *Project) AddVersion(versionName string) error {
 	err := os.MkdirAll(versionPath, 0775)
 	if err != nil {
 		log.Error.Printf("Failed to create directory at path '%s': %s\n", versionPath, err)
-		return err
+		return nil, err
 	}
 
 	err = writeDescriptor(versionDescriptor, versionPath, versionName)
 	if err != nil {
-		log.Error.Printf("Failed to create version file at path '%s': %s\n", versionPath, err)
-		return err
+		log.Error.Printf("Failed to create .version file at path '%s': %s\n", versionPath, err)
+		return nil, err
 	}
 
 	// Add to version slice
@@ -33,10 +33,10 @@ func (p *Project) AddVersion(versionName string) error {
 	p.Versions = append(p.Versions, v)
 
 	log.Info.Printf("Created version %s...\n", versionName)
-	return nil
+	return v, nil
 }
 
-func (p *Project) scanForVersions(version *Version) error {
+func (p *Project) scanForVersions() error {
 	log.Trace.Println("Entering scanForVersions...")
 	defer log.Trace.Println("Exiting scanForVersions...")
 

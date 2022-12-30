@@ -2,7 +2,6 @@
   <configuration default="false" name="debstudio" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="deb-studio" />
     <working_directory value="$PROJECT_DIR$" />
-    <parameters value="-trace" />
     <kind value="FILE" />
     <package value="deb-studio" />
     <directory value="$PROJECT_DIR$" />

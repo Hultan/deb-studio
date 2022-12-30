@@ -11,7 +11,29 @@ type Version struct {
 	Architectures []*Architecture
 }
 
-func (v *Version) AddArchitecture(architectureName string) {
+func (v *Version) AddArchitecture(architectureName string) (*Architecture, error) {
+	log.Trace.Println("Entering AddArchitecture...")
+	defer log.Trace.Println("Exiting AddArchitecture...")
+
+	architecturePath := path.Join(v.Path, architectureName)
+	err := os.MkdirAll(architecturePath, 0775)
+	if err != nil {
+		log.Error.Printf("Failed to create directory at path '%s': %s\n", architecturePath, err)
+		return nil, err
+	}
+
+	err = writeDescriptor(architectureDescriptor, architecturePath, architectureName)
+	if err != nil {
+		log.Error.Printf("Failed to create .architecture file at path '%s': %s\n", architecturePath, err)
+		return nil, err
+	}
+
+	// Add to version slice
+	a := &Architecture{Name: architectureName, Path: architecturePath}
+	v.Architectures = append(v.Architectures, a)
+
+	log.Info.Printf("Created architecture %s...\n", architectureName)
+	return a, nil
 
 }
 
