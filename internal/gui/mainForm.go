@@ -142,8 +142,9 @@ func (m *MainForm) Open(app *gtk.Application) {
 
 func (m *MainForm) printTraceInfo() {
 	m.log.Info.Printf(
-		"Project %s contains %d versions:\n",
+		"Project %s (path: %s) contains %d versions:\n",
 		currentProject.Name,
+		currentProject.Path,
 		len(currentProject.Versions),
 	)
 
