@@ -1,10 +1,6 @@
 package engine
 
 import (
-	"fmt"
-	"os"
-	"path"
-
 	"github.com/hultan/deb-studio/internal/logger"
 )
 
@@ -24,11 +20,7 @@ func (e *Engine) IsProjectFolder(projectPath string) bool {
 	defer log.Trace.Println("Exiting IsProjectFolder...")
 
 	// Check if .project file exists...
-	p := path.Join(projectPath, projectFileName)
-	_, err := os.Stat(p)
-	if err != nil {
-		// File .project does not exist, or possibly a permission error...
-		log.Info.Println(err)
+	if !haveDescriptor(projectDescriptor, projectPath) {
 		return false
 	}
 	return true
@@ -38,51 +30,38 @@ func (e *Engine) OpenProject(projectPath string) (*Project, error) {
 	log.Trace.Println("Entering OpenProject...")
 	defer log.Trace.Println("Exiting OpenProject...")
 
-	// Make sure that directory exists
-	if !doesDirectoryExist(projectPath) {
-		log.Error.Printf("Path %s is missing!", projectPath)
-		return nil, ErrorProjectFolderMissing
-	}
-
-	log.Info.Printf("Opening project : %s\n", projectPath)
-
-	projectName, err := getProjectName(projectPath)
+	// Read .project file
+	projectName, err := readDescriptor(projectDescriptor, projectPath)
 	if err != nil {
 		log.Error.Printf("Failed to get project name from path '%s': %s\n", projectPath, err)
 		return nil, err
 	}
 
-	w := &Project{
+	// Create project
+	p := &Project{
 		Name: projectName,
 		Path: projectPath,
 	}
 
-	err = w.scanProjectPath(nil)
+	// Scan for versions
+	err = p.scanForVersions(nil)
 	if err != nil {
 		log.Error.Printf("Failed to scan project path '%s'\n", projectPath)
 		return nil, err
 	}
 
 	log.Info.Printf("Successfully opened project path %s...\n", projectPath)
-	return w, nil
+	return p, nil
 }
 
 func (e *Engine) SetupProject(projectPath, projectName string) (*Project, error) {
 	log.Trace.Println("Entering SetupProject...")
 	defer log.Trace.Println("Exiting SetupProject...")
 
-	// Make sure that directory exists
-	if !doesDirectoryExist(projectPath) {
-		log.Error.Printf("Path %s is missing!", projectPath)
-		return nil, ErrorProjectFolderMissing
-	}
-
 	log.Info.Printf("Setting up new project at : %s\n", projectPath)
 
-	// Create project file
-	filePath := path.Join(projectPath, projectFileName)
-	content := fmt.Sprintf("PROJECT=%s", projectName)
-	err := createTextFile(filePath, content)
+	// Create .project file
+	err := writeDescriptor(projectDescriptor, projectPath, projectName)
 	if err != nil {
 		log.Error.Printf("Failed to write .project file to path '%s': %s\n", projectPath, err)
 		return nil, err

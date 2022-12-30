@@ -8,12 +8,6 @@ import (
 	"strings"
 )
 
-const projectFileName = ".project"
-const versionFileName = ".version"
-const architectureFileName = ".architecture"
-
-var ErrorProjectFolderMissing = errors.New("missing project folder")
-
 func readAllText(path string) (string, error) {
 	log.Trace.Println("Entering readAllText...")
 	defer log.Trace.Println("Exiting readAllText...")
