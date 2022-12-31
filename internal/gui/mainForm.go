@@ -21,7 +21,7 @@ type MainForm struct {
 	listBox       *gtk.ListBox
 	infoBar       *gtk.InfoBar
 	infoBarLabel  *gtk.Label
-	notebook      *gtk.Notebook
+	popup         *gtk.Menu
 }
 
 var currentProject *engine.Project
@@ -56,6 +56,7 @@ func (m *MainForm) Open(app *gtk.Application) {
 	m.setupStatusBar()
 	m.setupToolbar()
 	m.setupMenu()
+	m.setupPopupMenu()
 
 	// Setup pages
 	m.setupMainPage()
@@ -64,9 +65,6 @@ func (m *MainForm) Open(app *gtk.Application) {
 
 	// Show the main window
 	m.window.ShowAll()
-
-	m.notebook = m.builder.GetObject("mainWindow_notebook").(*gtk.Notebook)
-	m.enableDisableNotebook(false)
 
 	projectFolder := "/home/per/installs/softtube"
 	projectName := "test"
@@ -89,6 +87,8 @@ func (m *MainForm) Open(app *gtk.Application) {
 
 	m.listPackages()
 	m.printTraceInfo()
+	m.updateInfoBar()
+	m.enableDisableStackPages(m.getInfoBarStatus() != infoBarStatusNoPackageSelected)
 
 	// v, err := currentProject.AddVersion("testVersion1.0.0")
 	// if err != nil {
@@ -364,18 +364,24 @@ func (m *MainForm) removeFileButtonClicked() {
 
 }
 
-func (m *MainForm) enableDisableNotebook(enable bool) {
-	// pages := m.notebook.GetNPages()
-	// start := 0
-	// if !enable {
-	// 	start = 1
-	// }
-	// for p := start; p < pages; p++ {
-	// 	w, err := m.notebook.GetNthPage(p)
-	// 	if err != nil {
-	// 		m.log.Error.Printf("failed to disable page %d: %s", p, err)
-	// 	}
-	// 	widget := w.ToWidget()
-	// 	widget.SetSensitive(enable)
-	// }
+func (m *MainForm) enableDisableStackPages(status bool) {
+	m.enableDisableStackPage("mainWindow_controlPage", status)
+	m.enableDisableStackPage("mainWindow_preinstallPage", status)
+	m.enableDisableStackPage("mainWindow_installPage", status)
+	m.enableDisableStackPage("mainWindow_postinstallPage", status)
+	m.enableDisableStackPage("mainWindow_copyrightPage", status)
+}
+
+func (m *MainForm) enableDisableStackPage(name string, status bool) {
+	// TODO : Fix this code, should be doable with *gtk.Widget
+	box, ok := m.builder.GetObject(name).(*gtk.Box)
+	if !ok {
+		grid, ok := m.builder.GetObject(name).(*gtk.Grid)
+		if !ok {
+			m.log.Error.Printf("failed to retrieve stack page: %s", name)
+		}
+		grid.SetSensitive(status)
+		return
+	}
+	box.SetSensitive(status)
 }

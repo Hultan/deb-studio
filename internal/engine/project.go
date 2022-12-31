@@ -104,3 +104,13 @@ func (p *Project) GetArchitecture(versionName, architectureName string) *Archite
 	}
 	return nil
 }
+
+// TODO : Switch to another solution that is not dependant on sorting versions
+// and also move to Version.IsLatestVersion().
+
+func (p *Project) IsLatestVersion(v *Version) bool {
+	if len(p.Versions) == 0 || v == nil {
+		return false
+	}
+	return p.Versions[0].Name == v.Name
+}

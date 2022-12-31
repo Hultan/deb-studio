@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"sort"
+
 	"github.com/hultan/deb-studio/internal/logger"
 )
 
@@ -49,6 +51,15 @@ func (e *Engine) OpenProject(projectPath string) (*Project, error) {
 		log.Error.Printf("Failed to scan project path '%s'\n", projectPath)
 		return nil, err
 	}
+
+	// Sort versions based on name
+	// TODO : Every version needs an IsLatest flag
+	// Relying on sorting like this is probably not good enough
+	sort.Slice(
+		p.Versions, func(i, j int) bool {
+			return p.Versions[i].Name > p.Versions[j].Name
+		},
+	)
 
 	log.Info.Printf("Successfully opened project path %s...\n", projectPath)
 	return p, nil

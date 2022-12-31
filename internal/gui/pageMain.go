@@ -1,9 +1,7 @@
 package gui
 
 import (
-	"fmt"
 	"os"
-	"strings"
 
 	"github.com/gotk3/gotk3/gtk"
 
@@ -12,7 +10,8 @@ import (
 
 func (m *MainForm) setupMainPage() {
 	m.listBox = m.builder.GetObject("mainWindow_packageListBox").(*gtk.ListBox)
-	m.listBox.Connect("row-activated", m.packageRowActivated)
+	m.listBox.Connect("row-activated", m.setPackageAsCurrent)
+	m.listBox.Connect("button-press-event", m.showPopupMenu)
 
 	m.infoBar = m.builder.GetObject("mainWindow_infoBar").(*gtk.InfoBar)
 	m.infoBarLabel = m.builder.GetObject("mainWindow_infoBarLabel").(*gtk.Label)
@@ -86,64 +85,4 @@ func (m *MainForm) createPackageListRow(v *engine.Version, a *engine.Architectur
 	}
 	box.PackStart(label, false, true, 20)
 	return row, nil
-}
-
-func (m *MainForm) addPackageClicked() {
-
-	// dialog := m.builder.GetObject("addInstallationDialog").(*gtk.Dialog)
-	// versionName := m.builder.GetObject("addInstallationDialog_versionNameEntry").(*gtk.Entry)
-	// architectureCombo := m.builder.GetObject("addInstallationDialog_architectureCombo").(*gtk.Dialog)
-	// dialog.AddButton("Add", gtk.RESPONSE_ACCEPT)
-	// dialog.AddButton("Cancel", gtk.RESPONSE_CANCEL)
-	//
-	// architectureCombo.set
-	//
-	// // Show the dialog
-	// responseId := dialog.Run()
-	// if responseId == gtk.RESPONSE_ACCEPT {
-	// 	// Save installation
-	//
-	// }
-	//
-	// dialog.Hide()
-
-}
-
-func (m *MainForm) removePackageClicked() {
-
-}
-
-func (m *MainForm) packageRowActivated(l *gtk.ListBox, row *gtk.ListBoxRow) {
-	name, err := row.GetName()
-	if err != nil {
-		m.log.Error.Printf("failed to set current package")
-		return
-	}
-	list := strings.Split(name, "$$$")
-	versionName := list[0]
-	architectureName := list[1]
-
-	currentVersion = currentProject.GetVersion(versionName)
-	if currentVersion == nil {
-		m.log.Error.Printf("failed to find version '%s'", currentVersion.Name)
-		return
-	}
-	currentArchitecture = currentVersion.GetArchitecture(architectureName)
-	if currentArchitecture == nil {
-		m.log.Error.Printf(
-			"failed to find architecture '%s' in version '%s'",
-			architectureName, versionName,
-		)
-		return
-	}
-	m.infoBarLabel.SetText(m.getInfoBarText())
-	m.infoBar.SetMessageType(gtk.MESSAGE_WARNING)
-	m.window.QueueDraw()
-}
-
-func (m *MainForm) getInfoBarText() string {
-	return fmt.Sprintf(
-		"You are currently editing version %s and architecture %s.",
-		currentVersion.Name, currentArchitecture.Name,
-	)
 }
