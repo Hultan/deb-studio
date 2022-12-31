@@ -8,5 +8,5 @@ import (
 func (m *MainForm) setupInstallPage() {
 	// AddFileButton
 	btn := m.builder.GetObject("addFileButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.addFile)
+	btn.Connect("clicked", m.addFileButtonClicked)
 }

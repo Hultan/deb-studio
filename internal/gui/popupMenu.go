@@ -14,7 +14,7 @@ func (m *MainForm) setupPopupMenu() {
 	menuItem = m.builder.GetObject("mainWindow_popupSetAsLatest").(*gtk.MenuItem)
 	menuItem.Connect("activate", m.setAsLatestVersionClicked)
 	menuItem = m.builder.GetObject("mainWindow_popupSetAsCurrent").(*gtk.MenuItem)
-	menuItem.Connect("activate", m.setAsCurrentPackageClicked)
+	menuItem.Connect("activate", m.setPackageAsCurrentClickedPopup)
 }
 
 func (m *MainForm) showPopupMenu(_ *gtk.ListBox, e *gdk.Event) {

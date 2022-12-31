@@ -30,7 +30,7 @@ func (m *MainForm) getInfoBarText() string {
 			currentVersion.Name, currentArchitecture.Name,
 		)
 	default:
-		m.log.Error.Println("Invalid infoBarStatus in getInfoBarText()")
+		log.Error.Println("Invalid infoBarStatus in getInfoBarText()")
 		return ""
 	}
 }
@@ -44,7 +44,7 @@ func (m *MainForm) setInfoBarColor() {
 	case infoBarStatusLatestVersion:
 		m.infoBar.SetMessageType(gtk.MESSAGE_INFO)
 	default:
-		m.log.Error.Println("Invalid infoBarStatus in SetInfoBarColor()")
+		log.Error.Println("Invalid infoBarStatus in SetInfoBarColor()")
 	}
 }
 

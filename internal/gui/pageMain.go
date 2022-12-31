@@ -8,9 +8,9 @@ import (
 	"github.com/hultan/deb-studio/internal/engine"
 )
 
-func (m *MainForm) setupMainPage() {
+func (m *MainForm) setupPackagePage() {
 	m.listBox = m.builder.GetObject("mainWindow_packageListBox").(*gtk.ListBox)
-	m.listBox.Connect("row-activated", m.setPackageAsCurrent)
+	m.listBox.Connect("row-activated", m.setPackageAsCurrentClicked)
 	m.listBox.Connect("button-press-event", m.showPopupMenu)
 
 	m.infoBar = m.builder.GetObject("mainWindow_infoBar").(*gtk.InfoBar)
@@ -29,7 +29,7 @@ func (m *MainForm) listPackages() {
 		for _, architecture := range version.Architectures {
 			box, err := m.createPackageListRow(version, architecture)
 			if err != nil {
-				m.log.Error.Println(err)
+				log.Error.Println(err)
 				os.Exit(1)
 			}
 			m.listBox.Add(box)
@@ -55,13 +55,13 @@ func (m *MainForm) listPackages() {
 func (m *MainForm) createPackageListRow(v *engine.Version, a *engine.Architecture) (*gtk.ListBoxRow, error) {
 	row, err := gtk.ListBoxRowNew()
 	if err != nil {
-		m.log.Error.Printf("failed to create package list row")
+		log.Error.Printf("failed to create package list row")
 		return nil, err
 	}
 	box, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 20)
 	box.SetHomogeneous(true)
 	if err != nil {
-		m.log.Error.Printf("failed to create package box")
+		log.Error.Printf("failed to create package box")
 		return nil, err
 	}
 	row.Add(box)
@@ -71,7 +71,7 @@ func (m *MainForm) createPackageListRow(v *engine.Version, a *engine.Architectur
 	label, err := gtk.LabelNew(v.Name)
 	label.SetHAlign(gtk.ALIGN_START)
 	if err != nil {
-		m.log.Error.Printf("failed to create package version label")
+		log.Error.Printf("failed to create package version label")
 		return nil, err
 	}
 	box.PackStart(label, false, true, 20)
@@ -80,7 +80,7 @@ func (m *MainForm) createPackageListRow(v *engine.Version, a *engine.Architectur
 	label, err = gtk.LabelNew(a.Name)
 	label.SetHAlign(gtk.ALIGN_START)
 	if err != nil {
-		m.log.Error.Printf("failed to create package architecture label")
+		log.Error.Printf("failed to create package architecture label")
 		return nil, err
 	}
 	box.PackStart(label, false, true, 20)

@@ -16,7 +16,6 @@ import (
 type MainForm struct {
 	builder       *Builder
 	window        *gtk.ApplicationWindow
-	log           *logger.Logger
 	addFileDialog *addFileDialog
 	listBox       *gtk.ListBox
 	infoBar       *gtk.InfoBar
@@ -27,6 +26,7 @@ type MainForm struct {
 var currentProject *engine.Project
 var currentVersion *engine.Version
 var currentArchitecture *engine.Architecture
+var log *logger.Logger
 
 // NewMainForm : Creates a new MainForm object
 func NewMainForm() *MainForm {
@@ -59,7 +59,7 @@ func (m *MainForm) Open(app *gtk.Application) {
 	m.setupPopupMenu()
 
 	// Setup pages
-	m.setupMainPage()
+	m.setupPackagePage()
 	m.setupInstallPage()
 	m.setupControlPage()
 
@@ -70,17 +70,17 @@ func (m *MainForm) Open(app *gtk.Application) {
 	projectName := "test"
 
 	var err error
-	e := engine.NewEngine(m.log)
+	e := engine.NewEngine(log)
 	if e.IsProjectFolder(projectFolder) {
 		currentProject, err = e.OpenProject(projectFolder)
 		if err != nil {
-			m.log.Error.Printf("failure during opening of '%s': %s", projectFolder, err)
+			log.Error.Printf("failure during opening of '%s': %s", projectFolder, err)
 			os.Exit(1)
 		}
 	} else {
 		currentProject, err = e.SetupProject(projectFolder, projectName)
 		if err != nil {
-			m.log.Error.Printf("failure during setup of '%s': %s", projectFolder, err)
+			log.Error.Printf("failure during setup of '%s': %s", projectFolder, err)
 			os.Exit(1)
 		}
 	}
@@ -92,19 +92,19 @@ func (m *MainForm) Open(app *gtk.Application) {
 
 	// v, err := currentProject.AddVersion("testVersion1.0.0")
 	// if err != nil {
-	// 	m.log.Error.Printf("failed to add version")
+	// 	log.Error.Printf("failed to add version")
 	// 	os.Exit(1)
 	// }
 	// a, err := v.AddArchitecture("amd75")
 	// if err != nil {
-	// 	m.log.Error.Printf("failed to add architecture")
+	// 	log.Error.Printf("failed to add architecture")
 	// 	os.Exit(1)
 	// }
 	// fmt.Println(a.Name)
 	//
 	// err = a.AddFile("/home/per/temp/", "empty", "/usr/bin/", false)
 	// if err != nil {
-	// 	m.log.Error.Printf("failed to add file")
+	// 	log.Error.Printf("failed to add file")
 	// 	os.Exit(1)
 	// }
 	// fmt.Println("file added successfully!")
@@ -170,7 +170,7 @@ func (m *MainForm) Open(app *gtk.Application) {
 }
 
 func (m *MainForm) printTraceInfo() {
-	m.log.Info.Printf(
+	log.Info.Printf(
 		"Project %s (path: %s) contains %d versions:\n",
 		currentProject.Name,
 		currentProject.Path,
@@ -178,10 +178,10 @@ func (m *MainForm) printTraceInfo() {
 	)
 
 	for _, version := range currentProject.Versions {
-		m.log.Info.Printf("\tVersion: %s (path: %s)\n", version.Name, version.Path)
+		log.Info.Printf("\tVersion: %s (path: %s)\n", version.Name, version.Path)
 		if len(version.Architectures) > 0 {
 			for _, architecture := range version.Architectures {
-				m.log.Info.Printf("\t\tArchitecture: %s (path: %s)\n", architecture.Name, architecture.Path)
+				log.Info.Printf("\t\tArchitecture: %s (path: %s)\n", architecture.Name, architecture.Path)
 			}
 		}
 	}
@@ -214,7 +214,6 @@ func (m *MainForm) startLogging() {
 		}
 	}
 
-	var log *logger.Logger
 	if isTraceMode() {
 		log, err = logger.NewDebugLogger(fullLogPath)
 	} else {
@@ -225,13 +224,16 @@ func (m *MainForm) startLogging() {
 		_, _ = fmt.Fprintf(os.Stderr, "Continuing without logging...\n")
 		return
 	}
-	m.log = log
+}
+
+func isTraceMode() bool {
+	return len(os.Args) >= 2 && strings.HasPrefix(os.Args[1], "-t")
 }
 
 // shutDown : shuts down the application
 func (m *MainForm) shutDown() {
-	if m.log != nil {
-		m.log.Close()
+	if log != nil {
+		log.Close()
 	}
 	if m.window != nil {
 		m.window.Close()
@@ -262,21 +264,27 @@ func (m *MainForm) setupMenu() {
 func (m *MainForm) setupToolbar() {
 	// Toolbar new button
 	btn := m.builder.GetObject("toolbar_newButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.new)
+	btn.Connect("clicked", m.newButtonClicked)
 	btn.SetIsImportant(true)
 	btn.SetIconWidget(createImageFromBytes(newIcon, "new"))
 
 	// Toolbar open button
 	btn = m.builder.GetObject("toolbar_openButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.open)
+	btn.Connect("clicked", m.openButtonClicked)
 	btn.SetIsImportant(true)
 	btn.SetIconWidget(createImageFromBytes(openIcon, "open"))
 
 	// Toolbar save button
 	btn = m.builder.GetObject("toolbar_saveButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.save)
+	btn.Connect("clicked", m.saveButtonClicked)
 	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(saveIcon, "save"))
+	btn.SetIconWidget(createImageFromBytes(saveIcon, "saveButtonClicked"))
+
+	// Toolbar build button
+	btn = m.builder.GetObject("toolbar_buildButton").(*gtk.ToolButton)
+	btn.Connect("clicked", m.buildButtonClicked)
+	btn.SetIsImportant(true)
+	btn.SetIconWidget(createImageFromBytes(buildIcon, "build"))
 
 	// Toolbar quit button
 	btn = m.builder.GetObject("toolbar_quitButton").(*gtk.ToolButton)
@@ -308,80 +316,4 @@ func (m *MainForm) setupStatusBar() {
 	// Status bar
 	statusBar := m.builder.GetObject("mainWindow_StatusBar").(*gtk.Statusbar)
 	statusBar.Push(statusBar.GetContextId("debstudio"), getApplicationName())
-}
-
-// addFile: Handler for the add file button clicked signal
-func (m *MainForm) addFile() {
-	if m.addFileDialog == nil {
-		m.addFileDialog = m.newAddFileDialog()
-	}
-	m.addFileDialog.openForNewFile("/home/per/temp/dragon.ply")
-}
-
-// new: Handler for the new button clicked signal
-func (m *MainForm) new() {
-	// // TODO : new project here
-	// // Open setup dialog
-	// result, err := m.openSetupDialog()
-	// if err != nil {
-	// 	// TODO : Error handling
-	// 	return
-	// }
-	//
-	// // Create project file
-	// currentProject, err := engine.SetupProject(result.path, result.name)
-	// if err != nil {
-	// 	// TODO : Error handling
-	// 	return
-	// }
-	//
-	// return
-}
-
-// open: Handler for the open button clicked signal
-func (m *MainForm) open() {
-	// TODO : open project here
-}
-
-// save: Handler for the save button clicked signal
-func (m *MainForm) save() {
-	// TODO : save project here
-}
-
-func isTraceMode() bool {
-	return len(os.Args) >= 2 && strings.HasPrefix(os.Args[1], "-t")
-}
-
-func (m *MainForm) addFileButtonClicked() {
-
-}
-
-func (m *MainForm) editFileButtonClicked() {
-
-}
-
-func (m *MainForm) removeFileButtonClicked() {
-
-}
-
-func (m *MainForm) enableDisableStackPages(status bool) {
-	m.enableDisableStackPage("mainWindow_controlPage", status)
-	m.enableDisableStackPage("mainWindow_preinstallPage", status)
-	m.enableDisableStackPage("mainWindow_installPage", status)
-	m.enableDisableStackPage("mainWindow_postinstallPage", status)
-	m.enableDisableStackPage("mainWindow_copyrightPage", status)
-}
-
-func (m *MainForm) enableDisableStackPage(name string, status bool) {
-	// TODO : Fix this code, should be doable with *gtk.Widget
-	box, ok := m.builder.GetObject(name).(*gtk.Box)
-	if !ok {
-		grid, ok := m.builder.GetObject(name).(*gtk.Grid)
-		if !ok {
-			m.log.Error.Printf("failed to retrieve stack page: %s", name)
-		}
-		grid.SetSensitive(status)
-		return
-	}
-	box.SetSensitive(status)
 }

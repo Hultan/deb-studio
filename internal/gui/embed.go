@@ -2,6 +2,8 @@ package gui
 
 import _ "embed"
 
+// TODO : Switch buildIcon to package (see aboutDialog)
+
 //go:embed assets/main.glade
 var mainGlade string
 
@@ -25,6 +27,9 @@ var openIcon []byte
 
 //go:embed assets/save.png
 var saveIcon []byte
+
+//go:embed assets/build.png
+var buildIcon []byte
 
 //go:embed assets/exit.png
 var exitIcon []byte
