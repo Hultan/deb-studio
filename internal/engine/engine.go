@@ -44,7 +44,7 @@ func (e *Engine) OpenProject(projectPath string) (*Project, error) {
 	}
 
 	// Scan for versions
-	err = p.scanForVersions(nil)
+	err = p.scanForVersions()
 	if err != nil {
 		log.Error.Printf("Failed to scan project path '%s'\n", projectPath)
 		return nil, err

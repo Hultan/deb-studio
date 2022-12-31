@@ -81,3 +81,26 @@ func (p *Project) scanForVersions() error {
 
 	return nil
 }
+
+func (p *Project) GetVersion(name string) *Version {
+	for i := range p.Versions {
+		if p.Versions[i].Name == name {
+			return p.Versions[i]
+		}
+	}
+	return nil
+}
+
+func (p *Project) GetArchitecture(versionName, architectureName string) *Architecture {
+	for i := range p.Versions {
+		if p.Versions[i].Name == versionName {
+			for a := range p.Versions[i].Architectures {
+				if p.Versions[i].Architectures[a].Name == architectureName {
+					return p.Versions[i].Architectures[a]
+				}
+			}
+			return nil
+		}
+	}
+	return nil
+}

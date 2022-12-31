@@ -75,3 +75,12 @@ func (v *Version) scanForArchitectures() error {
 
 	return nil
 }
+
+func (v *Version) GetArchitecture(name string) *Architecture {
+	for i := range v.Architectures {
+		if v.Architectures[i].Name == name {
+			return v.Architectures[i]
+		}
+	}
+	return nil
+}

@@ -383,6 +383,54 @@
               </packing>
             </child>
             <child>
+              <object class="GtkSeparatorToolItem">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="is-important">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="toolbar_addFileButton">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="is-important">True</property>
+                <property name="label" translatable="yes">Add file</property>
+                <property name="use-underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="toolbar_editFileButton">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Edit file</property>
+                <property name="use-underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="toolbar_removeFileButton">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Remove file</property>
+                <property name="use-underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkToolItem">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
@@ -417,7 +465,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkInfoBar">
+          <object class="GtkInfoBar" id="mainWindow_infoBar">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="revealed">False</property>
@@ -465,7 +513,7 @@
               </packing>
             </child>
             <child type="center">
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="mainWindow_infoBarLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">center</property>
@@ -491,7 +539,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkNotebook" id="notebook">
+          <object class="GtkNotebook" id="mainWindow_notebook">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="tab-pos">left</property>
@@ -522,7 +570,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="misc_workAreaPathEntry">
+                      <object class="GtkEntry" id="mainWindow_workAreaPathEntry">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="editable">False</property>
@@ -550,9 +598,8 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="margin-top">5</property>
-                        <property name="margin-bottom">5</property>
-                        <property name="label" translatable="yes">Installations
+                        <property name="margin-top">15</property>
+                        <property name="label" translatable="yes">Packages
 </property>
                       </object>
                       <packing>
@@ -566,7 +613,7 @@
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <child>
-                          <object class="GtkToolButton" id="miscPage_addInstallationButton">
+                          <object class="GtkToolButton" id="mainWindow_addPackageButton">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Add</property>
@@ -578,7 +625,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToolButton">
+                          <object class="GtkToolButton" id="mainWindow_removePackageButton">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Remove</property>
@@ -606,7 +653,7 @@
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <child>
-                              <object class="GtkListBox">
+                              <object class="GtkListBox" id="mainWindow_packageListBox">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="margin-left">5</property>
@@ -1811,6 +1858,62 @@ Click the info button for more information.</property>
             <property name="fill">True</property>
             <property name="pack-type">end</property>
             <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkStackSwitcher">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="stack">mainStack</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkStack" id="mainStack">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">5</property>
           </packing>
         </child>
       </object>

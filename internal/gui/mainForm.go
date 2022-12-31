@@ -18,9 +18,15 @@ type MainForm struct {
 	window        *gtk.ApplicationWindow
 	log           *logger.Logger
 	addFileDialog *addFileDialog
+	listBox       *gtk.ListBox
+	infoBar       *gtk.InfoBar
+	infoBarLabel  *gtk.Label
+	notebook      *gtk.Notebook
 }
 
 var currentProject *engine.Project
+var currentVersion *engine.Version
+var currentArchitecture *engine.Architecture
 
 // NewMainForm : Creates a new MainForm object
 func NewMainForm() *MainForm {
@@ -59,7 +65,10 @@ func (m *MainForm) Open(app *gtk.Application) {
 	// Show the main window
 	m.window.ShowAll()
 
-	projectFolder := "/home/per/installs/test"
+	m.notebook = m.builder.GetObject("mainWindow_notebook").(*gtk.Notebook)
+	m.enableDisableNotebook(false)
+
+	projectFolder := "/home/per/installs/softtube"
 	projectName := "test"
 
 	var err error
@@ -78,26 +87,27 @@ func (m *MainForm) Open(app *gtk.Application) {
 		}
 	}
 
+	m.listPackages()
 	m.printTraceInfo()
 
-	v, err := currentProject.AddVersion("testVersion1.0.0")
-	if err != nil {
-		m.log.Error.Printf("failed to add version")
-		os.Exit(1)
-	}
-	a, err := v.AddArchitecture("amd75")
-	if err != nil {
-		m.log.Error.Printf("failed to add architecture")
-		os.Exit(1)
-	}
-	fmt.Println(a.Name)
-
-	err = a.AddFile("/home/per/temp/", "empty", "/usr/bin/", false)
-	if err != nil {
-		m.log.Error.Printf("failed to add file")
-		os.Exit(1)
-	}
-	fmt.Println("file added successfully!")
+	// v, err := currentProject.AddVersion("testVersion1.0.0")
+	// if err != nil {
+	// 	m.log.Error.Printf("failed to add version")
+	// 	os.Exit(1)
+	// }
+	// a, err := v.AddArchitecture("amd75")
+	// if err != nil {
+	// 	m.log.Error.Printf("failed to add architecture")
+	// 	os.Exit(1)
+	// }
+	// fmt.Println(a.Name)
+	//
+	// err = a.AddFile("/home/per/temp/", "empty", "/usr/bin/", false)
+	// if err != nil {
+	// 	m.log.Error.Printf("failed to add file")
+	// 	os.Exit(1)
+	// }
+	// fmt.Println("file added successfully!")
 
 	// //
 	// // Save
@@ -273,6 +283,24 @@ func (m *MainForm) setupToolbar() {
 	btn.Connect("clicked", m.window.Close)
 	btn.SetIsImportant(true)
 	btn.SetIconWidget(createImageFromBytes(exitIcon, "quit"))
+
+	// Toolbar add file button
+	btn = m.builder.GetObject("toolbar_addFileButton").(*gtk.ToolButton)
+	btn.Connect("clicked", m.addFileButtonClicked)
+	btn.SetIsImportant(true)
+	btn.SetIconWidget(createImageFromBytes(addFileIcon, "addFile"))
+
+	// Toolbar edit file button
+	btn = m.builder.GetObject("toolbar_editFileButton").(*gtk.ToolButton)
+	btn.Connect("clicked", m.editFileButtonClicked)
+	btn.SetIsImportant(true)
+	btn.SetIconWidget(createImageFromBytes(editFileIcon, "editFile"))
+
+	// Toolbar remove file button
+	btn = m.builder.GetObject("toolbar_removeFileButton").(*gtk.ToolButton)
+	btn.Connect("clicked", m.removeFileButtonClicked)
+	btn.SetIsImportant(true)
+	btn.SetIconWidget(createImageFromBytes(removeFileIcon, "removeFile"))
 }
 
 // setupStatusBar: Set up the status bar
@@ -322,4 +350,32 @@ func (m *MainForm) save() {
 
 func isTraceMode() bool {
 	return len(os.Args) >= 2 && strings.HasPrefix(os.Args[1], "-t")
+}
+
+func (m *MainForm) addFileButtonClicked() {
+
+}
+
+func (m *MainForm) editFileButtonClicked() {
+
+}
+
+func (m *MainForm) removeFileButtonClicked() {
+
+}
+
+func (m *MainForm) enableDisableNotebook(enable bool) {
+	// pages := m.notebook.GetNPages()
+	// start := 0
+	// if !enable {
+	// 	start = 1
+	// }
+	// for p := start; p < pages; p++ {
+	// 	w, err := m.notebook.GetNthPage(p)
+	// 	if err != nil {
+	// 		m.log.Error.Printf("failed to disable page %d: %s", p, err)
+	// 	}
+	// 	widget := w.ToWidget()
+	// 	widget.SetSensitive(enable)
+	// }
 }

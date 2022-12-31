@@ -28,3 +28,12 @@ var saveIcon []byte
 
 //go:embed assets/exit.png
 var exitIcon []byte
+
+//go:embed assets/addFile.png
+var addFileIcon []byte
+
+//go:embed assets/editFile.png
+var editFileIcon []byte
+
+//go:embed assets/removeFile.png
+var removeFileIcon []byte

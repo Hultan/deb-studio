@@ -60,7 +60,7 @@ func writeDescriptor(descType descriptorType, descPath, name string) error {
 	descPrefix := getDescriptorPrefix(descType)
 	filePath := path.Join(descPath, descName)
 
-	content := fmt.Sprintf("%s=%s", descPrefix, name)
+	content := fmt.Sprintf("%s%s", descPrefix, name)
 	err := createTextFile(filePath, content)
 	if err != nil {
 		log.Error.Printf("Failed to write descriptor to path '%s': %s\n", filePath, err)
@@ -85,11 +85,11 @@ func getDescriptorFileName(descType descriptorType) string {
 func getDescriptorPrefix(descType descriptorType) string {
 	switch descType {
 	case projectDescriptor:
-		return "PROJECT"
+		return "PROJECT="
 	case versionDescriptor:
-		return "VERSION"
+		return "VERSION="
 	case architectureDescriptor:
-		return "ARCHITECTURE"
+		return "ARCHITECTURE="
 	default:
 		return ""
 	}
