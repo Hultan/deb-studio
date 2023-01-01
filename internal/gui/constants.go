@@ -3,7 +3,7 @@ package gui
 // Application constants
 
 const applicationTitle = "Deb Studio"
-const applicationVersion = "v 0.1.1"
+const applicationVersion = "v 0.1.2"
 const applicationCopyRight = "©SoftTeam AB, 2022"
 
 // Exit codes
@@ -26,7 +26,8 @@ const (
 type infoBarStatus int
 
 const (
-	infoBarStatusNoPackageSelected infoBarStatus = iota
+	infoBarStatusNoProjectOpened infoBarStatus = iota
+	infoBarStatusNoPackageSelected
 	infoBarStatusLatestVersion
 	infoBarStatusNotLatestVersion
 )
@@ -34,3 +35,4 @@ const (
 // Misc constants
 
 const RightMouseButton = 3
+const separator = "$$$"

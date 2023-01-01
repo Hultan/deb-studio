@@ -574,6 +574,7 @@
             <property name="can-focus">False</property>
             <property name="margin-start">10</property>
             <property name="margin-end">10</property>
+            <property name="homogeneous">True</property>
             <property name="stack">mainWindow_stack</property>
           </object>
           <packing>
@@ -2456,18 +2457,6 @@ Click the info button for more information.</property>
                 <property name="margin-top">10</property>
                 <property name="margin-bottom">10</property>
                 <child>
-                  <object class="GtkFileChooserButton" id="setupDialog_locationFileChooser">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="action">select-folder</property>
-                    <property name="title" translatable="yes"/>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">0</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
@@ -2484,7 +2473,7 @@ Click the info button for more information.</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Program name :</property>
+                    <property name="label" translatable="yes">Name :</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -2492,13 +2481,47 @@ Click the info button for more information.</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="setupDialog_programName">
+                  <object class="GtkEntry" id="setupDialog_projectNameEntry">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
                     <property name="top-attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkEntry" id="setupDialog_projectLocationEntry">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="setupDialog_browseProjectLocation">
+                        <property name="label" translatable="yes">...</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">0</property>
                   </packing>
                 </child>
                 <child>

@@ -6,9 +6,11 @@ import (
 )
 
 type Project struct {
-	Path     string
-	Name     string
-	Versions []*Version
+	Path                string
+	Name                string
+	Versions            []*Version
+	CurrentVersion      *Version
+	CurrentArchitecture *Architecture
 }
 
 func (p *Project) AddVersion(versionName string) (*Version, error) {
@@ -83,15 +85,22 @@ func (p *Project) scanForVersions() error {
 }
 
 func (p *Project) GetVersion(name string) *Version {
+	log.Trace.Println("Entering GetVersion...")
+	defer log.Trace.Println("Exiting GetVersion...")
+
 	for i := range p.Versions {
 		if p.Versions[i].Name == name {
 			return p.Versions[i]
 		}
 	}
+	log.Trace.Printf("failed to find version '%s'", name)
 	return nil
 }
 
 func (p *Project) GetArchitecture(versionName, architectureName string) *Architecture {
+	log.Trace.Println("Entering GetArchitecture...")
+	defer log.Trace.Println("Exiting GetArchitecture...")
+
 	for i := range p.Versions {
 		if p.Versions[i].Name == versionName {
 			for a := range p.Versions[i].Architectures {
@@ -99,9 +108,11 @@ func (p *Project) GetArchitecture(versionName, architectureName string) *Archite
 					return p.Versions[i].Architectures[a]
 				}
 			}
+			log.Trace.Printf("failed to find architecture '%s' in version '%s'", architectureName, versionName)
 			return nil
 		}
 	}
+	log.Trace.Printf("failed to find version '%s'", versionName)
 	return nil
 }
 
@@ -109,8 +120,28 @@ func (p *Project) GetArchitecture(versionName, architectureName string) *Archite
 // and also move to Version.IsLatestVersion().
 
 func (p *Project) IsLatestVersion(v *Version) bool {
+	log.Trace.Println("Entering IsLatestVersion...")
+	defer log.Trace.Println("Exiting IsLatestVersion...")
+
 	if len(p.Versions) == 0 || v == nil {
 		return false
 	}
 	return p.Versions[0].Name == v.Name
+}
+
+func (p *Project) SetCurrent(versionName, architectureName string) {
+	log.Trace.Println("Entering SetCurrent...")
+	defer log.Trace.Println("Exiting SetCurrent...")
+
+	p.CurrentVersion = p.GetVersion(versionName)
+	if p.CurrentVersion == nil {
+		log.Error.Printf("failed to find version '%s'\n", versionName)
+		return
+	}
+	p.CurrentArchitecture = p.CurrentVersion.GetArchitecture(architectureName)
+	if p.CurrentArchitecture == nil {
+		log.Error.Printf("failed to find architecture '%s' in version '%s'\n", architectureName, versionName)
+		p.CurrentVersion = nil
+		return
+	}
 }

@@ -23,9 +23,7 @@ type MainForm struct {
 	popup         *gtk.Menu
 }
 
-var currentProject *engine.Project
-var currentVersion *engine.Version
-var currentArchitecture *engine.Architecture
+var project *engine.Project
 var log *logger.Logger
 
 // NewMainForm : Creates a new MainForm object
@@ -66,31 +64,10 @@ func (m *MainForm) Open(app *gtk.Application) {
 	// Show the main window
 	m.window.ShowAll()
 
-	projectFolder := "/home/per/installs/softtube"
-	projectName := "test"
+	// Disable pages until a project has been opened
+	m.enableDisableStackPages()
 
-	var err error
-	e := engine.NewEngine(log)
-	if e.IsProjectFolder(projectFolder) {
-		currentProject, err = e.OpenProject(projectFolder)
-		if err != nil {
-			log.Error.Printf("failure during opening of '%s': %s", projectFolder, err)
-			os.Exit(1)
-		}
-	} else {
-		currentProject, err = e.SetupProject(projectFolder, projectName)
-		if err != nil {
-			log.Error.Printf("failure during setup of '%s': %s", projectFolder, err)
-			os.Exit(1)
-		}
-	}
-
-	m.listPackages()
-	m.printTraceInfo()
-	m.updateInfoBar()
-	m.enableDisableStackPages(m.getInfoBarStatus() != infoBarStatusNoPackageSelected)
-
-	// v, err := currentProject.AddVersion("testVersion1.0.0")
+	// v, err := project.AddVersion("testVersion1.0.0")
 	// if err != nil {
 	// 	log.Error.Printf("failed to add version")
 	// 	os.Exit(1)
@@ -170,14 +147,18 @@ func (m *MainForm) Open(app *gtk.Application) {
 }
 
 func (m *MainForm) printTraceInfo() {
+	if project == nil {
+		return
+	}
+
 	log.Info.Printf(
 		"Project %s (path: %s) contains %d versions:\n",
-		currentProject.Name,
-		currentProject.Path,
-		len(currentProject.Versions),
+		project.Name,
+		project.Path,
+		len(project.Versions),
 	)
 
-	for _, version := range currentProject.Versions {
+	for _, version := range project.Versions {
 		log.Info.Printf("\tVersion: %s (path: %s)\n", version.Name, version.Path)
 		if len(version.Architectures) > 0 {
 			for _, architecture := range version.Architectures {

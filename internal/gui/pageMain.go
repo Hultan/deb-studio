@@ -25,7 +25,19 @@ func (m *MainForm) setupPackagePage() {
 }
 
 func (m *MainForm) listPackages() {
-	for _, version := range currentProject.Versions {
+	if project == nil {
+		return
+	}
+
+	// Clear list
+	m.listBox.GetChildren().Foreach(
+		func(item interface{}) {
+			m.listBox.Remove(item.(*gtk.Widget))
+		},
+	)
+
+	// Add versions and architectures to list box
+	for _, version := range project.Versions {
 		for _, architecture := range version.Architectures {
 			box, err := m.createPackageListRow(version, architecture)
 			if err != nil {
@@ -65,7 +77,8 @@ func (m *MainForm) createPackageListRow(v *engine.Version, a *engine.Architectur
 		return nil, err
 	}
 	row.Add(box)
-	row.SetName(v.Name + "$$$" + a.Name)
+	// TODO : Change to a map instead?
+	row.SetName(v.Name + separator + a.Name)
 
 	// Add version label
 	label, err := gtk.LabelNew(v.Name)
