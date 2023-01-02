@@ -670,6 +670,25 @@
                             <property name="homogeneous">True</property>
                           </packing>
                         </child>
+                        <child>
+                          <object class="GtkToolItem">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <child>
+                              <object class="GtkCheckButton" id="mainPage_toolbarShowOnlyCurrentAndLatest">
+                                <property name="label" translatable="yes">Show only current and latest</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="draw-indicator">True</property>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="homogeneous">True</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1902,18 +1921,10 @@ Click the info button for more information.</property>
       </object>
     </child>
     <child>
-      <object class="GtkMenuItem" id="mainWindow_popupOpenVersion">
+      <object class="GtkMenuItem" id="mainWindow_popupOpenPackage">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <property name="label" translatable="yes">Open version directory...</property>
-        <property name="use-underline">True</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="mainWindow_popupOpenArchitecture">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="label" translatable="yes">Open architecture directory...</property>
+        <property name="label" translatable="yes">Open package directory...</property>
         <property name="use-underline">True</property>
       </object>
     </child>
