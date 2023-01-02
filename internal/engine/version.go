@@ -3,12 +3,24 @@ package engine
 import (
 	"os"
 	"path"
+
+	"github.com/google/uuid"
 )
 
 type Version struct {
 	Path          string
 	Name          string
+	IsLatest      bool
+	Guid          uuid.UUID
 	Architectures []*Architecture
+}
+
+func newVersion(name, path string) *Version {
+	return &Version{
+		Path: path,
+		Name: name,
+		Guid: uuid.New(),
+	}
 }
 
 func (v *Version) AddArchitecture(architectureName string) (*Architecture, error) {
@@ -29,7 +41,7 @@ func (v *Version) AddArchitecture(architectureName string) (*Architecture, error
 	}
 
 	// Add to version slice
-	a := &Architecture{Name: architectureName, Path: architecturePath}
+	a := newArchitecture(v, architectureName, architecturePath)
 	v.Architectures = append(v.Architectures, a)
 
 	log.Info.Printf("Created architecture %s...\n", architectureName)
@@ -69,7 +81,7 @@ func (v *Version) scanForArchitectures() error {
 		}
 
 		// Add architecture
-		a := &Architecture{Name: architectureName, Path: architecturePath}
+		a := newArchitecture(v, architectureName, architecturePath)
 		v.Architectures = append(v.Architectures, a)
 	}
 
@@ -79,6 +91,15 @@ func (v *Version) scanForArchitectures() error {
 func (v *Version) GetArchitecture(name string) *Architecture {
 	for i := range v.Architectures {
 		if v.Architectures[i].Name == name {
+			return v.Architectures[i]
+		}
+	}
+	return nil
+}
+
+func (v *Version) GetArchitectureByGuid(guid string) *Architecture {
+	for i := range v.Architectures {
+		if v.Architectures[i].Guid.String() == guid {
 			return v.Architectures[i]
 		}
 	}

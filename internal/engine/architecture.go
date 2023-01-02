@@ -5,11 +5,24 @@ import (
 	"io"
 	"os"
 	"path"
+
+	"github.com/google/uuid"
 )
 
 type Architecture struct {
-	Path string
-	Name string
+	Version *Version
+	Path    string
+	Name    string
+	Guid    uuid.UUID
+}
+
+func newArchitecture(version *Version, name, path string) *Architecture {
+	return &Architecture{
+		Version: version,
+		Name:    name,
+		Path:    path,
+		Guid:    uuid.New(),
+	}
 }
 
 func (a *Architecture) AddFile(fromPath, fileName, userToPath string, copy bool) error {

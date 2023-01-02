@@ -3,50 +3,48 @@ package gui
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/gotk3/gotk3/gtk"
 
 	"github.com/hultan/deb-studio/internal/engine"
 )
 
-// TODO : All actions needs to check currentVersion and currentArchitecture
+// TODO : All actions needs to check project.IsPackageSelected()
 
 func (m *MainForm) setAsLatestVersionClicked() {
-	fmt.Println("Set as latest version!")
+	guid := m.projectList.GetSelectedVersionGuid()
+	project.SetAsLatest(project.GetVersionByGuid(guid))
 }
 
 func (m *MainForm) setPackageAsCurrentClickedPopup() {
-	row := m.listBox.GetSelectedRow()
-	m.setPackageAsCurrent(row)
+	guid := m.projectList.GetSelectedArchitectureGuid()
+	project.SetAsCurrent(project.GetArchitectureByGuid(guid))
 }
 
-func (m *MainForm) setPackageAsCurrentClicked(l *gtk.ListBox, row *gtk.ListBoxRow) {
-	m.setPackageAsCurrent(row)
+func (m *MainForm) setPackageAsCurrentClicked() {
+	guid := m.projectList.GetSelectedArchitectureGuid()
+	project.SetAsCurrent(project.GetArchitectureByGuid(guid))
 }
 
-func (m *MainForm) setPackageAsCurrent(row *gtk.ListBoxRow) {
-	defer func() {
-		m.updateInfoBar()
-		m.enableDisableStackPages()
-	}()
-
-	name, err := row.GetName()
+func (m *MainForm) getNames(model *gtk.ListStore, iter *gtk.TreeIter) (string, string) {
+	value, err := model.GetValue(iter, 1) // VersionName
 	if err != nil {
-		log.Error.Printf("failed to set current package")
-		return
+		return "", ""
 	}
-	list := strings.Split(name, separator)
-	versionName := list[0]
-	architectureName := list[1]
+	versionName, err := value.GetString()
+	if err != nil {
+		return "", ""
+	}
 
-	project.SetCurrent(versionName, architectureName)
-	if project.CurrentVersion == nil || project.CurrentArchitecture == nil {
-		log.Error.Printf(
-			"failed to set current version '%s' and architecture '%s'",
-			versionName, architectureName,
-		)
+	value, err = model.GetValue(iter, 1) // VersionName
+	if err != nil {
+		return "", ""
 	}
+	architectureName, err := value.GetString()
+	if err != nil {
+		return "", ""
+	}
+	return versionName, architectureName
 }
 
 func (m *MainForm) addPackageClicked() {

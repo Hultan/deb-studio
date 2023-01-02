@@ -1,17 +1,17 @@
 package gui
 
 import (
-	"os"
-
 	"github.com/gotk3/gotk3/gtk"
 
 	"github.com/hultan/deb-studio/internal/engine"
+	"github.com/hultan/deb-studio/internal/projectList"
 )
 
 func (m *MainForm) setupPackagePage() {
-	m.listBox = m.builder.GetObject("mainWindow_packageListBox").(*gtk.ListBox)
-	m.listBox.Connect("row-activated", m.setPackageAsCurrentClicked)
-	m.listBox.Connect("button-press-event", m.showPopupMenu)
+	m.treeView = m.builder.GetObject("mainWindow_packageList").(*gtk.TreeView)
+	m.projectList = projectList.NewProjectList(m.treeView)
+	m.treeView.Connect("row_activated", m.setPackageAsCurrentClicked)
+	m.treeView.Connect("button-press-event", m.showPopupMenu)
 
 	m.infoBar = m.builder.GetObject("mainWindow_infoBar").(*gtk.InfoBar)
 	m.infoBarLabel = m.builder.GetObject("mainWindow_infoBarLabel").(*gtk.Label)
@@ -29,39 +29,24 @@ func (m *MainForm) listPackages() {
 		return
 	}
 
-	// Clear list
-	m.listBox.GetChildren().Foreach(
-		func(item interface{}) {
-			m.listBox.Remove(item.(*gtk.Widget))
-		},
-	)
+	store := project.GetPackageListStore(checkIcon)
+	m.projectList.RefreshList(store)
+	//
+	// // Sort packages by newest first
+	// m.listBox.SetSortFunc(
+	// 	func(row1 *gtk.ListBoxRow, row2 *gtk.ListBoxRow) int {
+	// 		name1, _ := row1.GetName()
+	// 		name2, _ := row2.GetName()
+	// 		if name1 < name2 {
+	// 			return 1
+	// 		} else if name1 == name2 {
+	// 			return 0
+	// 		}
+	// 		return -1
+	// 	},
+	// )
 
-	// Add versions and architectures to list box
-	for _, version := range project.Versions {
-		for _, architecture := range version.Architectures {
-			box, err := m.createPackageListRow(version, architecture)
-			if err != nil {
-				log.Error.Println(err)
-				os.Exit(1)
-			}
-			m.listBox.Add(box)
-		}
-	}
-
-	// Sort packages by newest first
-	m.listBox.SetSortFunc(
-		func(row1 *gtk.ListBoxRow, row2 *gtk.ListBoxRow) int {
-			name1, _ := row1.GetName()
-			name2, _ := row2.GetName()
-			if name1 < name2 {
-				return 1
-			} else if name1 == name2 {
-				return 0
-			}
-			return -1
-		},
-	)
-	m.listBox.ShowAll()
+	m.treeView.ShowAll()
 }
 
 func (m *MainForm) createPackageListRow(v *engine.Version, a *engine.Architecture) (*gtk.ListBoxRow, error) {

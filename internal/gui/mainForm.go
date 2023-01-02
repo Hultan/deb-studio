@@ -10,6 +10,7 @@ import (
 
 	"github.com/hultan/deb-studio/internal/engine"
 	"github.com/hultan/deb-studio/internal/logger"
+	"github.com/hultan/deb-studio/internal/projectList"
 )
 
 // MainForm : Struct for the main form
@@ -17,7 +18,8 @@ type MainForm struct {
 	builder       *Builder
 	window        *gtk.ApplicationWindow
 	addFileDialog *addFileDialog
-	listBox       *gtk.ListBox
+	treeView      *gtk.TreeView
+	projectList   *projectList.ProjectList
 	infoBar       *gtk.InfoBar
 	infoBarLabel  *gtk.Label
 	popup         *gtk.Menu
@@ -66,6 +68,8 @@ func (m *MainForm) Open(app *gtk.Application) {
 
 	// Disable pages until a project has been opened
 	m.enableDisableStackPages()
+
+	m.updateInfoBar()
 
 	// v, err := project.AddVersion("testVersion1.0.0")
 	// if err != nil {
@@ -162,7 +166,10 @@ func (m *MainForm) printTraceInfo() {
 		log.Info.Printf("\tVersion: %s (path: %s)\n", version.Name, version.Path)
 		if len(version.Architectures) > 0 {
 			for _, architecture := range version.Architectures {
-				log.Info.Printf("\t\tArchitecture: %s (path: %s)\n", architecture.Name, architecture.Path)
+				log.Info.Printf(
+					"\t\tArchitecture: %s (path: %s, guid: %s)\n",
+					architecture.Name, architecture.Path, architecture.Guid,
+				)
 			}
 		}
 	}
@@ -272,24 +279,6 @@ func (m *MainForm) setupToolbar() {
 	btn.Connect("clicked", m.window.Close)
 	btn.SetIsImportant(true)
 	btn.SetIconWidget(createImageFromBytes(exitIcon, "quit"))
-
-	// Toolbar add file button
-	btn = m.builder.GetObject("toolbar_addFileButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.addFileButtonClicked)
-	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(addFileIcon, "addFile"))
-
-	// Toolbar edit file button
-	btn = m.builder.GetObject("toolbar_editFileButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.editFileButtonClicked)
-	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(editFileIcon, "editFile"))
-
-	// Toolbar remove file button
-	btn = m.builder.GetObject("toolbar_removeFileButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.removeFileButtonClicked)
-	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(removeFileIcon, "removeFile"))
 }
 
 // setupStatusBar: Set up the status bar

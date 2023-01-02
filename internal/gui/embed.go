@@ -42,3 +42,6 @@ var editFileIcon []byte
 
 //go:embed assets/removeFile.png
 var removeFileIcon []byte
+
+//go:embed assets/check.png
+var checkIcon []byte

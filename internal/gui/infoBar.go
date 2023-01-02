@@ -12,7 +12,7 @@ func (m *MainForm) getInfoBarStatus() infoBarStatus {
 	} else if project.CurrentVersion == nil ||
 		project.CurrentArchitecture == nil {
 		return infoBarStatusNoPackageSelected
-	} else if !project.IsLatestVersion(project.CurrentVersion) {
+	} else if !project.CurrentVersion.IsLatest {
 		return infoBarStatusNotLatestVersion
 	}
 	return infoBarStatusLatestVersion
@@ -20,6 +20,8 @@ func (m *MainForm) getInfoBarStatus() infoBarStatus {
 
 func (m *MainForm) getInfoBarText() string {
 	switch m.getInfoBarStatus() {
+	case infoBarStatusNoProjectOpened:
+		return "You need to open or create a new project..."
 	case infoBarStatusNoPackageSelected:
 		return "You need to select or add a package to edit!"
 	case infoBarStatusNotLatestVersion:
@@ -40,8 +42,10 @@ func (m *MainForm) getInfoBarText() string {
 
 func (m *MainForm) setInfoBarColor() {
 	switch m.getInfoBarStatus() {
+	case infoBarStatusNoProjectOpened:
+		m.infoBar.SetMessageType(gtk.MESSAGE_INFO)
 	case infoBarStatusNoPackageSelected:
-		m.infoBar.SetMessageType(gtk.MESSAGE_ERROR)
+		m.infoBar.SetMessageType(gtk.MESSAGE_WARNING)
 	case infoBarStatusNotLatestVersion:
 		m.infoBar.SetMessageType(gtk.MESSAGE_WARNING)
 	case infoBarStatusLatestVersion:
