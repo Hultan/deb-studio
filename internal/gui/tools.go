@@ -8,6 +8,8 @@ import (
 
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
+
+	"github.com/hultan/deb-studio/internal/common"
 )
 
 // createPixBufFromBytes: Create a *gdk.Pixbuf from a slice of bytes
@@ -35,7 +37,12 @@ func createImageFromBytes(bytes []byte, name string) *gtk.Image {
 
 // getApplicationName: Get the application name, version and copyright
 func getApplicationName() string {
-	return fmt.Sprintf("%s %s - %s", applicationTitle, applicationVersion, applicationCopyRight)
+	return fmt.Sprintf(
+		"%s %s - %s",
+		common.ApplicationTitle,
+		common.ApplicationVersion,
+		common.ApplicationCopyRight,
+	)
 }
 
 // getConfigPath: Get path to the config file
@@ -50,7 +57,7 @@ func getHomeDirectory() string {
 	u, err := user.Current()
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Failed to get user home directory : %s\n", err)
-		os.Exit(exitCodeSetupError)
+		os.Exit(common.ExitCodeSetupError)
 	}
 	return u.HomeDir
 }

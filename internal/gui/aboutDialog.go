@@ -3,6 +3,8 @@ package gui
 import (
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
+
+	"github.com/hultan/deb-studio/internal/common"
 )
 
 // openAboutDialog: Opens the help/about dialog
@@ -10,10 +12,10 @@ func (m *MainForm) openAboutDialog() {
 	about := m.builder.GetObject("aboutDialog").(*gtk.AboutDialog)
 	about.SetDestroyWithParent(true)
 	about.SetTransientFor(m.window)
-	about.SetProgramName(applicationTitle)
+	about.SetProgramName(common.ApplicationTitle)
 	about.SetComments("Create deb packages for debian based linux distributions.")
-	about.SetVersion(applicationVersion)
-	about.SetCopyright(applicationCopyRight)
+	about.SetVersion(common.ApplicationVersion)
+	about.SetCopyright(common.ApplicationCopyRight)
 	image, err := gdk.PixbufNewFromBytesOnly(applicationIcon)
 	if err == nil {
 		about.SetLogo(image)

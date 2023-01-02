@@ -12,12 +12,27 @@ import (
 // TODO : All actions needs to check project.IsPackageSelected()
 
 func (m *MainForm) setAsLatestVersionClicked() {
-}
+	// Set version as latest
+	pkgName := m.projectList.GetSelectedPackageName()
+	if pkgName == "" {
+		return
+	}
+	project.SetAsLatest(pkgName)
 
-func (m *MainForm) setPackageAsCurrentClickedPopup() {
+	// Refresh package list
+	m.refreshList()
 }
 
 func (m *MainForm) setPackageAsCurrentClicked() {
+	// Set package as current
+	pkgName := m.projectList.GetSelectedPackageName()
+	if pkgName == "" {
+		return
+	}
+	project.SetAsCurrent(pkgName)
+
+	// Refresh package list
+	m.refreshList()
 }
 
 func (m *MainForm) addPackageClicked() {
@@ -37,7 +52,6 @@ func (m *MainForm) addPackageClicked() {
 	}
 
 	dialog.Hide()
-
 }
 
 func (m *MainForm) removePackageClicked() {
@@ -52,11 +66,11 @@ func (m *MainForm) addFileButtonClicked() {
 }
 
 func (m *MainForm) editFileButtonClicked() {
-
+	fmt.Println("Edit file clicked!")
 }
 
 func (m *MainForm) removeFileButtonClicked() {
-
+	fmt.Println("Remove file clicked!")
 }
 
 // newButtonClicked: Handler for the newButtonClicked button clicked signal
@@ -88,6 +102,7 @@ func (m *MainForm) newButtonClicked() {
 
 // openButtonClicked: Handler for the openButtonClicked button clicked signal
 func (m *MainForm) openButtonClicked() {
+	// TODO : Handle if a project is already open
 	var err error
 	dlg, err := gtk.FileChooserDialogNewWith2Buttons(
 		"Select folder...", m.window, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
@@ -138,4 +153,9 @@ func (m *MainForm) saveButtonClicked() {
 func (m *MainForm) buildButtonClicked() {
 	// TODO : build project here
 	fmt.Println("Build clicked")
+}
+
+func (m *MainForm) refreshList() {
+	store := project.GetPackageListStore(checkIcon)
+	m.projectList.RefreshList(store)
 }

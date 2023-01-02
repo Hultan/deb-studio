@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/gotk3/gotk3/gtk"
+
+	"github.com/hultan/deb-studio/internal/common"
 )
 
 // addFileDialog: Struct for the add file dialog
@@ -74,9 +76,9 @@ func (a *addFileDialog) setupForNewFile(filePath string) {
 	a.installPath.GrabFocus()
 	buf, err := a.runScriptTextView.GetBuffer()
 	if err != nil {
-		_,_ = fmt.Fprintln(os.Stderr,"failed to get textview buffer")
-		_,_ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(exitCodeGtkError)
+		_, _ = fmt.Fprintln(os.Stderr, "failed to get textview buffer")
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(common.ExitCodeGtkError)
 	}
 	buf.SetText("")
 	a.staticRadioButton.SetActive(true)
@@ -96,9 +98,9 @@ func (a *addFileDialog) filePathButtonClicked() {
 	)
 
 	if err != nil {
-		_,_ = fmt.Fprintln(os.Stderr,"failed to create file path dialog")
-		_,_ = fmt.Fprintln(os.Stderr,err)
-		os.Exit(exitCodeGtkError)
+		_, _ = fmt.Fprintln(os.Stderr, "failed to create file path dialog")
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(common.ExitCodeGtkError)
 	}
 
 	// Show the dialog
@@ -123,9 +125,9 @@ func (a *addFileDialog) installPathButtonClicked() {
 	)
 
 	if err != nil {
-		_,_ = fmt.Fprintln(os.Stderr,"failed to create install path dialog")
-		_,_ = fmt.Fprintln(os.Stderr,err)
-		os.Exit(exitCodeGtkError)
+		_, _ = fmt.Fprintln(os.Stderr, "failed to create install path dialog")
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(common.ExitCodeGtkError)
 	}
 
 	// Show the dialog

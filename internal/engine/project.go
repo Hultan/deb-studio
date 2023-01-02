@@ -11,6 +11,7 @@ import (
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 
+	"github.com/hultan/deb-studio/internal/common"
 	"github.com/hultan/deb-studio/internal/config/packageConfig"
 	"github.com/hultan/deb-studio/internal/config/projectConfig"
 	"github.com/hultan/deb-studio/internal/logger"
@@ -32,7 +33,7 @@ func OpenProject(l *logger.Logger, projectPath string) (*Project, error) {
 		return nil, errors.New("missing project.json")
 	}
 
-	config, err := projectConfig.Load(path.Join(projectPath, projectJsonFileName))
+	config, err := projectConfig.Load(path.Join(projectPath, common.ProjectJsonFileName))
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func NewProject(l *logger.Logger, projectPath, projectName string) (*Project, er
 	p.Config = &projectConfig.ProjectConfig{Name: projectName}
 
 	// Save config
-	err := p.Config.Save(path.Join(projectPath, projectJsonFileName))
+	err := p.Config.Save(path.Join(projectPath, common.ProjectJsonFileName))
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +70,7 @@ func NewProject(l *logger.Logger, projectPath, projectName string) (*Project, er
 }
 
 func isProjectFolder(projectPath string) bool {
-	info, err := os.Stat(path.Join(projectPath, projectJsonFileName))
+	info, err := os.Stat(path.Join(projectPath, common.ProjectJsonFileName))
 	if err != nil {
 		return false
 	}
@@ -185,7 +186,7 @@ func (p *Project) scanForPackages() error {
 
 	for _, dir := range dirs {
 		packagePath := path.Join(p.Path, dir)
-		packageConfigPath := path.Join(packagePath, packageJsonFileName)
+		packageConfigPath := path.Join(packagePath, common.PackageJsonFileName)
 
 		info, err := os.Stat(packageConfigPath)
 		if err != nil || info.IsDir() {
@@ -203,4 +204,32 @@ func (p *Project) scanForPackages() error {
 	}
 
 	return nil
+}
+
+func (p *Project) GetPackageByName(name string) *Package {
+	for i := range p.Packages {
+		pkg := p.Packages[i]
+		if pkg.Config.Name == name {
+			return pkg
+		}
+	}
+	return nil
+}
+
+func (p *Project) SetAsCurrent(name string) {
+	pkg := p.GetPackageByName(name)
+	if pkg == nil {
+		// TODO : Error handling
+		return
+	}
+	p.Config.CurrentPackage = pkg.Config.Name
+}
+
+func (p *Project) SetAsLatest(name string) {
+	pkg := p.GetPackageByName(name)
+	if pkg == nil {
+		// TODO : Error handling
+		return
+	}
+	p.Config.LatestVersion = pkg.Config.Version
 }

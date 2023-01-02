@@ -4,6 +4,8 @@ import (
 	"log"
 
 	"github.com/gotk3/gotk3/gtk"
+
+	"github.com/hultan/deb-studio/internal/common"
 )
 
 type ProjectList struct {
@@ -24,8 +26,8 @@ func (p *ProjectList) RefreshList(store *gtk.ListStore) {
 func (p *ProjectList) setupColumns() {
 	// p.treeView.AppendColumn(p.createTextColumn("Is latest", 0, 70, 300))
 	p.treeView.AppendColumn(p.createImageColumn("latest"))
-	p.treeView.AppendColumn(p.createTextColumn("Version name", packageListColumnVersionName, 0, 300))
-	p.treeView.AppendColumn(p.createTextColumn("Architecture name", packageListColumnArchitectureName, 0, 300))
+	p.treeView.AppendColumn(p.createTextColumn("Version name", common.PackageListColumnVersionName, 0, 300))
+	p.treeView.AppendColumn(p.createTextColumn("Architecture name", common.PackageListColumnArchitectureName, 0, 300))
 }
 
 // createTextColumn : Add a column to the tree view (during the initialization of the tree view)
@@ -58,7 +60,7 @@ func (p *ProjectList) createImageColumn(title string) *gtk.TreeViewColumn {
 		log.Fatal("Unable to create pixbuf cell renderer:", err)
 	}
 
-	column, err := gtk.TreeViewColumnNewWithAttribute(title, cellRenderer, "pixbuf", packageListColumnIsLatest)
+	column, err := gtk.TreeViewColumnNewWithAttribute(title, cellRenderer, "pixbuf", common.PackageListColumnIsLatest)
 	if err != nil {
 		log.Fatal("Unable to create cell column:", err)
 	}
@@ -69,30 +71,24 @@ func (p *ProjectList) createImageColumn(title string) *gtk.TreeViewColumn {
 	return column
 }
 
-func (p *ProjectList) GetSelectedVersionGuid() string {
+func (p *ProjectList) GetSelectedPackageName() string {
 	selection, err := p.treeView.GetSelection()
 	if err != nil {
 		return ""
 	}
 	model, iter, ok := selection.GetSelected()
-	if ok {
+	if !ok {
 		return ""
 	}
-	v, _ := model.ToTreeModel().GetValue(iter, packageListColumnVersionGuid)
-	guid, _ := v.GetString()
-	return guid
-}
+	v, err := model.ToTreeModel().GetValue(iter, common.PackageListColumnPackageName)
+	if err != nil {
+		return ""
+	}
 
-func (p *ProjectList) GetSelectedArchitectureGuid() string {
-	selection, err := p.treeView.GetSelection()
+	name, err := v.GetString()
 	if err != nil {
 		return ""
 	}
-	model, iter, ok := selection.GetSelected()
-	if ok {
-		return ""
-	}
-	v, _ := model.ToTreeModel().GetValue(iter, packageListColumnArchitectureGuid)
-	guid, _ := v.GetString()
-	return guid
+
+	return name
 }
