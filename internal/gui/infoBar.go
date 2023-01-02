@@ -9,10 +9,9 @@ import (
 func (m *MainForm) getInfoBarStatus() infoBarStatus {
 	if project == nil {
 		return infoBarStatusNoProjectOpened
-	} else if project.CurrentVersion == nil ||
-		project.CurrentArchitecture == nil {
+	} else if project.CurrentPackage == nil {
 		return infoBarStatusNoPackageSelected
-	} else if !project.CurrentVersion.IsLatest {
+	} else if project.WorkingWithLatestVersion() {
 		return infoBarStatusNotLatestVersion
 	}
 	return infoBarStatusLatestVersion
@@ -27,12 +26,12 @@ func (m *MainForm) getInfoBarText() string {
 	case infoBarStatusNotLatestVersion:
 		return fmt.Sprintf(
 			"You are currently not editing the latest version! You are editing version %s and architecture %s.",
-			project.CurrentVersion.Name, project.CurrentArchitecture.Name,
+			project.CurrentPackage.Config.Version, project.CurrentPackage.Config.Architecture,
 		)
 	case infoBarStatusLatestVersion:
 		return fmt.Sprintf(
 			"You are currently editing version %s and architecture %s.",
-			project.CurrentVersion.Name, project.CurrentArchitecture.Name,
+			project.CurrentPackage.Config.Version, project.CurrentPackage.Config.Architecture,
 		)
 	default:
 		log.Error.Println("Invalid infoBarStatus in getInfoBarText()")

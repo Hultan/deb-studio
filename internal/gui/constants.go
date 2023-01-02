@@ -3,7 +3,7 @@ package gui
 // Application constants
 
 const applicationTitle = "Deb Studio"
-const applicationVersion = "v 0.1.3"
+const applicationVersion = "v 0.1.4"
 const applicationCopyRight = "©SoftTeam AB, 2022"
 
 // Exit codes

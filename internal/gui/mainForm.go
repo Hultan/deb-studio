@@ -70,84 +70,6 @@ func (m *MainForm) Open(app *gtk.Application) {
 	m.enableDisableStackPages()
 
 	m.updateInfoBar()
-
-	// v, err := project.AddVersion("testVersion1.0.0")
-	// if err != nil {
-	// 	log.Error.Printf("failed to add version")
-	// 	os.Exit(1)
-	// }
-	// a, err := v.AddArchitecture("amd75")
-	// if err != nil {
-	// 	log.Error.Printf("failed to add architecture")
-	// 	os.Exit(1)
-	// }
-	// fmt.Println(a.Name)
-	//
-	// err = a.AddFile("/home/per/temp/", "empty", "/usr/bin/", false)
-	// if err != nil {
-	// 	log.Error.Printf("failed to add file")
-	// 	os.Exit(1)
-	// }
-	// fmt.Println("file added successfully!")
-
-	// //
-	// // Save
-	// //
-	//
-	// configPath := getConfigPath()
-	//
-	// av := &installationConfig.InstallationConfig{}
-	// av.Version = "1.0.0"
-	// av.Architecture = "amd64"
-	//
-	// av.Control.Package = "debStudio"
-	// av.Control.Source = "source"
-	// av.Control.Version = "1.0.0"
-	// av.Control.Section = "section"
-	// av.Control.Priority = "high"
-	// av.Control.Architecture = "amd64"
-	// av.Control.Essential = true
-	// av.Control.Depends = "dpkg"
-	// av.Control.InstalledSize = "1024"
-	// av.Control.Maintainer = "Per Hultqvist"
-	// av.Control.Description = "A deb file creator"
-	// av.Control.Homepage = "www.softteam.se"
-	// av.Control.BuiltUsing = "debStudio"
-	//
-	// file := installationConfig.FileSection{}
-	// file.FilePath = "/home/per/temp/dragon.ply"
-	// file.InstallPath = "/usr/bin"
-	// file.Static = false
-	// file.RunScript = true
-	// file.Script = "go build /home/per/code"
-	//
-	// av.Files = append(av.Files, file)
-	//
-	// err = av.Save(configPath)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	//
-	// //
-	// // Load
-	// //
-	//
-	// av, err = installationConfig.Load(configPath)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Printf("%+v\n", av)
-	//
-	// // Modify the indent level of the ConfigState only.  The global
-	// // configuration is not modified.
-	// scs := spew.ConfigState{
-	// 	Indent:                  "\t",
-	// 	DisableCapacities:       true,
-	// 	DisableMethods:          true,
-	// 	DisablePointerMethods:   true,
-	// 	DisablePointerAddresses: true,
-	// }
-	// scs.Dump(av)
 }
 
 func (m *MainForm) printTraceInfo() {
@@ -156,22 +78,17 @@ func (m *MainForm) printTraceInfo() {
 	}
 
 	log.Info.Printf(
-		"Project %s (path: %s) contains %d versions:\n",
-		project.Name,
+		"Project %s (path: %s) contains %d packages:\n",
+		project.Config.Name,
 		project.Path,
-		len(project.Versions),
+		len(project.Packages),
 	)
 
-	for _, version := range project.Versions {
-		log.Info.Printf("\tVersion: %s (path: %s)\n", version.Name, version.Path)
-		if len(version.Architectures) > 0 {
-			for _, architecture := range version.Architectures {
-				log.Info.Printf(
-					"\t\tArchitecture: %s (path: %s, guid: %s)\n",
-					architecture.Name, architecture.Path, architecture.Guid,
-				)
-			}
-		}
+	for _, pkg := range project.Packages {
+		log.Info.Printf(
+			"\t\tPath: %s (name: %s)\n",
+			pkg.Path, pkg.Config.Name,
+		)
 	}
 }
 

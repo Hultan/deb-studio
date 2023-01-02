@@ -6,32 +6,28 @@ import (
 	"os"
 	"path"
 
-	"github.com/google/uuid"
+	"github.com/hultan/deb-studio/internal/config/packageConfig"
 )
 
-type Architecture struct {
-	Version *Version
-	Path    string
-	Name    string
-	Guid    uuid.UUID
+type Package struct {
+	Path   string
+	Config *packageConfig.PackageConfig
 }
 
-func newArchitecture(version *Version, name, path string) *Architecture {
-	return &Architecture{
-		Version: version,
-		Name:    name,
-		Path:    path,
-		Guid:    uuid.New(),
+func newPackage(path string, config *packageConfig.PackageConfig) *Package {
+	return &Package{
+		Path:   path,
+		Config: config,
 	}
 }
 
-func (a *Architecture) AddFile(fromPath, fileName, userToPath string, copy bool) error {
+func (p *Package) AddFile(fromPath, fileName, userToPath string, copy bool) error {
 	log.Trace.Println("Entering AddFile...")
 	defer log.Trace.Println("Exiting AddFile...")
 
 	// Create localToPath by joining architecture path with userToPath
 	// and create it locally
-	localToPath := path.Join(a.Path, userToPath)
+	localToPath := path.Join(p.Path, userToPath)
 	err := os.MkdirAll(localToPath, 0755)
 	if err != nil {
 		log.Error.Printf("failed to create directory %s : %s", localToPath, err)

@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -8,43 +10,163 @@ import (
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
+
+	"github.com/hultan/deb-studio/internal/config/packageConfig"
+	"github.com/hultan/deb-studio/internal/config/projectConfig"
+	"github.com/hultan/deb-studio/internal/logger"
 )
 
+var log *logger.Logger
+
 type Project struct {
-	Path                string
-	Name                string
-	Versions            []*Version
-	CurrentVersion      *Version
-	CurrentArchitecture *Architecture
+	Config         *projectConfig.ProjectConfig
+	Path           string
+	CurrentPackage *Package
+	Packages       []*Package
 }
 
-func (p *Project) AddVersion(versionName string) (*Version, error) {
-	log.Trace.Println("Entering AddVersion...")
-	defer log.Trace.Println("Exiting AddVersion...")
+func OpenProject(l *logger.Logger, projectPath string) (*Project, error) {
+	log = l
+	if !isProjectFolder(projectPath) {
+		// TODO : Fix error handling
+		return nil, errors.New("missing project.json")
+	}
 
-	versionPath := path.Join(p.Path, versionName)
-	err := os.MkdirAll(versionPath, 0775)
+	config, err := projectConfig.Load(path.Join(projectPath, projectJsonFileName))
 	if err != nil {
-		log.Error.Printf("Failed to create directory at path '%s': %s\n", versionPath, err)
 		return nil, err
 	}
 
-	err = writeDescriptor(versionDescriptor, versionPath, versionName)
+	p := &Project{Path: projectPath, Config: config}
+
+	err = p.scanForPackages()
 	if err != nil {
-		log.Error.Printf("Failed to create .version file at path '%s': %s\n", versionPath, err)
+		log.Error.Printf("Failed to scan project path '%s'\n", projectPath)
 		return nil, err
+	}
+
+	log.Info.Printf("Successfully opened project %s...\n", p.Config.Name)
+
+	p.SetCurrentPackage()
+
+	return p, nil
+}
+
+func NewProject(l *logger.Logger, projectPath, projectName string) (*Project, error) {
+	log = l
+
+	// Create project and config
+	p := &Project{Path: projectPath}
+	p.Config = &projectConfig.ProjectConfig{Name: projectName}
+
+	// Save config
+	err := p.Config.Save(path.Join(projectPath, projectJsonFileName))
+	if err != nil {
+		return nil, err
+	}
+
+	return p, nil
+}
+
+func isProjectFolder(projectPath string) bool {
+	info, err := os.Stat(path.Join(projectPath, projectJsonFileName))
+	if err != nil {
+		return false
+	}
+	return !info.IsDir()
+}
+
+func (p *Project) AddPackage(versionName, architectureName string) (*Package, error) {
+	log.Trace.Println("Entering AddPackage...")
+	defer log.Trace.Println("Exiting AddPackage...")
+
+	packageName := fmt.Sprintf("%s_%s", versionName, architectureName)
+	packagePath := path.Join(p.Path, packageName)
+	err := os.MkdirAll(packagePath, 0775)
+	if err != nil {
+		log.Error.Printf(
+			"Failed to create directory '%s' for package '%s': %s\n",
+			packagePath, packageName, err,
+		)
+		return nil, err
+	}
+
+	config := &packageConfig.PackageConfig{
+		Name:         packageName,
+		Version:      versionName,
+		Architecture: architectureName,
+		Files:        nil,
 	}
 
 	// Add to version slice
-	v := newVersion(versionName, versionPath)
-	p.SetAsLatest(v)
-	p.Versions = append(p.Versions, v)
+	pkg := newPackage(packagePath, config)
+	p.Packages = append(p.Packages, pkg)
+	p.Config.LatestVersion = versionName
 
-	log.Info.Printf("Created version %s...\n", versionName)
-	return v, nil
+	log.Info.Printf("Created package %s...\n", packageName)
+
+	return pkg, nil
 }
 
-func (p *Project) scanForVersions() error {
+func (p *Project) GetPackageListStore(checkIcon []byte) *gtk.ListStore {
+	log.Trace.Println("Entering GetPackageListStore...")
+	defer log.Trace.Println("Exiting GetPackageListStore...")
+
+	// Icon, Version name, Architecture name, package name
+	s, err := gtk.ListStoreNew(
+		gdk.PixbufGetType(), glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING,
+	)
+	if err != nil {
+		log.Error.Printf("failed to create new list store: %s\n", err)
+		return nil
+	}
+
+	check, _ := gdk.PixbufNewFromBytesOnly(checkIcon)
+	for _, pkg := range p.Packages {
+		iter := s.InsertAfter(nil)
+		data := []interface{}{
+			nil,
+			pkg.Config.Name, pkg.Config.Version, pkg.Config.Architecture,
+		}
+		if pkg.Config.Version == p.Config.LatestVersion {
+			data[0] = check
+		}
+		_ = s.Set(iter, []int{0, 1, 2, 3}, data)
+	}
+
+	s.SetSortFunc(
+		1, func(model *gtk.TreeModel, a, b *gtk.TreeIter) int {
+			va, _ := model.GetValue(a, 2)
+			vb, _ := model.GetValue(b, 2)
+			vaName, _ := va.GetString()
+			vbName, _ := vb.GetString()
+
+			return strings.Compare(vbName, vaName)
+		},
+	)
+
+	s.SetSortColumnId(1, gtk.SORT_ASCENDING)
+
+	return s
+}
+
+func (p *Project) WorkingWithLatestVersion() bool {
+	if p.CurrentPackage == nil {
+		return false
+	}
+	return p.CurrentPackage.Config.Version == p.Config.LatestVersion
+}
+
+func (p *Project) SetCurrentPackage() {
+	for i := range p.Packages {
+		pkg := p.Packages[i]
+		if pkg.Config.Name == p.Config.CurrentPackage {
+			p.CurrentPackage = pkg
+		}
+	}
+}
+
+func (p *Project) scanForPackages() error {
 	log.Trace.Println("Entering scanForVersions...")
 	defer log.Trace.Println("Exiting scanForVersions...")
 
@@ -62,162 +184,23 @@ func (p *Project) scanForVersions() error {
 	}
 
 	for _, dir := range dirs {
-		versionPath := path.Join(p.Path, dir)
+		packagePath := path.Join(p.Path, dir)
+		packageConfigPath := path.Join(packagePath, packageJsonFileName)
 
-		// Check if .version file exists
-		if !haveDescriptor(versionDescriptor, versionPath) {
+		info, err := os.Stat(packageConfigPath)
+		if err != nil || info.IsDir() {
 			continue
 		}
 
-		versionName, err := readDescriptor(versionDescriptor, versionPath)
+		config, err := packageConfig.Load(packageConfigPath)
 		if err != nil {
-			log.Error.Printf("Failed to get descriptor in path '%s': %s\n", versionPath, err)
-			return err
+			// TODO : Log and error handling
 		}
 
-		// Add version
-		v := newVersion(versionName, versionPath)
-		p.Versions = append(p.Versions, v)
-
-		// Scan architecture folders
-		err = v.scanForArchitectures()
-		if err != nil {
-			log.Error.Printf("Failed to scan path '%s': %s\n", versionPath, err)
-			return err
-		}
+		// Add package
+		pkg := newPackage(packagePath, config)
+		p.Packages = append(p.Packages, pkg)
 	}
-
-	p.setLatestAsLatest()
 
 	return nil
-}
-
-func (p *Project) GetVersion(name string) *Version {
-	for i := range p.Versions {
-		if p.Versions[i].Name == name {
-			return p.Versions[i]
-		}
-	}
-	return nil
-}
-
-func (p *Project) GetVersionByGuid(guid string) *Version {
-	for i := range p.Versions {
-		if p.Versions[i].Guid.String() == guid {
-			return p.Versions[i]
-		}
-	}
-	return nil
-}
-
-func (p *Project) GetArchitectureByGuid(guid string) *Architecture {
-	for i := range p.Versions {
-		for j := range p.Versions[i].Architectures {
-			if p.Versions[i].Architectures[j].Guid.String() == guid {
-				return p.Versions[i].Architectures[j]
-			}
-		}
-	}
-	return nil
-}
-
-func (p *Project) SetAsCurrent(a *Architecture) {
-	log.Trace.Println("Entering SetAsCurrent...")
-	defer log.Trace.Println("Exiting SetAsCurrent...")
-
-	p.CurrentVersion = p.GetVersion(a.Version.Name)
-	if p.CurrentVersion == nil {
-		log.Error.Printf("failed to find version '%s'\n", a.Version.Name)
-		return
-	}
-	p.CurrentArchitecture = p.CurrentVersion.GetArchitecture(a.Name)
-	if p.CurrentArchitecture == nil {
-		log.Error.Printf("failed to find architecture '%s' in version '%s'\n", a.Name, a.Version.Name)
-		p.CurrentVersion = nil
-		return
-	}
-}
-
-//
-// func (p *Project) SetAsCurrent(versionName, architectureName string) {
-// 	log.Trace.Println("Entering SetAsCurrent...")
-// 	defer log.Trace.Println("Exiting SetAsCurrent...")
-//
-// 	p.CurrentVersion = p.GetVersion(versionName)
-// 	if p.CurrentVersion == nil {
-// 		log.Error.Printf("failed to find version '%s'\n", versionName)
-// 		return
-// 	}
-// 	p.CurrentArchitecture = p.CurrentVersion.GetArchitecture(architectureName)
-// 	if p.CurrentArchitecture == nil {
-// 		log.Error.Printf("failed to find architecture '%s' in version '%s'\n", architectureName, versionName)
-// 		p.CurrentVersion = nil
-// 		return
-// 	}
-// }
-
-func (p *Project) SetAsLatest(v *Version) {
-	for i := range p.Versions {
-		p.Versions[i].IsLatest = false
-	}
-	v.IsLatest = true
-}
-
-// TEMPORARY FUNCTION! REMOVE!
-func (p *Project) setLatestAsLatest() {
-	latest := 0
-
-	for i := 1; i < len(p.Versions); i++ {
-		if p.Versions[i].Name > p.Versions[latest].Name {
-			latest = i
-		}
-	}
-
-	p.SetAsLatest(p.Versions[latest])
-}
-
-func (p *Project) GetPackageListStore(checkIcon []byte) *gtk.ListStore {
-	log.Trace.Println("Entering GetPackageListStore...")
-	defer log.Trace.Println("Exiting GetPackageListStore...")
-
-	// Icon, Version name, Architecture name, Version guid, Architecture guid
-	s, err := gtk.ListStoreNew(
-		gdk.PixbufGetType(), glib.TYPE_STRING, glib.TYPE_STRING,
-		glib.TYPE_STRING, glib.TYPE_STRING,
-	)
-	if err != nil {
-		log.Error.Printf("failed to create new list store: %s\n", err)
-		return nil
-	}
-
-	check, _ := gdk.PixbufNewFromBytesOnly(checkIcon)
-	for _, version := range p.Versions {
-		for _, architecture := range version.Architectures {
-			iter := s.InsertAfter(nil)
-			data := []interface{}{
-				nil,
-				version.Name, architecture.Name,
-				version.Guid, architecture.Guid,
-			}
-			if version.IsLatest {
-				data[0] = check
-			}
-			_ = s.Set(iter, []int{0, 1, 2, 3, 4}, data)
-		}
-	}
-
-	s.SetSortFunc(
-		1, func(model *gtk.TreeModel, a, b *gtk.TreeIter) int {
-			va, _ := model.GetValue(a, 1)
-			vb, _ := model.GetValue(b, 1)
-			vaName, _ := va.GetString()
-			vbName, _ := vb.GetString()
-
-			return strings.Compare(vbName, vaName)
-		},
-	)
-
-	s.SetSortColumnId(1, gtk.SORT_ASCENDING)
-
-	return s
 }

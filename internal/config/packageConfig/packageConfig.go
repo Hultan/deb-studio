@@ -1,20 +1,27 @@
-package applicationConfig
+package packageConfig
 
 import (
 	"encoding/json"
 	"os"
 )
 
-type ApplicationConfig struct {
-	WorkingFolders []WorkingFolder `json:"workingFolders"`
+type PackageConfig struct {
+	Name         string `json:"name"`
+	Version      string `json:"version"`
+	Architecture string `json:"architecture"`
+	Files        []File `json:"files"`
 }
 
-type WorkingFolder struct {
-	Path string `json:"path"`
+type File struct {
+	FilePath    string `json:"filePath"`
+	InstallPath string `json:"installPath"`
+	Static      bool   `json:"static"`
+	RunScript   bool   `json:"runScript"`
+	Script      string `json:"script"`
 }
 
-// Load : Loads a deb-studio config file
-func Load(path string) (*ApplicationConfig, error) {
+// Load : Loads a deb-studio application version configuration file
+func Load(path string) (*PackageConfig, error) {
 	// Make sure the file exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return nil, err
@@ -27,7 +34,7 @@ func Load(path string) (*ApplicationConfig, error) {
 	}
 
 	// Parse the JSON document
-	av := &ApplicationConfig{}
+	av := &PackageConfig{}
 	jsonParser := json.NewDecoder(configFile)
 	err = jsonParser.Decode(av)
 	if err != nil {
@@ -42,8 +49,8 @@ func Load(path string) (*ApplicationConfig, error) {
 	return av, nil
 }
 
-// Save : Saves a deb-studio config file
-func (c *ApplicationConfig) Save(path string) error {
+// Save : Saves a deb-studio application version configuration file
+func (av *PackageConfig) Save(path string) error {
 	// Open config file
 	configFile, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {
@@ -51,7 +58,7 @@ func (c *ApplicationConfig) Save(path string) error {
 	}
 
 	// Create JSON from config object
-	data, err := json.MarshalIndent(c, "", "\t")
+	data, err := json.MarshalIndent(av, "", "\t")
 	if err != nil {
 		return err
 	}

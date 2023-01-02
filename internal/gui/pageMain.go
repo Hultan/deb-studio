@@ -49,7 +49,7 @@ func (m *MainForm) listPackages() {
 	m.treeView.ShowAll()
 }
 
-func (m *MainForm) createPackageListRow(v *engine.Version, a *engine.Architecture) (*gtk.ListBoxRow, error) {
+func (m *MainForm) createPackageListRow(p *engine.Package) (*gtk.ListBoxRow, error) {
 	row, err := gtk.ListBoxRowNew()
 	if err != nil {
 		log.Error.Printf("failed to create package list row")
@@ -63,10 +63,10 @@ func (m *MainForm) createPackageListRow(v *engine.Version, a *engine.Architectur
 	}
 	row.Add(box)
 	// TODO : Change to a map instead?
-	row.SetName(v.Name + separator + a.Name)
+	row.SetName(p.Config.Name)
 
 	// Add version label
-	label, err := gtk.LabelNew(v.Name)
+	label, err := gtk.LabelNew(p.Config.Version)
 	label.SetHAlign(gtk.ALIGN_START)
 	if err != nil {
 		log.Error.Printf("failed to create package version label")
@@ -75,7 +75,7 @@ func (m *MainForm) createPackageListRow(v *engine.Version, a *engine.Architectur
 	box.PackStart(label, false, true, 20)
 
 	// Add architecture label
-	label, err = gtk.LabelNew(a.Name)
+	label, err = gtk.LabelNew(p.Config.Architecture)
 	label.SetHAlign(gtk.ALIGN_START)
 	if err != nil {
 		log.Error.Printf("failed to create package architecture label")

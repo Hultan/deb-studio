@@ -12,39 +12,12 @@ import (
 // TODO : All actions needs to check project.IsPackageSelected()
 
 func (m *MainForm) setAsLatestVersionClicked() {
-	guid := m.projectList.GetSelectedVersionGuid()
-	project.SetAsLatest(project.GetVersionByGuid(guid))
 }
 
 func (m *MainForm) setPackageAsCurrentClickedPopup() {
-	guid := m.projectList.GetSelectedArchitectureGuid()
-	project.SetAsCurrent(project.GetArchitectureByGuid(guid))
 }
 
 func (m *MainForm) setPackageAsCurrentClicked() {
-	guid := m.projectList.GetSelectedArchitectureGuid()
-	project.SetAsCurrent(project.GetArchitectureByGuid(guid))
-}
-
-func (m *MainForm) getNames(model *gtk.ListStore, iter *gtk.TreeIter) (string, string) {
-	value, err := model.GetValue(iter, 1) // VersionName
-	if err != nil {
-		return "", ""
-	}
-	versionName, err := value.GetString()
-	if err != nil {
-		return "", ""
-	}
-
-	value, err = model.GetValue(iter, 1) // VersionName
-	if err != nil {
-		return "", ""
-	}
-	architectureName, err := value.GetString()
-	if err != nil {
-		return "", ""
-	}
-	return versionName, architectureName
 }
 
 func (m *MainForm) addPackageClicked() {
@@ -107,22 +80,15 @@ func (m *MainForm) newButtonClicked() {
 	}
 
 	// Create project file
-	e := engine.NewEngine(log)
-	if e.IsProjectFolder(result.path) {
-		showErrorDialog("This folder is already a project folder for another project.", err)
-		log.Warning.Printf("folder is already a %s project folder : %s", applicationTitle, result.path)
-		return
-	} else {
-		project, err = e.SetupProject(result.path, result.name)
-		if err != nil {
-			log.Error.Printf("failure during setup of '%s': %s", result.path, err)
-			os.Exit(1)
-		}
+	project, err = engine.NewProject(log, result.path, result.name)
+	if err != nil {
+		// TODO : Handle error
 	}
 }
 
 // openButtonClicked: Handler for the openButtonClicked button clicked signal
 func (m *MainForm) openButtonClicked() {
+	var err error
 	dlg, err := gtk.FileChooserDialogNewWith2Buttons(
 		"Select folder...", m.window, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
 		"OK", gtk.RESPONSE_ACCEPT,
@@ -145,17 +111,8 @@ func (m *MainForm) openButtonClicked() {
 			log.Error.Printf("failed to get folder from fileChooserDialog: %s\n", err)
 			return
 		}
-		e := engine.NewEngine(log)
-		if !e.IsProjectFolder(projectFolder) {
-			// TODO : Ask if the user wants to create a new project here
-			title := "Invalid folder"
-			msg := fmt.Sprintf("This is not a %s project folder.", applicationTitle)
-			showInformationDialog(title, msg)
-			log.Trace.Printf("opened a non project folder: %s\n", projectFolder)
-			return
-		}
-
-		project, err = e.OpenProject(projectFolder)
+		project, err = engine.OpenProject(log, projectFolder)
+		// TODO: Handle if project.json does not exist
 		if err != nil {
 			msg := fmt.Sprintf("failed to open project folder: %s", err)
 			showErrorDialog(msg, err)
