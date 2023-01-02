@@ -11,7 +11,7 @@ func (m *MainForm) getInfoBarStatus() infoBarStatus {
 		return infoBarStatusNoProjectOpened
 	} else if project.CurrentPackage == nil {
 		return infoBarStatusNoPackageSelected
-	} else if project.WorkingWithLatestVersion() {
+	} else if !project.WorkingWithLatestVersion() {
 		return infoBarStatusNotLatestVersion
 	}
 	return infoBarStatusLatestVersion
@@ -25,12 +25,12 @@ func (m *MainForm) getInfoBarText() string {
 		return "You need to select or add a package to edit!"
 	case infoBarStatusNotLatestVersion:
 		return fmt.Sprintf(
-			"You are currently not editing the latest version! You are editing version %s and architecture %s.",
+			"You are currently not editing the latest version! You are editing <b>version %s</b> and <b>architecture %s</b>.",
 			project.CurrentPackage.Config.Version, project.CurrentPackage.Config.Architecture,
 		)
 	case infoBarStatusLatestVersion:
 		return fmt.Sprintf(
-			"You are currently editing version %s and architecture %s.",
+			"You are currently editing <b>version %s</b> and <b>architecture %s</b>.",
 			project.CurrentPackage.Config.Version, project.CurrentPackage.Config.Architecture,
 		)
 	default:
@@ -55,7 +55,7 @@ func (m *MainForm) setInfoBarColor() {
 }
 
 func (m *MainForm) updateInfoBar() {
-	m.infoBarLabel.SetText(m.getInfoBarText())
+	m.infoBarLabel.SetMarkup(m.getInfoBarText())
 	m.setInfoBarColor()
 	m.window.QueueDraw()
 }

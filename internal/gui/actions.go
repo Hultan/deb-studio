@@ -3,13 +3,12 @@ package gui
 import (
 	"fmt"
 	"os"
+	"os/exec"
 
 	"github.com/gotk3/gotk3/gtk"
 
 	"github.com/hultan/deb-studio/internal/engine"
 )
-
-// TODO : All actions needs to check project.IsPackageSelected()
 
 func (m *MainForm) setAsLatestVersionClicked() {
 	// Set version as latest
@@ -20,7 +19,8 @@ func (m *MainForm) setAsLatestVersionClicked() {
 	project.SetAsLatest(pkgName)
 
 	// Refresh package list
-	m.refreshList()
+	m.listPackages()
+	m.updateInfoBar()
 }
 
 func (m *MainForm) setPackageAsCurrentClicked() {
@@ -32,7 +32,8 @@ func (m *MainForm) setPackageAsCurrentClicked() {
 	project.SetAsCurrent(pkgName)
 
 	// Refresh package list
-	m.refreshList()
+	m.listPackages()
+	m.updateInfoBar()
 }
 
 func (m *MainForm) addPackageClicked() {
@@ -41,14 +42,19 @@ func (m *MainForm) addPackageClicked() {
 	dialog := m.builder.GetObject("addPackageDialog").(*gtk.Dialog)
 	// versionEntry := m.builder.GetObject("addInstallationDialog_versionNameEntry").(*gtk.Entry)
 	// architectureCombo := m.builder.GetObject("addInstallationDialog_architectureCombo").(*gtk.Dialog)
-	dialog.AddButton("Add", gtk.RESPONSE_ACCEPT)
-	dialog.AddButton("Cancel", gtk.RESPONSE_CANCEL)
+	_, err := dialog.AddButton("Add", gtk.RESPONSE_ACCEPT)
+	if err != nil {
+		return
+	}
+	_, err = dialog.AddButton("Cancel", gtk.RESPONSE_CANCEL)
+	if err != nil {
+		return
+	}
 
 	// Show the dialog
 	responseId := dialog.Run()
 	if responseId == gtk.RESPONSE_ACCEPT {
-		// Save installation
-
+		// Add package
 	}
 
 	dialog.Hide()
@@ -77,7 +83,6 @@ func (m *MainForm) removeFileButtonClicked() {
 func (m *MainForm) newButtonClicked() {
 	defer func() {
 		m.listPackages()
-		m.printTraceInfo()
 		m.updateInfoBar()
 		m.enableDisableStackPages()
 	}()
@@ -135,8 +140,10 @@ func (m *MainForm) openButtonClicked() {
 			os.Exit(1)
 		}
 
+		if project.Config.ShowOnlyLatestVersion {
+			m.showOnlyCheckBox.SetActive(true)
+		}
 		m.listPackages()
-		m.printTraceInfo()
 		m.updateInfoBar()
 		m.enableDisableStackPages()
 	}
@@ -155,7 +162,29 @@ func (m *MainForm) buildButtonClicked() {
 	fmt.Println("Build clicked")
 }
 
-func (m *MainForm) refreshList() {
-	store := project.GetPackageListStore(checkIcon)
-	m.projectList.RefreshList(store)
+// openProjectFolder: Handler for the open project folder button clicked signal
+func (m *MainForm) openProjectFolder() {
+	cmd := exec.Command("xdg-open", project.Path)
+	cmd.Run()
+}
+
+// openPackageFolder: Handler for the open package folder button clicked signal
+func (m *MainForm) openPackageFolder() {
+	// Set version as latest
+	pkgName := m.projectList.GetSelectedPackageName()
+	if pkgName == "" {
+		return
+	}
+	pkg := project.GetPackageByName(pkgName)
+	if pkg == nil {
+		return
+	}
+	cmd := exec.Command("xdg-open", pkg.Path)
+	cmd.Run()
+}
+
+func (m *MainForm) showOnlyCurrentAndLatestToggled(check *gtk.CheckButton) {
+	checked := check.GetActive()
+	project.SetShowOnlyCurrentAndLatest(checked)
+	m.listPackages()
 }

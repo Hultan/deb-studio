@@ -5,8 +5,6 @@ import (
 	"os"
 )
 
-// TODO : Implement showOnlyLatestVersion (checkbox in package list)
-
 type ProjectConfig struct {
 	Name                  string `json:"name"`
 	LatestVersion         string `json:"latestVersion"`

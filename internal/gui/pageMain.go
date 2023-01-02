@@ -22,6 +22,9 @@ func (m *MainForm) setupPackagePage() {
 
 	btn = m.builder.GetObject("mainWindow_removePackageButton").(*gtk.ToolButton)
 	btn.Connect("clicked", m.removePackageClicked)
+
+	m.showOnlyCheckBox = m.builder.GetObject("mainPage_toolbarShowOnlyCurrentAndLatest").(*gtk.CheckButton)
+	m.showOnlyCheckBox.Connect("toggled", m.showOnlyCurrentAndLatestToggled)
 }
 
 func (m *MainForm) listPackages() {
@@ -29,24 +32,8 @@ func (m *MainForm) listPackages() {
 		return
 	}
 
-	store := project.GetPackageListStore(checkIcon)
+	store := project.GetPackageListStore(checkIcon, editIcon)
 	m.projectList.RefreshList(store)
-	//
-	// // Sort packages by newest first
-	// m.listBox.SetSortFunc(
-	// 	func(row1 *gtk.ListBoxRow, row2 *gtk.ListBoxRow) int {
-	// 		name1, _ := row1.GetName()
-	// 		name2, _ := row2.GetName()
-	// 		if name1 < name2 {
-	// 			return 1
-	// 		} else if name1 == name2 {
-	// 			return 0
-	// 		}
-	// 		return -1
-	// 	},
-	// )
-
-	m.treeView.ShowAll()
 }
 
 func (m *MainForm) createPackageListRow(p *engine.Package) (*gtk.ListBoxRow, error) {

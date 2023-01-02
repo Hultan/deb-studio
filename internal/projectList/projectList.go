@@ -18,14 +18,15 @@ func NewProjectList(treeView *gtk.TreeView) *ProjectList {
 	return p
 }
 
-func (p *ProjectList) RefreshList(store *gtk.ListStore) {
+func (p *ProjectList) RefreshList(store *gtk.TreeModelFilter) {
 	p.treeView.SetModel(store)
 	p.treeView.ShowAll()
 }
 
 func (p *ProjectList) setupColumns() {
 	// p.treeView.AppendColumn(p.createTextColumn("Is latest", 0, 70, 300))
-	p.treeView.AppendColumn(p.createImageColumn("latest"))
+	p.treeView.AppendColumn(p.createImageColumn("Current", common.PackageListColumnIsCurrent))
+	p.treeView.AppendColumn(p.createImageColumn("Latest", common.PackageListColumnIsLatest))
 	p.treeView.AppendColumn(p.createTextColumn("Version name", common.PackageListColumnVersionName, 0, 300))
 	p.treeView.AppendColumn(p.createTextColumn("Architecture name", common.PackageListColumnArchitectureName, 0, 300))
 }
@@ -54,13 +55,13 @@ func (p *ProjectList) createTextColumn(title string, id int, width int, weight i
 }
 
 // createImageColumn : Add a column to the tree view (during the initialization of the tree view)
-func (p *ProjectList) createImageColumn(title string) *gtk.TreeViewColumn {
+func (p *ProjectList) createImageColumn(title string, colIndex int) *gtk.TreeViewColumn {
 	cellRenderer, err := gtk.CellRendererPixbufNew()
 	if err != nil {
 		log.Fatal("Unable to create pixbuf cell renderer:", err)
 	}
 
-	column, err := gtk.TreeViewColumnNewWithAttribute(title, cellRenderer, "pixbuf", common.PackageListColumnIsLatest)
+	column, err := gtk.TreeViewColumnNewWithAttribute(title, cellRenderer, "pixbuf", colIndex)
 	if err != nil {
 		log.Fatal("Unable to create cell column:", err)
 	}

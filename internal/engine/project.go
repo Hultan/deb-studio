@@ -109,13 +109,14 @@ func (p *Project) AddPackage(versionName, architectureName string) (*Package, er
 	return pkg, nil
 }
 
-func (p *Project) GetPackageListStore(checkIcon []byte) *gtk.ListStore {
+func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModelFilter {
 	log.Trace.Println("Entering GetPackageListStore...")
 	defer log.Trace.Println("Exiting GetPackageListStore...")
 
 	// Icon, Version name, Architecture name, package name
 	s, err := gtk.ListStoreNew(
-		gdk.PixbufGetType(), glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING,
+		glib.TYPE_BOOLEAN, gdk.PixbufGetType(), gdk.PixbufGetType(),
+		glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING,
 	)
 	if err != nil {
 		log.Error.Printf("failed to create new list store: %s\n", err)
@@ -123,32 +124,66 @@ func (p *Project) GetPackageListStore(checkIcon []byte) *gtk.ListStore {
 	}
 
 	check, _ := gdk.PixbufNewFromBytesOnly(checkIcon)
+	edit, _ := gdk.PixbufNewFromBytesOnly(editIcon)
 	for _, pkg := range p.Packages {
 		iter := s.InsertAfter(nil)
 		data := []interface{}{
-			nil,
+			false, nil, nil,
 			pkg.Config.Name, pkg.Config.Version, pkg.Config.Architecture,
 		}
 		if pkg.Config.Version == p.Config.LatestVersion {
-			data[0] = check
+			data[common.PackageListColumnFilter] = true
+			data[common.PackageListColumnIsLatest] = check
 		}
-		_ = s.Set(iter, []int{0, 1, 2, 3}, data)
+		if pkg.Config.Name == p.Config.CurrentPackage {
+			data[common.PackageListColumnFilter] = true
+			data[common.PackageListColumnIsCurrent] = edit
+		}
+		_ = s.Set(iter, []int{0, 1, 2, 3, 4, 5}, data)
 	}
 
+	// Sorting
 	s.SetSortFunc(
 		1, func(model *gtk.TreeModel, a, b *gtk.TreeIter) int {
-			va, _ := model.GetValue(a, 2)
-			vb, _ := model.GetValue(b, 2)
+			va, _ := model.GetValue(a, common.PackageListColumnVersionName)
+			vb, _ := model.GetValue(b, common.PackageListColumnVersionName)
 			vaName, _ := va.GetString()
 			vbName, _ := vb.GetString()
 
 			return strings.Compare(vbName, vaName)
 		},
 	)
-
 	s.SetSortColumnId(1, gtk.SORT_ASCENDING)
 
-	return s
+	// Filtering
+	filter, err := s.FilterNew(&gtk.TreePath{})
+	if err != nil {
+		return nil
+	}
+	filter.SetVisibleFunc(p.filterFunc)
+
+	return filter
+}
+
+func (p *Project) filterFunc(model *gtk.TreeModel, iter *gtk.TreeIter) bool {
+	if !p.Config.ShowOnlyLatestVersion {
+		return true
+	}
+
+	value, err := model.GetValue(iter, common.PackageListColumnFilter)
+	if err != nil {
+		return true
+	}
+	goValue, err := value.GoValue()
+	if err != nil {
+		return true
+	}
+	filter := goValue.(bool)
+	if err != nil {
+		return true
+	}
+
+	return filter
 }
 
 func (p *Project) WorkingWithLatestVersion() bool {
@@ -223,6 +258,7 @@ func (p *Project) SetAsCurrent(name string) {
 		return
 	}
 	p.Config.CurrentPackage = pkg.Config.Name
+	p.CurrentPackage = pkg
 }
 
 func (p *Project) SetAsLatest(name string) {
@@ -232,4 +268,13 @@ func (p *Project) SetAsLatest(name string) {
 		return
 	}
 	p.Config.LatestVersion = pkg.Config.Version
+}
+
+func (p *Project) Save() {
+	configPath := path.Join(p.Path, common.ProjectJsonFileName)
+	p.Config.Save(configPath)
+}
+
+func (p *Project) SetShowOnlyCurrentAndLatest(checked bool) {
+	p.Config.ShowOnlyLatestVersion = checked
 }

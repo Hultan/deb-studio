@@ -15,14 +15,15 @@ import (
 
 // MainForm : Struct for the main form
 type MainForm struct {
-	builder       *Builder
-	window        *gtk.ApplicationWindow
-	addFileDialog *addFileDialog
-	treeView      *gtk.TreeView
-	projectList   *projectList.ProjectList
-	infoBar       *gtk.InfoBar
-	infoBarLabel  *gtk.Label
-	popup         *gtk.Menu
+	builder          *Builder
+	window           *gtk.ApplicationWindow
+	addFileDialog    *addFileDialog
+	treeView         *gtk.TreeView
+	projectList      *projectList.ProjectList
+	infoBar          *gtk.InfoBar
+	infoBarLabel     *gtk.Label
+	popup            *gtk.Menu
+	showOnlyCheckBox *gtk.CheckButton
 }
 
 var project *engine.Project
@@ -69,27 +70,8 @@ func (m *MainForm) Open(app *gtk.Application) {
 	// Disable pages until a project has been opened
 	m.enableDisableStackPages()
 
+	// Update info bar
 	m.updateInfoBar()
-}
-
-func (m *MainForm) printTraceInfo() {
-	if project == nil {
-		return
-	}
-
-	log.Info.Printf(
-		"Project %s (path: %s) contains %d packages:\n",
-		project.Config.Name,
-		project.Path,
-		len(project.Packages),
-	)
-
-	for _, pkg := range project.Packages {
-		log.Info.Printf(
-			"\t\tPath: %s (name: %s)\n",
-			pkg.Path, pkg.Config.Name,
-		)
-	}
 }
 
 func (m *MainForm) startLogging() {
@@ -137,6 +119,9 @@ func isTraceMode() bool {
 
 // shutDown : shuts down the application
 func (m *MainForm) shutDown() {
+	if project != nil {
+		project.Save()
+	}
 	if log != nil {
 		log.Close()
 	}

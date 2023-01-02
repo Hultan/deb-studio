@@ -3,7 +3,7 @@ package common
 // Application constants
 
 const ApplicationTitle = "Deb Studio"
-const ApplicationVersion = "v 0.1.4"
+const ApplicationVersion = "v 0.1.5"
 const ApplicationCopyRight = "©SoftTeam AB, 2022"
 
 // Exit codes
@@ -19,7 +19,9 @@ const ProjectJsonFileName = "project.json"
 // Package list columns
 
 const (
-	PackageListColumnIsLatest = iota
+	PackageListColumnFilter = iota
+	PackageListColumnIsCurrent
+	PackageListColumnIsLatest
 	PackageListColumnPackageName
 	PackageListColumnVersionName
 	PackageListColumnArchitectureName
