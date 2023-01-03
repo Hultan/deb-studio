@@ -28,6 +28,23 @@ const (
 	PackageListColumnPackagePath
 )
 
+// Script page
+
+const (
+	ScriptPagePreInstall = iota
+	ScriptPagePostInstall
+	ScriptPagePreRemove
+	ScriptPagePostRemove
+)
+
+// TextPage
+
+const (
+	TextPageCopyRight = iota
+	TextPageChangeLog
+	TextPageReadme
+)
+
 // Misc constants
 
 const RightMouseButton = 3

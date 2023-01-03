@@ -10,10 +10,9 @@ func (m *MainForm) enableDisableStackPages() {
 	haveChosenPackage := status > infoBarStatusNoPackageSelected
 	m.enableDisableStackPage("mainWindow_packagePage", haveOpenedProject)
 	m.enableDisableStackPage("mainWindow_controlPage", haveChosenPackage)
-	m.enableDisableStackPage("mainWindow_preinstallPage", haveChosenPackage)
+	m.enableDisableStackPage("mainWindow_scriptPage", haveChosenPackage)
 	m.enableDisableStackPage("mainWindow_installPage", haveChosenPackage)
-	m.enableDisableStackPage("mainWindow_postinstallPage", haveChosenPackage)
-	m.enableDisableStackPage("mainWindow_copyrightPage", haveChosenPackage)
+	m.enableDisableStackPage("mainWindow_textPage", haveChosenPackage)
 }
 
 func (m *MainForm) enableDisableStackPage(name string, status bool) {

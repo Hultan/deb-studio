@@ -640,6 +640,8 @@
                     <property name="position">6</property>
                   </packing>
                 </child>
+                <child>
+                </child>
               </object>
               <packing>
                 <property name="name">page6</property>
@@ -1556,7 +1558,7 @@ Click the info button for more information.</property>
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="mainWindow_preinstallPage">
+              <object class="GtkBox" id="mainWindow_scriptPage">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="orientation">vertical</property>
@@ -1566,7 +1568,7 @@ Click the info button for more information.</property>
                     <property name="can-focus">False</property>
                     <property name="margin-top">10</property>
                     <property name="margin-bottom">10</property>
-                    <property name="label" translatable="yes">Pre-install script</property>
+                    <property name="label" translatable="yes">Script</property>
                     <attributes>
                       <attribute name="font-desc" value="Sans Bold 16"/>
                     </attributes>
@@ -1582,12 +1584,58 @@ Click the info button for more information.</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="margin-bottom">10</property>
-                    <property name="label" translatable="yes">A bash script that is executed before the main installation.</property>
+                    <property name="label" translatable="yes">Edit package scripts...</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-start">20</property>
+                        <property name="margin-end">10</property>
+                        <property name="label" translatable="yes">Choose script to edit : </property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="active">0</property>
+                        <items>
+                          <item id="0" translatable="yes">Pre-install</item>
+                          <item id="1" translatable="yes">Post-install</item>
+                          <item id="2" translatable="yes">Pre-remove</item>
+                          <item id="3" translatable="yes">Post-remove</item>
+                        </items>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
@@ -1617,13 +1665,13 @@ Click the info button for more information.</property>
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
               </object>
               <packing>
                 <property name="name">page2</property>
-                <property name="title" translatable="yes">Preinstall</property>
+                <property name="title" translatable="yes">Script</property>
                 <property name="position">3</property>
               </packing>
             </child>
@@ -1761,7 +1809,7 @@ Click the info button for more information.</property>
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="mainWindow_postinstallPage">
+              <object class="GtkBox" id="mainWindow_textPage">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="orientation">vertical</property>
@@ -1771,7 +1819,7 @@ Click the info button for more information.</property>
                     <property name="can-focus">False</property>
                     <property name="margin-top">10</property>
                     <property name="margin-bottom">10</property>
-                    <property name="label" translatable="yes">Post-install script</property>
+                    <property name="label" translatable="yes">Text</property>
                     <attributes>
                       <attribute name="font-desc" value="Sans Bold 16"/>
                     </attributes>
@@ -1787,12 +1835,57 @@ Click the info button for more information.</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="margin-bottom">10</property>
-                    <property name="label" translatable="yes">A bash script that is executed after the main installation.</property>
+                    <property name="label" translatable="yes">Edit various text files in installation...</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-start">20</property>
+                        <property name="margin-end">10</property>
+                        <property name="label" translatable="yes">Choose text file to edit : </property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="active">0</property>
+                        <items>
+                          <item id="0" translatable="yes">Copyright</item>
+                          <item id="1" translatable="yes">Change log</item>
+                          <item id="2" translatable="yes">Readme</item>
+                        </items>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
@@ -1822,86 +1915,14 @@ Click the info button for more information.</property>
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
               </object>
               <packing>
                 <property name="name">page4</property>
-                <property name="title" translatable="yes">Postinstall</property>
+                <property name="title" translatable="yes">Text</property>
                 <property name="position">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="mainWindow_copyrightPage">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="orientation">vertical</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="margin-top">10</property>
-                    <property name="margin-bottom">10</property>
-                    <property name="label" translatable="yes">Copyright</property>
-                    <attributes>
-                      <attribute name="font-desc" value="Sans Bold 16"/>
-                    </attributes>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="margin-bottom">10</property>
-                    <property name="label" translatable="yes">Copyright information for the package.</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkScrolledWindow">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="margin-left">10</property>
-                    <property name="margin-right">10</property>
-                    <property name="margin-start">10</property>
-                    <property name="margin-end">10</property>
-                    <property name="margin-top">10</property>
-                    <property name="margin-bottom">10</property>
-                    <property name="shadow-type">in</property>
-                    <child>
-                      <object class="GtkTextView">
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="margin-left">10</property>
-                        <property name="margin-right">10</property>
-                        <property name="margin-start">10</property>
-                        <property name="margin-end">10</property>
-                        <property name="margin-top">10</property>
-                        <property name="margin-bottom">10</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="name">page5</property>
-                <property name="title" translatable="yes">Copyright</property>
-                <property name="position">6</property>
               </packing>
             </child>
           </object>
