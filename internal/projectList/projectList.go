@@ -29,6 +29,7 @@ func (p *ProjectList) setupColumns() {
 	p.treeView.AppendColumn(p.createImageColumn("Latest", common.PackageListColumnIsLatest))
 	p.treeView.AppendColumn(p.createTextColumn("Version name", common.PackageListColumnVersionName, 0, 300))
 	p.treeView.AppendColumn(p.createTextColumn("Architecture name", common.PackageListColumnArchitectureName, 0, 300))
+	p.treeView.AppendColumn(p.createTextColumn("Package path", common.PackageListColumnPackagePath, 0, 300))
 }
 
 // createTextColumn : Add a column to the tree view (during the initialization of the tree view)

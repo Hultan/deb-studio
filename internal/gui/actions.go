@@ -18,7 +18,8 @@ func (m *MainForm) setAsLatestVersionClicked() {
 	}
 	project.SetAsLatest(pkgName)
 
-	// Refresh package list
+	// Update some things
+	m.updateProjectPage()
 	m.listPackages()
 	m.updateInfoBar()
 }
@@ -31,7 +32,8 @@ func (m *MainForm) setPackageAsCurrentClicked() {
 	}
 	project.SetAsCurrent(pkgName)
 
-	// Refresh package list
+	// Update some things
+	m.updateProjectPage()
 	m.listPackages()
 	m.updateInfoBar()
 }
@@ -140,13 +142,33 @@ func (m *MainForm) openButtonClicked() {
 			os.Exit(1)
 		}
 
-		if project.Config.ShowOnlyLatestVersion {
-			m.showOnlyCheckBox.SetActive(true)
-		}
+		m.updateProjectPage()
+		m.updatePackagePage()
 		m.listPackages()
 		m.updateInfoBar()
 		m.enableDisableStackPages()
 	}
+}
+
+func (m *MainForm) updatePackagePage() {
+	if project.Config.ShowOnlyLatestVersion {
+		m.showOnlyCheckBox.SetActive(true)
+	}
+}
+
+func (m *MainForm) updateProjectPage() {
+	entry := m.builder.GetObject("mainWindow_projectHeaderLabel").(*gtk.Label)
+	entry.SetText(project.Config.Name)
+	entry = m.builder.GetObject("mainWindow_projectSubheaderLabel").(*gtk.Label)
+	entry.SetText("Project information")
+	entry = m.builder.GetObject("mainWindow_projectNameLabel").(*gtk.Label)
+	entry.SetMarkup("Project name: <b>" + project.Config.Name + "</b>")
+	entry = m.builder.GetObject("mainWindow_projectPathLabel").(*gtk.Label)
+	entry.SetMarkup("Project path: <b>" + project.Path + "</b>")
+	entry = m.builder.GetObject("mainWindow_latestVersionLabel").(*gtk.Label)
+	entry.SetMarkup("Latest version: <b>" + project.Config.LatestVersion + "</b>")
+	entry = m.builder.GetObject("mainWindow_currentPackageLabel").(*gtk.Label)
+	entry.SetMarkup("Current package: <b>" + project.Config.CurrentPackage + "</b>")
 }
 
 // saveButtonClicked: Handler for the saveButtonClicked button clicked signal

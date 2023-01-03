@@ -116,7 +116,7 @@ func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModel
 	// Icon, Version name, Architecture name, package name
 	s, err := gtk.ListStoreNew(
 		glib.TYPE_BOOLEAN, gdk.PixbufGetType(), gdk.PixbufGetType(),
-		glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING,
+		glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING,
 	)
 	if err != nil {
 		log.Error.Printf("failed to create new list store: %s\n", err)
@@ -129,7 +129,7 @@ func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModel
 		iter := s.InsertAfter(nil)
 		data := []interface{}{
 			false, nil, nil,
-			pkg.Config.Name, pkg.Config.Version, pkg.Config.Architecture,
+			pkg.Config.Name, pkg.Config.Version, pkg.Config.Architecture, pkg.Path,
 		}
 		if pkg.Config.Version == p.Config.LatestVersion {
 			data[common.PackageListColumnFilter] = true
@@ -139,7 +139,7 @@ func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModel
 			data[common.PackageListColumnFilter] = true
 			data[common.PackageListColumnIsCurrent] = edit
 		}
-		_ = s.Set(iter, []int{0, 1, 2, 3, 4, 5}, data)
+		_ = s.Set(iter, []int{0, 1, 2, 3, 4, 5, 6}, data)
 	}
 
 	// Sorting
