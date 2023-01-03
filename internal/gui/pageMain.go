@@ -50,7 +50,7 @@ func (m *MainForm) createPackageListRow(p *engine.Package) (*gtk.ListBoxRow, err
 	}
 	row.Add(box)
 	// TODO : Change to a map instead?
-	row.SetName(p.Config.Name)
+	row.SetName(p.Config.GetFolderName())
 
 	// Add version label
 	label, err := gtk.LabelNew(p.Config.Version)

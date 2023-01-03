@@ -63,7 +63,7 @@ func (a *addFileDialog) openForNewFile(filePath string) {
 	// Show the dialog
 	responseId := a.dialog.Run()
 	if responseId == gtk.RESPONSE_ACCEPT {
-		// Save settings
+		// SaveControlFile settings
 	}
 
 	a.dialog.Hide()

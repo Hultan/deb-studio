@@ -6,19 +6,75 @@ import (
 	"os"
 	"path"
 
+	"pault.ag/go/debian/control"
+
 	"github.com/hultan/deb-studio/internal/config/packageConfig"
 )
 
+// See advanced control file example here: https://gist.github.com/citrusui/c3358f9661550e8cb849
+
+const emptyControlFile = `Section: 
+Package: 
+License: 
+Vendor: 
+Version: 
+Architecture: 
+Essential: no
+Priority: 
+Depends: 
+Installed-Size: 
+Maintainer: 
+Description: 
+HomePage: `
+
 type Package struct {
+	*control.Control
 	Path   string
 	Config *packageConfig.PackageConfig
 }
 
-func newPackage(path string, config *packageConfig.PackageConfig) *Package {
-	return &Package{
-		Path:   path,
-		Config: config,
+func newPackage(packagePath string, config *packageConfig.PackageConfig) (*Package, error) {
+	controlFile, err := control.ParseControlFile(config.GetControlFilePath(packagePath))
+	if os.IsNotExist(err) {
+		// Control file does not exist, create an empty one
+		err = createEmptyControlFile(config.GetControlFilePath(packagePath))
+		if err != nil {
+			return nil, err
+		}
+		controlFile, err = control.ParseControlFile(config.GetControlFilePath(packagePath))
+		if err != nil {
+			return nil, err
+		}
+	} else if err != nil {
+		return nil, err
 	}
+
+	return &Package{
+		Control: controlFile,
+		Path:    packagePath,
+		Config:  config,
+	}, nil
+}
+
+func createEmptyControlFile(controlPath string) error {
+	f, err := os.Create(controlPath)
+	if err != nil {
+		return err
+	}
+	_, err = f.WriteString(emptyControlFile)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *Package) SaveControlFile() error {
+	f, _ := os.OpenFile(p.Config.GetControlFilePath(p.Path), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
+	err := p.Source.WriteTo(f)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (p *Package) AddFile(fromPath, fileName, userToPath string, copy bool) error {

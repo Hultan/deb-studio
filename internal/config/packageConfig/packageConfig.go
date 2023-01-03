@@ -2,11 +2,16 @@ package packageConfig
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
+	"path"
+	"strings"
+
+	"github.com/hultan/deb-studio/internal/common"
 )
 
 type PackageConfig struct {
-	Name         string `json:"name"`
+	Project      string `json:"project"`
 	Version      string `json:"version"`
 	Architecture string `json:"architecture"`
 	Files        []File `json:"files"`
@@ -50,7 +55,7 @@ func Load(path string) (*PackageConfig, error) {
 }
 
 // Save : Saves a deb-studio application version configuration file
-func (av *PackageConfig) Save(path string) error {
+func (c *PackageConfig) Save(path string) error {
 	// Open config file
 	configFile, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {
@@ -58,7 +63,7 @@ func (av *PackageConfig) Save(path string) error {
 	}
 
 	// Create JSON from config object
-	data, err := json.MarshalIndent(av, "", "\t")
+	data, err := json.MarshalIndent(c, "", "\t")
 	if err != nil {
 		return err
 	}
@@ -75,4 +80,28 @@ func (av *PackageConfig) Save(path string) error {
 	}
 
 	return nil
+}
+
+func (c *PackageConfig) GetFolderName() string {
+	return fmt.Sprintf(
+		"%s-%s",
+		strings.ToLower(c.Version),
+		strings.ToLower(c.Architecture),
+	)
+}
+
+func (c *PackageConfig) GetPackageFolderName() string {
+	return fmt.Sprintf(
+		"%s-%s",
+		strings.ToLower(c.Project),
+		c.GetFolderName(),
+	)
+}
+
+func (c *PackageConfig) GetDebianFolderPath(packagePath string) string {
+	return path.Join(packagePath, c.GetPackageFolderName(), common.DebianFolderName)
+}
+
+func (c *PackageConfig) GetControlFilePath(packagePath string) string {
+	return path.Join(c.GetDebianFolderPath(packagePath), common.ControlFileName)
 }

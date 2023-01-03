@@ -25,7 +25,7 @@ func (m *MainForm) openSetupDialog() (*setup, error) {
 	dialog.SetTitle("Setup dialog")
 	dialog.SetTransientFor(m.window)
 	dialog.SetModal(true)
-	dialog.AddButton("Save", gtk.RESPONSE_ACCEPT)
+	dialog.AddButton("SaveControlFile", gtk.RESPONSE_ACCEPT)
 	dialog.AddButton("Cancel", gtk.RESPONSE_CANCEL)
 
 	// Show the dialog
@@ -34,7 +34,7 @@ func (m *MainForm) openSetupDialog() (*setup, error) {
 
 	switch responseId {
 	case gtk.RESPONSE_ACCEPT:
-		// Save setup information
+		// SaveControlFile setup information
 		p, err := locationEntry.GetText()
 		if err != nil {
 			return nil, err

@@ -3,7 +3,7 @@ package common
 // Application constants
 
 const ApplicationTitle = "Deb Studio"
-const ApplicationVersion = "v 0.1.6"
+const ApplicationVersion = "v 0.1.7"
 const ApplicationCopyRight = "©SoftTeam AB, 2022"
 
 // Exit codes
@@ -48,3 +48,5 @@ const (
 // Misc constants
 
 const RightMouseButton = 3
+const DebianFolderName = "DEBIAN"
+const ControlFileName = "control"

@@ -60,7 +60,7 @@ func NewProject(l *logger.Logger, projectPath, projectName string) (*Project, er
 	p := &Project{Path: projectPath}
 	p.Config = &projectConfig.ProjectConfig{Name: projectName}
 
-	// Save config
+	// SaveControlFile config
 	err := p.Config.Save(path.Join(projectPath, common.ProjectJsonFileName))
 	if err != nil {
 		return nil, err
@@ -81,7 +81,11 @@ func (p *Project) AddPackage(versionName, architectureName string) (*Package, er
 	log.Trace.Println("Entering AddPackage...")
 	defer log.Trace.Println("Exiting AddPackage...")
 
-	packageName := fmt.Sprintf("%s_%s", versionName, architectureName)
+	packageName := fmt.Sprintf(
+		"%s-%s-%s",
+		strings.ToLower(p.Config.Name), versionName, architectureName,
+	)
+
 	packagePath := path.Join(p.Path, packageName)
 	err := os.MkdirAll(packagePath, 0775)
 	if err != nil {
@@ -93,14 +97,17 @@ func (p *Project) AddPackage(versionName, architectureName string) (*Package, er
 	}
 
 	config := &packageConfig.PackageConfig{
-		Name:         packageName,
+		Project:      p.Config.Name,
 		Version:      versionName,
 		Architecture: architectureName,
 		Files:        nil,
 	}
 
 	// Add to version slice
-	pkg := newPackage(packagePath, config)
+	pkg, err := newPackage(packagePath, config)
+	if err != nil {
+		return nil, err
+	}
 	p.Packages = append(p.Packages, pkg)
 	p.Config.LatestVersion = versionName
 
@@ -129,13 +136,13 @@ func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModel
 		iter := s.InsertAfter(nil)
 		data := []interface{}{
 			false, nil, nil,
-			pkg.Config.Name, pkg.Config.Version, pkg.Config.Architecture, pkg.Path,
+			pkg.Config.GetFolderName(), pkg.Config.Version, pkg.Config.Architecture, pkg.Path,
 		}
 		if pkg.Config.Version == p.Config.LatestVersion {
 			data[common.PackageListColumnFilter] = true
 			data[common.PackageListColumnIsLatest] = check
 		}
-		if pkg.Config.Name == p.Config.CurrentPackage {
+		if pkg.Config.GetFolderName() == p.Config.CurrentPackage {
 			data[common.PackageListColumnFilter] = true
 			data[common.PackageListColumnIsCurrent] = edit
 		}
@@ -196,7 +203,7 @@ func (p *Project) WorkingWithLatestVersion() bool {
 func (p *Project) SetCurrentPackage() {
 	for i := range p.Packages {
 		pkg := p.Packages[i]
-		if pkg.Config.Name == p.Config.CurrentPackage {
+		if pkg.Config.GetFolderName() == p.Config.CurrentPackage {
 			p.CurrentPackage = pkg
 		}
 	}
@@ -234,7 +241,10 @@ func (p *Project) scanForPackages() error {
 		}
 
 		// Add package
-		pkg := newPackage(packagePath, config)
+		pkg, err := newPackage(packagePath, config)
+		if err != nil {
+			return err
+		}
 		p.Packages = append(p.Packages, pkg)
 	}
 
@@ -244,7 +254,7 @@ func (p *Project) scanForPackages() error {
 func (p *Project) GetPackageByName(name string) *Package {
 	for i := range p.Packages {
 		pkg := p.Packages[i]
-		if pkg.Config.Name == name {
+		if pkg.Config.GetFolderName() == name {
 			return pkg
 		}
 	}
@@ -257,7 +267,7 @@ func (p *Project) SetAsCurrent(name string) {
 		// TODO : Error handling
 		return
 	}
-	p.Config.CurrentPackage = pkg.Config.Name
+	p.Config.CurrentPackage = pkg.Config.GetFolderName()
 	p.CurrentPackage = pkg
 }
 

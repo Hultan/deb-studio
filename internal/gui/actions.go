@@ -147,6 +147,14 @@ func (m *MainForm) openButtonClicked() {
 		m.listPackages()
 		m.updateInfoBar()
 		m.enableDisableStackPages()
+
+		// REMOVE
+		project.CurrentPackage.Source.Set("Maintainer", "Per Hultqvist")
+		err = project.CurrentPackage.SaveControlFile()
+		if err != nil {
+			fmt.Println(err)
+		}
+		// REMOVE
 	}
 }
 
@@ -175,7 +183,7 @@ func (m *MainForm) updateProjectPage() {
 // TODO : Do we even need a save button?
 func (m *MainForm) saveButtonClicked() {
 	// TODO : saveButtonClicked project here
-	fmt.Println("Save clicked")
+	fmt.Println("SaveControlFile clicked")
 }
 
 // buildButtonClicked: Handler for the build button clicked signal

@@ -16,7 +16,7 @@ func (m *MainForm) openSettingsDialog() {
 	// Show the dialog
 	responseId := dialog.Run()
 	if responseId == gtk.RESPONSE_ACCEPT {
-		// Save settings
+		// SaveControlFile settings
 	}
 
 	dialog.Hide()
