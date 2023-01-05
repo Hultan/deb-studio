@@ -45,9 +45,7 @@ func (m *MainWindow) setupToolbar() {
 // newButtonClicked: Handler for the newButtonClicked button clicked signal
 func (m *MainWindow) newButtonClicked() {
 	defer func() {
-		m.packagePage.listPackages()
-		m.packagePage.updateInfoBar()
-		m.stackPages.enableDisable()
+		m.pages.update()
 	}()
 
 	// Open setup dialog
@@ -103,9 +101,11 @@ func (m *MainWindow) openButtonClicked() {
 			os.Exit(1)
 		}
 
-		m.projectPage.update()
-		m.packagePage.update()
-		m.stackPages.enableDisable()
+		// Update gui
+		if project.Config.ShowOnlyLatestVersion {
+			m.pages.packagePage.showOnlyCheckBox.SetActive(true)
+		}
+		m.pages.update()
 
 		// TODO : REMOVE
 		project.CurrentPackage.Source.Set("Maintainer", "Per Hultqvist")

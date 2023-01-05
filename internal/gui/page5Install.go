@@ -11,25 +11,31 @@ type pageInstall struct {
 }
 
 // setupInstallPage: Set up the install page
-func (m *MainWindow) setupInstallPage() {
-	m.installPage = &pageInstall{parent: m}
+func (m *MainWindow) setupInstallPage() *pageInstall {
+	p := &pageInstall{parent: m}
 
 	// AddFileButton
 	btn := m.builder.GetObject("addFileButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.addFileButtonClicked)
+	btn.Connect("clicked", p.addFileButtonClicked)
+
+	return p
 }
 
-func (m *MainWindow) addFileButtonClicked() {
-	if m.addFileDialog == nil {
-		m.addFileDialog = m.newAddFileDialog()
+func (p *pageInstall) addFileButtonClicked() {
+	if p.parent.addFileDialog == nil {
+		p.parent.addFileDialog = p.parent.newAddFileDialog()
 	}
-	m.addFileDialog.openForNewFile("/home/per/temp/dragon.ply")
+	p.parent.addFileDialog.openForNewFile("/home/per/temp/dragon.ply")
 }
 
-func (m *MainWindow) editFileButtonClicked() {
+func (p *pageInstall) editFileButtonClicked() {
 	fmt.Println("Edit file clicked!")
 }
 
-func (m *MainWindow) removeFileButtonClicked() {
+func (p *pageInstall) removeFileButtonClicked() {
 	fmt.Println("Remove file clicked!")
+}
+
+func (p *pageInstall) update() {
+
 }

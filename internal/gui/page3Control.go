@@ -9,9 +9,8 @@ type pageControl struct {
 }
 
 // setupControlPage: Set up the control page
-func (m *MainWindow) setupControlPage() {
+func (m *MainWindow) setupControlPage() *pageControl {
 	p := &pageControl{parent: m}
-	m.controlPage = p
 
 	p.setControlImage("imgPackage", imageTypeMandatory)
 	p.setControlImage("imgSource", imageTypeOptional)
@@ -27,6 +26,7 @@ func (m *MainWindow) setupControlPage() {
 	p.setControlImage("imgHomePage", imageTypeOptional)
 	p.setControlImage("imgBuiltUsing", imageTypeOptional)
 
+	return p
 }
 
 // setControlImage: Set a control tab image
@@ -48,4 +48,8 @@ func (p *pageControl) getControlIcon(imgType imageType) []byte {
 		bytes = optionalIcon
 	}
 	return bytes
+}
+
+func (p *pageControl) update() {
+
 }

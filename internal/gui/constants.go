@@ -10,13 +10,13 @@ const (
 	imageTypeOptional
 )
 
-// Info bar
+// Project status
 
-type infoBarStatus int
+type projectStatus int
 
 const (
-	infoBarStatusNoProjectOpened infoBarStatus = iota
-	infoBarStatusNoPackageSelected
-	infoBarStatusLatestVersion
-	infoBarStatusNotLatestVersion
+	projectStatusNoProjectOpened projectStatus = iota
+	projectStatusNoPackageSelected
+	projectStatusLatestVersion
+	projectStatusNotLatestVersion
 )

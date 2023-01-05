@@ -4,6 +4,12 @@ type pageScript struct {
 	parent *MainWindow
 }
 
-func (m *MainWindow) setupScriptPage() {
-	m.scriptPage = &pageScript{parent: m}
+func (m *MainWindow) setupScriptPage() *pageScript {
+	p := &pageScript{parent: m}
+
+	return p
+}
+
+func (p *pageScript) update() {
+
 }

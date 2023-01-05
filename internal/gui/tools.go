@@ -48,3 +48,14 @@ func isTraceMode() bool {
 	// TODO : Fix trace mode
 	return len(os.Args) >= 2 && strings.HasPrefix(os.Args[1], "-t")
 }
+
+func getProjectStatus() projectStatus {
+	if project == nil {
+		return projectStatusNoProjectOpened
+	} else if project.CurrentPackage == nil {
+		return projectStatusNoPackageSelected
+	} else if !project.IsWorkingWithLatestVersion() {
+		return projectStatusNotLatestVersion
+	}
+	return projectStatusLatestVersion
+}

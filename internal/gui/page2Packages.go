@@ -28,9 +28,8 @@ type pagePackage struct {
 	popup *gtk.Menu
 }
 
-func (m *MainWindow) setupPackagePage() {
+func (m *MainWindow) setupPackagePage() *pagePackage {
 	p := &pagePackage{parent: m}
-	m.packagePage = p
 
 	// General
 	treeView := m.builder.GetObject("mainWindow_packageList").(*gtk.TreeView)
@@ -62,6 +61,8 @@ func (m *MainWindow) setupPackagePage() {
 	tool.Connect("activate", p.openProjectFolder)
 	tool = m.builder.GetObject("mainWindow_popupOpenPackage").(*gtk.MenuItem)
 	tool.Connect("activate", p.openPackageFolder)
+
+	return p
 }
 
 func (p *pagePackage) setAsLatestVersionClicked() {
@@ -72,10 +73,8 @@ func (p *pagePackage) setAsLatestVersionClicked() {
 	}
 	project.SetAsLatest(id)
 
-	// Update some things
-	p.parent.projectPage.update()
-	p.listPackages()
-	p.updateInfoBar()
+	// Update gui
+	p.parent.pages.update()
 }
 
 func (p *pagePackage) setPackageAsCurrentClicked() {
@@ -87,9 +86,7 @@ func (p *pagePackage) setPackageAsCurrentClicked() {
 	project.SetAsCurrent(id)
 
 	// Update some things
-	p.parent.projectPage.update()
-	p.listPackages()
-	p.updateInfoBar()
+	p.parent.pages.update()
 }
 
 func (p *pagePackage) addPackageClicked() {
@@ -166,9 +163,6 @@ func (p *pagePackage) createPackageListRow(pkg *engine.Package) (*gtk.ListBoxRow
 }
 
 func (p *pagePackage) update() {
-	if project.Config.ShowOnlyLatestVersion {
-		p.showOnlyCheckBox.SetActive(true)
-	}
 	p.listPackages()
 	p.updateInfoBar()
 }
@@ -176,60 +170,50 @@ func (p *pagePackage) update() {
 func (p *pagePackage) showOnlyCurrentAndLatestToggled(check *gtk.CheckButton) {
 	checked := check.GetActive()
 	project.SetShowOnlyLatestVersion(checked)
-	p.listPackages()
-}
-
-func (p *pagePackage) getInfoBarStatus() infoBarStatus {
-	if project == nil {
-		return infoBarStatusNoProjectOpened
-	} else if project.CurrentPackage == nil {
-		return infoBarStatusNoPackageSelected
-	} else if !project.IsWorkingWithLatestVersion() {
-		return infoBarStatusNotLatestVersion
-	}
-	return infoBarStatusLatestVersion
+	p.parent.pages.update()
 }
 
 func (p *pagePackage) getInfoBarText() string {
-	switch p.getInfoBarStatus() {
-	case infoBarStatusNoProjectOpened:
+	switch getProjectStatus() {
+	case projectStatusNoProjectOpened:
 		return "You need to open or create a new project..."
-	case infoBarStatusNoPackageSelected:
+	case projectStatusNoPackageSelected:
 		return "You need to select or add a package to edit!"
-	case infoBarStatusNotLatestVersion:
+	case projectStatusNotLatestVersion:
 		return fmt.Sprintf(
 			"You are currently not editing the latest version! You are editing <b>version %s</b> and <b>architecture %s</b>.",
 			project.CurrentPackage.Config.Version, project.CurrentPackage.Config.Architecture,
 		)
-	case infoBarStatusLatestVersion:
+	case projectStatusLatestVersion:
 		return fmt.Sprintf(
 			"You are currently editing <b>version %s</b> and <b>architecture %s</b>.",
 			project.CurrentPackage.Config.Version, project.CurrentPackage.Config.Architecture,
 		)
 	default:
-		log.Error.Println("Invalid infoBarStatus in getInfoBarText()")
+		log.Error.Println("Invalid projectStatus in getInfoBarText()")
 		return ""
 	}
 }
 
 func (p *pagePackage) setInfoBarColor() {
-	switch p.getInfoBarStatus() {
-	case infoBarStatusNoProjectOpened:
+	switch getProjectStatus() {
+	case projectStatusNoProjectOpened:
 		p.infoBar.SetMessageType(gtk.MESSAGE_INFO)
-	case infoBarStatusNoPackageSelected:
+	case projectStatusNoPackageSelected:
 		p.infoBar.SetMessageType(gtk.MESSAGE_WARNING)
-	case infoBarStatusNotLatestVersion:
+	case projectStatusNotLatestVersion:
 		p.infoBar.SetMessageType(gtk.MESSAGE_WARNING)
-	case infoBarStatusLatestVersion:
+	case projectStatusLatestVersion:
 		p.infoBar.SetMessageType(gtk.MESSAGE_INFO)
 	default:
-		log.Error.Println("Invalid infoBarStatus in SetInfoBarColor()")
+		log.Error.Println("Invalid projectStatus in SetInfoBarColor()")
 	}
 }
 
 func (p *pagePackage) updateInfoBar() {
 	p.infoBarLabel.SetMarkup(p.getInfoBarText())
 	p.setInfoBarColor()
+	// Force a redraw to update the info bar
 	p.parent.window.QueueDraw()
 }
 

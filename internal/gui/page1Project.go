@@ -17,9 +17,8 @@ type pageProject struct {
 	currentVersionLabel *gtk.Label
 }
 
-func (m *MainWindow) setupProjectPage() {
+func (m *MainWindow) setupProjectPage() *pageProject {
 	p := &pageProject{parent: m}
-	m.projectPage = p
 
 	p.headerLabel = m.builder.GetObject("mainWindow_projectHeaderLabel").(*gtk.Label)
 	p.subHeaderLabel = m.builder.GetObject("mainWindow_projectSubheaderLabel").(*gtk.Label)
@@ -27,9 +26,14 @@ func (m *MainWindow) setupProjectPage() {
 	p.projectPathLabel = m.builder.GetObject("mainWindow_projectPathLabel").(*gtk.Label)
 	p.latestVersionLabel = m.builder.GetObject("mainWindow_latestVersionLabel").(*gtk.Label)
 	p.currentVersionLabel = m.builder.GetObject("mainWindow_currentPackageLabel").(*gtk.Label)
+
+	return p
 }
 
 func (p *pageProject) update() {
+	if project == nil {
+		return
+	}
 	p.headerLabel.SetText(project.Config.Name)
 	p.subHeaderLabel.SetText("Project information")
 	p.projectNameLabel.SetMarkup("Project name: <b>" + project.Config.Name + "</b>")

@@ -18,13 +18,7 @@ type MainWindow struct {
 	window  *gtk.ApplicationWindow
 
 	// Pages
-	stackPages  *stackPages
-	projectPage *pageProject
-	packagePage *pagePackage
-	controlPage *pageControl
-	scriptPage  *pageScript
-	installPage *pageInstall
-	textPage    *pageText
+	pages *stackPages
 
 	// dialogs
 	addFileDialog *addFileDialog
@@ -64,21 +58,12 @@ func (m *MainWindow) Open(app *gtk.Application) {
 
 	// Setup pages
 	m.setupStackPages()
-	m.setupProjectPage()
-	m.setupPackagePage()
-	m.setupControlPage()
-	m.setupScriptPage()
-	m.setupInstallPage()
-	m.setupTextPage()
 
 	// Show the main window
 	m.window.ShowAll()
 
-	// Disable pages until a project has been opened
-	m.stackPages.enableDisable()
-
-	// Update info bar
-	m.packagePage.updateInfoBar()
+	// Update gui
+	m.pages.update()
 }
 
 func (m *MainWindow) startLogging() {

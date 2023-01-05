@@ -4,6 +4,12 @@ type pageText struct {
 	parent *MainWindow
 }
 
-func (m *MainWindow) setupTextPage() {
-	m.textPage = &pageText{parent: m}
+func (m *MainWindow) setupTextPage() *pageText {
+	p := &pageText{parent: m}
+
+	return p
+}
+
+func (p *pageText) update() {
+
 }
