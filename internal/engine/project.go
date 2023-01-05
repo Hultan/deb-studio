@@ -136,13 +136,13 @@ func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModel
 		iter := s.InsertAfter(nil)
 		data := []interface{}{
 			false, nil, nil,
-			pkg.Config.GetFolderName(), pkg.Config.Version, pkg.Config.Architecture, pkg.Path,
+			pkg.Config.GetPackageName(), pkg.Config.Version, pkg.Config.Architecture, pkg.Path,
 		}
 		if pkg.Config.Version == p.Config.LatestVersion {
 			data[common.PackageListColumnFilter] = true
 			data[common.PackageListColumnIsLatest] = check
 		}
-		if pkg.Config.GetFolderName() == p.Config.CurrentPackage {
+		if pkg.Config.GetPackageName() == p.Config.CurrentPackage {
 			data[common.PackageListColumnFilter] = true
 			data[common.PackageListColumnIsCurrent] = edit
 		}
@@ -203,7 +203,7 @@ func (p *Project) WorkingWithLatestVersion() bool {
 func (p *Project) SetCurrentPackage() {
 	for i := range p.Packages {
 		pkg := p.Packages[i]
-		if pkg.Config.GetFolderName() == p.Config.CurrentPackage {
+		if pkg.Config.GetPackageName() == p.Config.CurrentPackage {
 			p.CurrentPackage = pkg
 		}
 	}
@@ -254,7 +254,7 @@ func (p *Project) scanForPackages() error {
 func (p *Project) GetPackageByName(name string) *Package {
 	for i := range p.Packages {
 		pkg := p.Packages[i]
-		if pkg.Config.GetFolderName() == name {
+		if pkg.Config.GetPackageName() == name {
 			return pkg
 		}
 	}
@@ -267,7 +267,7 @@ func (p *Project) SetAsCurrent(name string) {
 		// TODO : Error handling
 		return
 	}
-	p.Config.CurrentPackage = pkg.Config.GetFolderName()
+	p.Config.CurrentPackage = pkg.Config.GetPackageName()
 	p.CurrentPackage = pkg
 }
 

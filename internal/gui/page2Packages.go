@@ -142,7 +142,7 @@ func (p *pagePackage) createPackageListRow(pkg *engine.Package) (*gtk.ListBoxRow
 	}
 	row.Add(box)
 	// TODO : Change to a map instead?
-	row.SetName(pkg.Config.GetFolderName())
+	row.SetName(pkg.Config.GetPackageName())
 
 	// Add version label
 	label, err := gtk.LabelNew(pkg.Config.Version)

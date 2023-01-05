@@ -82,7 +82,7 @@ func (c *PackageConfig) Save(path string) error {
 	return nil
 }
 
-func (c *PackageConfig) GetFolderName() string {
+func (c *PackageConfig) GetPackageName() string {
 	return fmt.Sprintf(
 		"%s-%s",
 		strings.ToLower(c.Version),
@@ -94,7 +94,7 @@ func (c *PackageConfig) GetPackageFolderName() string {
 	return fmt.Sprintf(
 		"%s-%s",
 		strings.ToLower(c.Project),
-		c.GetFolderName(),
+		c.GetPackageName(),
 	)
 }
 
