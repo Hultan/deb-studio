@@ -5,6 +5,8 @@ import (
 )
 
 type pageProject struct {
+	parent *MainWindow
+
 	headerLabel         *gtk.Label
 	subHeaderLabel      *gtk.Label
 	projectNameLabel    *gtk.Label
@@ -21,6 +23,8 @@ func (m *MainWindow) setupProjectPage() {
 	p.projectPathLabel = m.builder.GetObject("mainWindow_projectPathLabel").(*gtk.Label)
 	p.latestVersionLabel = m.builder.GetObject("mainWindow_latestVersionLabel").(*gtk.Label)
 	p.currentVersionLabel = m.builder.GetObject("mainWindow_currentPackageLabel").(*gtk.Label)
+	p.parent = m
+
 	m.projectPage = p
 }
 

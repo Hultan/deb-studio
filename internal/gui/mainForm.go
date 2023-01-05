@@ -10,22 +10,15 @@ import (
 	"github.com/hultan/deb-studio/internal/builder"
 	"github.com/hultan/deb-studio/internal/engine"
 	"github.com/hultan/deb-studio/internal/logger"
-	"github.com/hultan/deb-studio/internal/packageList"
 )
 
 // MainWindow : Struct for the main form
 type MainWindow struct {
-	builder          *builder.Builder
-	window           *gtk.ApplicationWindow
-	projectPage      *pageProject
-	packagePage      *pagePackage
-	addFileDialog    *addFileDialog
-	treeView         *gtk.TreeView
-	projectList      *packageList.PackageList
-	infoBar          *gtk.InfoBar
-	infoBarLabel     *gtk.Label
-	popup            *gtk.Menu
-	showOnlyCheckBox *gtk.CheckButton
+	builder       *builder.Builder
+	window        *gtk.ApplicationWindow
+	projectPage   *pageProject
+	packagePage   *pagePackage
+	addFileDialog *addFileDialog
 }
 
 var project *engine.Project
@@ -59,7 +52,6 @@ func (m *MainWindow) Open(app *gtk.Application) {
 	m.setupStatusBar()
 	m.setupToolbar()
 	m.setupMenu()
-	m.setupPopupMenu()
 
 	// Setup pages
 	m.setupProjectPage()
@@ -74,7 +66,7 @@ func (m *MainWindow) Open(app *gtk.Application) {
 	m.enableDisableStackPages()
 
 	// Update info bar
-	m.updateInfoBar()
+	m.packagePage.updateInfoBar()
 }
 
 func (m *MainWindow) startLogging() {

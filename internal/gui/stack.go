@@ -5,7 +5,7 @@ import (
 )
 
 func (m *MainWindow) enableDisableStackPages() {
-	status := m.getInfoBarStatus()
+	status := m.packagePage.getInfoBarStatus()
 	haveOpenedProject := status > infoBarStatusNoProjectOpened
 	haveChosenPackage := status > infoBarStatusNoPackageSelected
 	m.enableDisableStackPage("mainWindow_packagePage", haveOpenedProject)

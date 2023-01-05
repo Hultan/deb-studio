@@ -45,8 +45,8 @@ func (m *MainWindow) setupToolbar() {
 // newButtonClicked: Handler for the newButtonClicked button clicked signal
 func (m *MainWindow) newButtonClicked() {
 	defer func() {
-		m.listPackages()
-		m.updateInfoBar()
+		m.packagePage.listPackages()
+		m.packagePage.updateInfoBar()
 		m.enableDisableStackPages()
 	}()
 
@@ -103,10 +103,8 @@ func (m *MainWindow) openButtonClicked() {
 			os.Exit(1)
 		}
 
-		m.updateProjectPage()
-		m.updatePackagePage()
-		m.listPackages()
-		m.updateInfoBar()
+		m.projectPage.update()
+		m.packagePage.update()
 		m.enableDisableStackPages()
 
 		// TODO : REMOVE
