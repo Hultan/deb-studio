@@ -14,12 +14,14 @@ import (
 
 // MainWindow : Struct for the main form
 type MainWindow struct {
-	builder       *builder.Builder
-	window        *gtk.ApplicationWindow
-	projectPage   *pageProject
-	packagePage   *pagePackage
-	controlPage   *pageControl
-	scriptPage    *pageScript
+	builder     *builder.Builder
+	window      *gtk.ApplicationWindow
+	projectPage *pageProject
+	packagePage *pagePackage
+	controlPage *pageControl
+	scriptPage  *pageScript
+
+	textPage      *pageText
 	addFileDialog *addFileDialog
 }
 
@@ -61,6 +63,7 @@ func (m *MainWindow) Open(app *gtk.Application) {
 	m.setupControlPage()
 	m.setupScriptPage()
 	m.setupInstallPage()
+	m.setupTextPage()
 
 	// Show the main window
 	m.window.ShowAll()
