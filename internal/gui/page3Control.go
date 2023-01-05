@@ -4,32 +4,40 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
+type pageControl struct {
+	parent *MainWindow
+}
+
 // setupControlPage: Set up the control page
 func (m *MainWindow) setupControlPage() {
-	m.setControlImage("imgPackage", imageTypeMandatory)
-	m.setControlImage("imgSource", imageTypeOptional)
-	m.setControlImage("imgVersion", imageTypeMandatory)
-	m.setControlImage("imgSection", imageTypeRecommended)
-	m.setControlImage("imgPriority", imageTypeRecommended)
-	m.setControlImage("imgArchitecture", imageTypeMandatory)
-	m.setControlImage("imgEssential", imageTypeOptional)
-	m.setControlImage("imgDepends", imageTypeOptional)
-	m.setControlImage("imgInstalledSize", imageTypeOptional)
-	m.setControlImage("imgMaintainer", imageTypeMandatory)
-	m.setControlImage("imgDescription", imageTypeMandatory)
-	m.setControlImage("imgHomePage", imageTypeOptional)
-	m.setControlImage("imgBuiltUsing", imageTypeOptional)
+	p := &pageControl{parent: m}
+	m.controlPage = p
+
+	p.setControlImage("imgPackage", imageTypeMandatory)
+	p.setControlImage("imgSource", imageTypeOptional)
+	p.setControlImage("imgVersion", imageTypeMandatory)
+	p.setControlImage("imgSection", imageTypeRecommended)
+	p.setControlImage("imgPriority", imageTypeRecommended)
+	p.setControlImage("imgArchitecture", imageTypeMandatory)
+	p.setControlImage("imgEssential", imageTypeOptional)
+	p.setControlImage("imgDepends", imageTypeOptional)
+	p.setControlImage("imgInstalledSize", imageTypeOptional)
+	p.setControlImage("imgMaintainer", imageTypeMandatory)
+	p.setControlImage("imgDescription", imageTypeMandatory)
+	p.setControlImage("imgHomePage", imageTypeOptional)
+	p.setControlImage("imgBuiltUsing", imageTypeOptional)
+
 }
 
 // setControlImage: Set a control tab image
-func (m *MainWindow) setControlImage(imgName string, imgType imageType) {
-	img := m.builder.GetObject(imgName).(*gtk.Image)
-	bytes := m.getControlIcon(imgType)
+func (p *pageControl) setControlImage(imgName string, imgType imageType) {
+	img := p.parent.builder.GetObject(imgName).(*gtk.Image)
+	bytes := p.getControlIcon(imgType)
 	img.SetFromPixbuf(createPixBufFromBytes(bytes, imgName))
 }
 
 // getControlIcon: Get the icon bytes from an image type
-func (m *MainWindow) getControlIcon(imgType imageType) []byte {
+func (p *pageControl) getControlIcon(imgType imageType) []byte {
 	var bytes []byte
 	switch imgType {
 	case imageTypeMandatory:

@@ -18,6 +18,7 @@ type MainWindow struct {
 	window        *gtk.ApplicationWindow
 	projectPage   *pageProject
 	packagePage   *pagePackage
+	controlPage   *pageControl
 	addFileDialog *addFileDialog
 }
 

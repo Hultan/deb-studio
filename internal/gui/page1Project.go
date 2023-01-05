@@ -16,16 +16,15 @@ type pageProject struct {
 }
 
 func (m *MainWindow) setupProjectPage() {
-	p := &pageProject{}
+	p := &pageProject{parent: m}
+	m.projectPage = p
+
 	p.headerLabel = m.builder.GetObject("mainWindow_projectHeaderLabel").(*gtk.Label)
 	p.subHeaderLabel = m.builder.GetObject("mainWindow_projectSubheaderLabel").(*gtk.Label)
 	p.projectNameLabel = m.builder.GetObject("mainWindow_projectNameLabel").(*gtk.Label)
 	p.projectPathLabel = m.builder.GetObject("mainWindow_projectPathLabel").(*gtk.Label)
 	p.latestVersionLabel = m.builder.GetObject("mainWindow_latestVersionLabel").(*gtk.Label)
 	p.currentVersionLabel = m.builder.GetObject("mainWindow_currentPackageLabel").(*gtk.Label)
-	p.parent = m
-
-	m.projectPage = p
 }
 
 func (p *pageProject) update() {

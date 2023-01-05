@@ -28,7 +28,8 @@ type pagePackage struct {
 }
 
 func (m *MainWindow) setupPackagePage() {
-	p := &pagePackage{}
+	p := &pagePackage{parent: m}
+	m.packagePage = p
 
 	// General
 	treeView := m.builder.GetObject("mainWindow_packageList").(*gtk.TreeView)
@@ -60,10 +61,6 @@ func (m *MainWindow) setupPackagePage() {
 	tool.Connect("activate", p.openProjectFolder)
 	tool = m.builder.GetObject("mainWindow_popupOpenPackage").(*gtk.MenuItem)
 	tool.Connect("activate", p.openPackageFolder)
-
-	p.parent = m
-
-	m.packagePage = p
 }
 
 func (p *pagePackage) setAsLatestVersionClicked() {
