@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 
+	"github.com/google/uuid"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 
@@ -65,11 +66,11 @@ func (m *MainWindow) setupPackagePage() {
 
 func (p *pagePackage) setAsLatestVersionClicked() {
 	// Set version as latest
-	pkgName := p.projectList.GetSelectedPackageName()
-	if pkgName == "" {
+	id := p.projectList.GetSelectedPackageId()
+	if id == uuid.Nil {
 		return
 	}
-	project.SetAsLatest(pkgName)
+	project.SetAsLatest(id)
 
 	// Update some things
 	p.parent.projectPage.update()
@@ -79,11 +80,11 @@ func (p *pagePackage) setAsLatestVersionClicked() {
 
 func (p *pagePackage) setPackageAsCurrentClicked() {
 	// Set package as current
-	pkgName := p.projectList.GetSelectedPackageName()
-	if pkgName == "" {
+	id := p.projectList.GetSelectedPackageId()
+	if id == uuid.Nil {
 		return
 	}
-	project.SetAsCurrent(pkgName)
+	project.SetAsCurrent(id)
 
 	// Update some things
 	p.parent.projectPage.update()
@@ -174,7 +175,7 @@ func (p *pagePackage) update() {
 
 func (p *pagePackage) showOnlyCurrentAndLatestToggled(check *gtk.CheckButton) {
 	checked := check.GetActive()
-	project.SetShowOnlyCurrentAndLatest(checked)
+	project.SetShowOnlyLatestVersion(checked)
 	p.listPackages()
 }
 
@@ -183,7 +184,7 @@ func (p *pagePackage) getInfoBarStatus() infoBarStatus {
 		return infoBarStatusNoProjectOpened
 	} else if project.CurrentPackage == nil {
 		return infoBarStatusNoPackageSelected
-	} else if !project.WorkingWithLatestVersion() {
+	} else if !project.IsWorkingWithLatestVersion() {
 		return infoBarStatusNotLatestVersion
 	}
 	return infoBarStatusLatestVersion
@@ -248,11 +249,11 @@ func (p *pagePackage) openProjectFolder() {
 // openPackageFolder: Handler for the open package folder button clicked signal
 func (p *pagePackage) openPackageFolder() {
 	// Set version as latest
-	pkgName := p.projectList.GetSelectedPackageName()
-	if pkgName == "" {
+	id := p.projectList.GetSelectedPackageId()
+	if id == uuid.Nil {
 		return
 	}
-	pkg := project.GetPackageByName(pkgName)
+	pkg := project.GetPackageById(id)
 	if pkg == nil {
 		return
 	}

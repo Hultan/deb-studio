@@ -2,11 +2,11 @@ package engine
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
@@ -48,7 +48,7 @@ func OpenProject(l *logger.Logger, projectPath string) (*Project, error) {
 
 	log.Info.Printf("Successfully opened project %s...\n", p.Config.Name)
 
-	p.SetCurrentPackage()
+	p.CurrentPackage = p.GetPackageById(p.Config.CurrentPackageId)
 
 	return p, nil
 }
@@ -69,38 +69,26 @@ func NewProject(l *logger.Logger, projectPath, projectName string) (*Project, er
 	return p, nil
 }
 
-func isProjectFolder(projectPath string) bool {
-	info, err := os.Stat(path.Join(projectPath, common.ProjectJsonFileName))
-	if err != nil {
-		return false
-	}
-	return !info.IsDir()
-}
-
 func (p *Project) AddPackage(versionName, architectureName string) (*Package, error) {
 	log.Trace.Println("Entering AddPackage...")
 	defer log.Trace.Println("Exiting AddPackage...")
 
-	packageName := fmt.Sprintf(
-		"%s-%s-%s",
-		strings.ToLower(p.Config.Name), versionName, architectureName,
-	)
-
-	packagePath := path.Join(p.Path, packageName)
-	err := os.MkdirAll(packagePath, 0775)
-	if err != nil {
-		log.Error.Printf(
-			"Failed to create directory '%s' for package '%s': %s\n",
-			packagePath, packageName, err,
-		)
-		return nil, err
-	}
-
 	config := &packageConfig.PackageConfig{
+		Id:           uuid.New(),
 		Project:      p.Config.Name,
 		Version:      versionName,
 		Architecture: architectureName,
 		Files:        nil,
+	}
+
+	packagePath := path.Join(p.Path, config.GetPackageFolderName())
+	err := os.MkdirAll(packagePath, 0775)
+	if err != nil {
+		log.Error.Printf(
+			"Failed to create directory '%s' for package '%s': %s\n",
+			packagePath, config.GetPackageFolderName(), err,
+		)
+		return nil, err
 	}
 
 	// Add to version slice
@@ -111,9 +99,54 @@ func (p *Project) AddPackage(versionName, architectureName string) (*Package, er
 	p.Packages = append(p.Packages, pkg)
 	p.Config.LatestVersion = versionName
 
-	log.Info.Printf("Created package %s...\n", packageName)
+	log.Info.Printf("Created package %s...\n", config.GetPackageFolderName())
 
 	return pkg, nil
+}
+
+func (p *Project) IsWorkingWithLatestVersion() bool {
+	if p.CurrentPackage == nil {
+		return false
+	}
+	return p.CurrentPackage.Config.Version == p.Config.LatestVersion
+}
+
+func (p *Project) GetPackageById(id uuid.UUID) *Package {
+	for i := range p.Packages {
+		pkg := p.Packages[i]
+		if pkg.Config.Id == id {
+			return pkg
+		}
+	}
+	return nil
+}
+
+func (p *Project) SetAsCurrent(id uuid.UUID) {
+	pkg := p.GetPackageById(id)
+	if pkg == nil {
+		// TODO : Error handling
+		return
+	}
+	p.Config.CurrentPackageId = pkg.Config.Id
+	p.CurrentPackage = pkg
+}
+
+func (p *Project) SetAsLatest(id uuid.UUID) {
+	pkg := p.GetPackageById(id)
+	if pkg == nil {
+		// TODO : Error handling
+		return
+	}
+	p.Config.LatestVersion = pkg.Config.Version
+}
+
+func (p *Project) Save() {
+	configPath := path.Join(p.Path, common.ProjectJsonFileName)
+	p.Config.Save(configPath)
+}
+
+func (p *Project) SetShowOnlyLatestVersion(checked bool) {
+	p.Config.ShowOnlyLatestVersion = checked
 }
 
 func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModelFilter {
@@ -123,7 +156,7 @@ func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModel
 	// Icon, Version name, Architecture name, package name
 	s, err := gtk.ListStoreNew(
 		glib.TYPE_BOOLEAN, gdk.PixbufGetType(), gdk.PixbufGetType(),
-		glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING,
+		glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING,
 	)
 	if err != nil {
 		log.Error.Printf("failed to create new list store: %s\n", err)
@@ -136,17 +169,18 @@ func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModel
 		iter := s.InsertAfter(nil)
 		data := []interface{}{
 			false, nil, nil,
-			pkg.Config.GetPackageName(), pkg.Config.Version, pkg.Config.Architecture, pkg.Path,
+			pkg.Config.GetPackageName(), pkg.Config.Version, pkg.Config.Architecture,
+			pkg.Path, pkg.Config.Id.String(),
 		}
 		if pkg.Config.Version == p.Config.LatestVersion {
 			data[common.PackageListColumnFilter] = true
 			data[common.PackageListColumnIsLatest] = check
 		}
-		if pkg.Config.GetPackageName() == p.Config.CurrentPackage {
+		if pkg.Config.Id == p.Config.CurrentPackageId {
 			data[common.PackageListColumnFilter] = true
 			data[common.PackageListColumnIsCurrent] = edit
 		}
-		_ = s.Set(iter, []int{0, 1, 2, 3, 4, 5, 6}, data)
+		_ = s.Set(iter, []int{0, 1, 2, 3, 4, 5, 6, 7}, data)
 	}
 
 	// Sorting
@@ -193,22 +227,6 @@ func (p *Project) filterFunc(model *gtk.TreeModel, iter *gtk.TreeIter) bool {
 	return filter
 }
 
-func (p *Project) WorkingWithLatestVersion() bool {
-	if p.CurrentPackage == nil {
-		return false
-	}
-	return p.CurrentPackage.Config.Version == p.Config.LatestVersion
-}
-
-func (p *Project) SetCurrentPackage() {
-	for i := range p.Packages {
-		pkg := p.Packages[i]
-		if pkg.Config.GetPackageName() == p.Config.CurrentPackage {
-			p.CurrentPackage = pkg
-		}
-	}
-}
-
 func (p *Project) scanForPackages() error {
 	log.Trace.Println("Entering scanForVersions...")
 	defer log.Trace.Println("Exiting scanForVersions...")
@@ -251,40 +269,10 @@ func (p *Project) scanForPackages() error {
 	return nil
 }
 
-func (p *Project) GetPackageByName(name string) *Package {
-	for i := range p.Packages {
-		pkg := p.Packages[i]
-		if pkg.Config.GetPackageName() == name {
-			return pkg
-		}
+func isProjectFolder(projectPath string) bool {
+	info, err := os.Stat(path.Join(projectPath, common.ProjectJsonFileName))
+	if err != nil {
+		return false
 	}
-	return nil
-}
-
-func (p *Project) SetAsCurrent(name string) {
-	pkg := p.GetPackageByName(name)
-	if pkg == nil {
-		// TODO : Error handling
-		return
-	}
-	p.Config.CurrentPackage = pkg.Config.GetPackageName()
-	p.CurrentPackage = pkg
-}
-
-func (p *Project) SetAsLatest(name string) {
-	pkg := p.GetPackageByName(name)
-	if pkg == nil {
-		// TODO : Error handling
-		return
-	}
-	p.Config.LatestVersion = pkg.Config.Version
-}
-
-func (p *Project) Save() {
-	configPath := path.Join(p.Path, common.ProjectJsonFileName)
-	p.Config.Save(configPath)
-}
-
-func (p *Project) SetShowOnlyCurrentAndLatest(checked bool) {
-	p.Config.ShowOnlyLatestVersion = checked
+	return !info.IsDir()
 }

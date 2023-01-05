@@ -26,6 +26,7 @@ const (
 	PackageListColumnVersionName
 	PackageListColumnArchitectureName
 	PackageListColumnPackagePath
+	PackageListColumnPackageId
 )
 
 // Script page

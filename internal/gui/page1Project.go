@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"fmt"
+
 	"github.com/gotk3/gotk3/gtk"
 )
 
@@ -33,5 +35,10 @@ func (p *pageProject) update() {
 	p.projectNameLabel.SetMarkup("Project name: <b>" + project.Config.Name + "</b>")
 	p.projectPathLabel.SetMarkup("Project path: <b>" + project.Path + "</b>")
 	p.latestVersionLabel.SetMarkup("Latest version: <b>" + project.Config.LatestVersion + "</b>")
-	p.currentVersionLabel.SetMarkup("Current package: <b>" + project.Config.CurrentPackage + "</b>")
+	pkgName := fmt.Sprintf(
+		"%s (%s)",
+		project.CurrentPackage.Config.GetPackageName(),
+		project.Config.CurrentPackageId.String(),
+	)
+	p.currentVersionLabel.SetMarkup("Current package: <b>" + pkgName + "</b>")
 }
