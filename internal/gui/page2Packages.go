@@ -17,58 +17,49 @@ type pagePackage struct {
 
 	// General
 	projectList  *packageList.PackageList
-	treeView     *gtk.TreeView
 	infoBar      *gtk.InfoBar
 	infoBarLabel *gtk.Label
 
 	// Toolbar
-	addPackageButton    *gtk.ToolButton
-	removePackageButton *gtk.ToolButton
-	showOnlyCheckBox    *gtk.CheckButton
+	showOnlyCheckBox *gtk.CheckButton
 
 	// Popup menu
-	popup              *gtk.Menu
-	popupAddPackage    *gtk.MenuItem
-	popupRemovePackage *gtk.MenuItem
-	popupSetLatest     *gtk.MenuItem
-	popupSetCurrent    *gtk.MenuItem
-	popupOpenProject   *gtk.MenuItem
-	popupOpenPackage   *gtk.MenuItem
+	popup *gtk.Menu
 }
 
 func (m *MainWindow) setupPackagePage() {
 	p := &pagePackage{}
 
 	// General
-	p.treeView = m.builder.GetObject("mainWindow_packageList").(*gtk.TreeView)
-	p.projectList = packageList.NewProjectList(p.treeView)
-	p.treeView.Connect("row_activated", p.setPackageAsCurrentClicked)
-	p.treeView.Connect("button-press-event", p.showPopupMenu)
+	treeView := m.builder.GetObject("mainWindow_packageList").(*gtk.TreeView)
+	treeView.Connect("row_activated", p.setPackageAsCurrentClicked)
+	treeView.Connect("button-press-event", p.showPopupMenu)
+	p.projectList = packageList.NewProjectList(treeView)
 	p.infoBar = m.builder.GetObject("mainWindow_infoBar").(*gtk.InfoBar)
 	p.infoBarLabel = m.builder.GetObject("mainWindow_infoBarLabel").(*gtk.Label)
 
 	// Toolbar
-	p.addPackageButton = m.builder.GetObject("mainWindow_addPackageButton").(*gtk.ToolButton)
-	p.addPackageButton.Connect("clicked", p.addPackageClicked)
-	p.removePackageButton = m.builder.GetObject("mainWindow_removePackageButton").(*gtk.ToolButton)
-	p.removePackageButton.Connect("clicked", p.removePackageClicked)
+	btn := m.builder.GetObject("mainWindow_addPackageButton").(*gtk.ToolButton)
+	btn.Connect("clicked", p.addPackageClicked)
+	btn = m.builder.GetObject("mainWindow_removePackageButton").(*gtk.ToolButton)
+	btn.Connect("clicked", p.removePackageClicked)
 	p.showOnlyCheckBox = m.builder.GetObject("mainPage_toolbarShowOnlyCurrentAndLatest").(*gtk.CheckButton)
 	p.showOnlyCheckBox.Connect("toggled", p.showOnlyCurrentAndLatestToggled)
 
 	// Popup
 	p.popup = m.builder.GetObject("mainWindow_popupPackageMenu").(*gtk.Menu)
-	p.popupAddPackage = m.builder.GetObject("mainWindow_popupAddPackage").(*gtk.MenuItem)
-	p.popupAddPackage.Connect("activate", p.addPackageClicked)
-	p.popupRemovePackage = m.builder.GetObject("mainWindow_popupRemovePackage").(*gtk.MenuItem)
-	p.popupRemovePackage.Connect("activate", p.removePackageClicked)
-	p.popupSetLatest = m.builder.GetObject("mainWindow_popupSetAsLatest").(*gtk.MenuItem)
-	p.popupSetLatest.Connect("activate", p.setAsLatestVersionClicked)
-	p.popupSetCurrent = m.builder.GetObject("mainWindow_popupSetAsCurrent").(*gtk.MenuItem)
-	p.popupSetCurrent.Connect("activate", p.setPackageAsCurrentClicked)
-	p.popupOpenProject = m.builder.GetObject("mainWindow_popupOpenProject").(*gtk.MenuItem)
-	p.popupOpenProject.Connect("activate", p.openProjectFolder)
-	p.popupOpenPackage = m.builder.GetObject("mainWindow_popupOpenPackage").(*gtk.MenuItem)
-	p.popupOpenPackage.Connect("activate", p.openPackageFolder)
+	tool := m.builder.GetObject("mainWindow_popupAddPackage").(*gtk.MenuItem)
+	tool.Connect("activate", p.addPackageClicked)
+	tool = m.builder.GetObject("mainWindow_popupRemovePackage").(*gtk.MenuItem)
+	tool.Connect("activate", p.removePackageClicked)
+	tool = m.builder.GetObject("mainWindow_popupSetAsLatest").(*gtk.MenuItem)
+	tool.Connect("activate", p.setAsLatestVersionClicked)
+	tool = m.builder.GetObject("mainWindow_popupSetAsCurrent").(*gtk.MenuItem)
+	tool.Connect("activate", p.setPackageAsCurrentClicked)
+	tool = m.builder.GetObject("mainWindow_popupOpenProject").(*gtk.MenuItem)
+	tool.Connect("activate", p.openProjectFolder)
+	tool = m.builder.GetObject("mainWindow_popupOpenPackage").(*gtk.MenuItem)
+	tool.Connect("activate", p.openPackageFolder)
 
 	p.parent = m
 
