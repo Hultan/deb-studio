@@ -3,7 +3,6 @@ package packageList
 import (
 	"log"
 
-	"github.com/google/uuid"
 	"github.com/gotk3/gotk3/gtk"
 
 	"github.com/hultan/deb-studio/internal/common"
@@ -74,29 +73,24 @@ func (p *PackageList) createImageColumn(title string, colIndex int) *gtk.TreeVie
 	return column
 }
 
-func (p *PackageList) GetSelectedPackageId() uuid.UUID {
+func (p *PackageList) GetSelectedPackageId() string {
 	selection, err := p.treeView.GetSelection()
 	if err != nil {
-		return uuid.Nil
+		return ""
 	}
 	model, iter, ok := selection.GetSelected()
 	if !ok {
-		return uuid.Nil
+		return ""
 	}
 	v, err := model.ToTreeModel().GetValue(iter, common.PackageListColumnPackageId)
 	if err != nil {
-		return uuid.Nil
+		return ""
 	}
 
 	str, err := v.GetString()
 	if err != nil {
-		return uuid.Nil
+		return ""
 	}
 
-	id, err := uuid.FromBytes([]byte(str))
-	if err != nil {
-		return uuid.Nil
-	}
-
-	return id
+	return str
 }

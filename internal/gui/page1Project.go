@@ -39,10 +39,13 @@ func (p *pageProject) update() {
 	p.projectNameLabel.SetMarkup("Project name: <b>" + project.Config.Name + "</b>")
 	p.projectPathLabel.SetMarkup("Project path: <b>" + project.Path + "</b>")
 	p.latestVersionLabel.SetMarkup("Latest version: <b>" + project.Config.LatestVersion + "</b>")
-	pkgName := fmt.Sprintf(
-		"%s (%s)",
-		project.CurrentPackage.Config.GetPackageName(),
-		project.Config.CurrentPackageId.String(),
-	)
-	p.currentVersionLabel.SetMarkup("Current package: <b>" + pkgName + "</b>")
+	current := ""
+	if project.CurrentPackage != nil {
+		current = fmt.Sprintf(
+			"%s (%s)",
+			project.CurrentPackage.Config.GetPackageName(),
+			project.Config.CurrentPackageId,
+		)
+	}
+	p.currentVersionLabel.SetMarkup("Current package: <b>" + current + "</b>")
 }

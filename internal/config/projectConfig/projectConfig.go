@@ -3,15 +3,13 @@ package projectConfig
 import (
 	"encoding/json"
 	"os"
-
-	"github.com/google/uuid"
 )
 
 type ProjectConfig struct {
-	Name                  string    `json:"name"`
-	LatestVersion         string    `json:"latestVersion"`
-	CurrentPackageId      uuid.UUID `json:"currentPackage"`
-	ShowOnlyLatestVersion bool      `json:"showOnlyLatestVersion"`
+	Name                  string `json:"name"`
+	LatestVersion         string `json:"latestVersion"`
+	CurrentPackageId      string `json:"currentPackage"`
+	ShowOnlyLatestVersion bool   `json:"showOnlyLatestVersion"`
 }
 
 // Load : Loads a deb-studio config file

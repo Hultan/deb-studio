@@ -74,7 +74,7 @@ func (p *Project) AddPackage(versionName, architectureName string) (*Package, er
 	defer log.Trace.Println("Exiting AddPackage...")
 
 	config := &packageConfig.PackageConfig{
-		Id:           uuid.New(),
+		Id:           uuid.New().String(),
 		Project:      p.Config.Name,
 		Version:      versionName,
 		Architecture: architectureName,
@@ -111,7 +111,7 @@ func (p *Project) IsWorkingWithLatestVersion() bool {
 	return p.CurrentPackage.Config.Version == p.Config.LatestVersion
 }
 
-func (p *Project) GetPackageById(id uuid.UUID) *Package {
+func (p *Project) GetPackageById(id string) *Package {
 	for i := range p.Packages {
 		pkg := p.Packages[i]
 		if pkg.Config.Id == id {
@@ -121,7 +121,7 @@ func (p *Project) GetPackageById(id uuid.UUID) *Package {
 	return nil
 }
 
-func (p *Project) SetAsCurrent(id uuid.UUID) {
+func (p *Project) SetAsCurrent(id string) {
 	pkg := p.GetPackageById(id)
 	if pkg == nil {
 		// TODO : Error handling
@@ -131,7 +131,7 @@ func (p *Project) SetAsCurrent(id uuid.UUID) {
 	p.CurrentPackage = pkg
 }
 
-func (p *Project) SetAsLatest(id uuid.UUID) {
+func (p *Project) SetAsLatest(id string) {
 	pkg := p.GetPackageById(id)
 	if pkg == nil {
 		// TODO : Error handling
@@ -170,7 +170,7 @@ func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModel
 		data := []interface{}{
 			false, nil, nil,
 			pkg.Config.GetPackageName(), pkg.Config.Version, pkg.Config.Architecture,
-			pkg.Path, pkg.Config.Id.String(),
+			pkg.Path, pkg.Config.Id,
 		}
 		if pkg.Config.Version == p.Config.LatestVersion {
 			data[common.PackageListColumnFilter] = true

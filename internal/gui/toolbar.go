@@ -108,11 +108,11 @@ func (m *MainWindow) openButtonClicked() {
 		m.pages.update()
 
 		// TODO : REMOVE
-		project.CurrentPackage.Source.Set("Maintainer", "Per Hultqvist")
-		err = project.CurrentPackage.SaveControlFile()
-		if err != nil {
-			fmt.Println(err)
-		}
+		// project.CurrentPackage.Source.Set("Maintainer", "Per Hultqvist")
+		// err = project.CurrentPackage.SaveControlFile()
+		// if err != nil {
+		// 	fmt.Println(err)
+		// }
 		// REMOVE
 	}
 }

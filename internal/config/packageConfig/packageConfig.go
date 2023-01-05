@@ -7,13 +7,11 @@ import (
 	"path"
 	"strings"
 
-	"github.com/google/uuid"
-
 	"github.com/hultan/deb-studio/internal/common"
 )
 
 type PackageConfig struct {
-	Id           uuid.UUID
+	Id           string `json:"id"`
 	Project      string `json:"project"`
 	Version      string `json:"version"`
 	Architecture string `json:"architecture"`

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/google/uuid"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 
@@ -68,7 +67,7 @@ func (m *MainWindow) setupPackagePage() *pagePackage {
 func (p *pagePackage) setAsLatestVersionClicked() {
 	// Set version as latest
 	id := p.projectList.GetSelectedPackageId()
-	if id == uuid.Nil {
+	if id == "" {
 		return
 	}
 	project.SetAsLatest(id)
@@ -80,7 +79,7 @@ func (p *pagePackage) setAsLatestVersionClicked() {
 func (p *pagePackage) setPackageAsCurrentClicked() {
 	// Set package as current
 	id := p.projectList.GetSelectedPackageId()
-	if id == uuid.Nil {
+	if id == "" {
 		return
 	}
 	project.SetAsCurrent(id)
@@ -234,7 +233,7 @@ func (p *pagePackage) openProjectFolder() {
 func (p *pagePackage) openPackageFolder() {
 	// Set version as latest
 	id := p.projectList.GetSelectedPackageId()
-	if id == uuid.Nil {
+	if id == "" {
 		return
 	}
 	pkg := project.GetPackageById(id)
