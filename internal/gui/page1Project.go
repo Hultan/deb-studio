@@ -4,17 +4,31 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func (m *MainWindow) updateProjectPage() {
-	entry := m.builder.GetObject("mainWindow_projectHeaderLabel").(*gtk.Label)
-	entry.SetText(project.Config.Name)
-	entry = m.builder.GetObject("mainWindow_projectSubheaderLabel").(*gtk.Label)
-	entry.SetText("Project information")
-	entry = m.builder.GetObject("mainWindow_projectNameLabel").(*gtk.Label)
-	entry.SetMarkup("Project name: <b>" + project.Config.Name + "</b>")
-	entry = m.builder.GetObject("mainWindow_projectPathLabel").(*gtk.Label)
-	entry.SetMarkup("Project path: <b>" + project.Path + "</b>")
-	entry = m.builder.GetObject("mainWindow_latestVersionLabel").(*gtk.Label)
-	entry.SetMarkup("Latest version: <b>" + project.Config.LatestVersion + "</b>")
-	entry = m.builder.GetObject("mainWindow_currentPackageLabel").(*gtk.Label)
-	entry.SetMarkup("Current package: <b>" + project.Config.CurrentPackage + "</b>")
+type pageProject struct {
+	headerLabel         *gtk.Label
+	subHeaderLabel      *gtk.Label
+	projectNameLabel    *gtk.Label
+	projectPathLabel    *gtk.Label
+	latestVersionLabel  *gtk.Label
+	currentVersionLabel *gtk.Label
+}
+
+func (m *MainWindow) setupProjectPage() {
+	p := &pageProject{}
+	p.headerLabel = m.builder.GetObject("mainWindow_projectHeaderLabel").(*gtk.Label)
+	p.subHeaderLabel = m.builder.GetObject("mainWindow_projectSubheaderLabel").(*gtk.Label)
+	p.projectNameLabel = m.builder.GetObject("mainWindow_projectNameLabel").(*gtk.Label)
+	p.projectPathLabel = m.builder.GetObject("mainWindow_projectPathLabel").(*gtk.Label)
+	p.latestVersionLabel = m.builder.GetObject("mainWindow_latestVersionLabel").(*gtk.Label)
+	p.currentVersionLabel = m.builder.GetObject("mainWindow_currentPackageLabel").(*gtk.Label)
+	m.projectPage = p
+}
+
+func (p *pageProject) update() {
+	p.headerLabel.SetText(project.Config.Name)
+	p.subHeaderLabel.SetText("Project information")
+	p.projectNameLabel.SetMarkup("Project name: <b>" + project.Config.Name + "</b>")
+	p.projectPathLabel.SetMarkup("Project path: <b>" + project.Path + "</b>")
+	p.latestVersionLabel.SetMarkup("Latest version: <b>" + project.Config.LatestVersion + "</b>")
+	p.currentVersionLabel.SetMarkup("Current package: <b>" + project.Config.CurrentPackage + "</b>")
 }

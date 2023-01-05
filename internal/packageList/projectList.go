@@ -1,4 +1,4 @@
-package projectList
+package packageList
 
 import (
 	"log"
@@ -8,22 +8,22 @@ import (
 	"github.com/hultan/deb-studio/internal/common"
 )
 
-type ProjectList struct {
+type PackageList struct {
 	treeView *gtk.TreeView
 }
 
-func NewProjectList(treeView *gtk.TreeView) *ProjectList {
-	p := &ProjectList{treeView: treeView}
+func NewProjectList(treeView *gtk.TreeView) *PackageList {
+	p := &PackageList{treeView: treeView}
 	p.setupColumns()
 	return p
 }
 
-func (p *ProjectList) RefreshList(store *gtk.TreeModelFilter) {
+func (p *PackageList) RefreshList(store *gtk.TreeModelFilter) {
 	p.treeView.SetModel(store)
 	p.treeView.ShowAll()
 }
 
-func (p *ProjectList) setupColumns() {
+func (p *PackageList) setupColumns() {
 	// p.treeView.AppendColumn(p.createTextColumn("Is latest", 0, 70, 300))
 	p.treeView.AppendColumn(p.createImageColumn("Current", common.PackageListColumnIsCurrent))
 	p.treeView.AppendColumn(p.createImageColumn("Latest", common.PackageListColumnIsLatest))
@@ -33,7 +33,7 @@ func (p *ProjectList) setupColumns() {
 }
 
 // createTextColumn : Add a column to the tree view (during the initialization of the tree view)
-func (p *ProjectList) createTextColumn(title string, id int, width int, weight int) *gtk.TreeViewColumn {
+func (p *PackageList) createTextColumn(title string, id int, width int, weight int) *gtk.TreeViewColumn {
 	cellRenderer, err := gtk.CellRendererTextNew()
 	if err != nil {
 		log.Fatal("Unable to create text cell renderer:", err)
@@ -56,7 +56,7 @@ func (p *ProjectList) createTextColumn(title string, id int, width int, weight i
 }
 
 // createImageColumn : Add a column to the tree view (during the initialization of the tree view)
-func (p *ProjectList) createImageColumn(title string, colIndex int) *gtk.TreeViewColumn {
+func (p *PackageList) createImageColumn(title string, colIndex int) *gtk.TreeViewColumn {
 	cellRenderer, err := gtk.CellRendererPixbufNew()
 	if err != nil {
 		log.Fatal("Unable to create pixbuf cell renderer:", err)
@@ -73,7 +73,7 @@ func (p *ProjectList) createImageColumn(title string, colIndex int) *gtk.TreeVie
 	return column
 }
 
-func (p *ProjectList) GetSelectedPackageName() string {
+func (p *PackageList) GetSelectedPackageName() string {
 	selection, err := p.treeView.GetSelection()
 	if err != nil {
 		return ""

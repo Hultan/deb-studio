@@ -10,16 +10,18 @@ import (
 	"github.com/hultan/deb-studio/internal/builder"
 	"github.com/hultan/deb-studio/internal/engine"
 	"github.com/hultan/deb-studio/internal/logger"
-	"github.com/hultan/deb-studio/internal/projectList"
+	"github.com/hultan/deb-studio/internal/packageList"
 )
 
 // MainWindow : Struct for the main form
 type MainWindow struct {
 	builder          *builder.Builder
 	window           *gtk.ApplicationWindow
+	projectPage      *pageProject
+	packagePage      *pagePackage
 	addFileDialog    *addFileDialog
 	treeView         *gtk.TreeView
-	projectList      *projectList.ProjectList
+	projectList      *packageList.PackageList
 	infoBar          *gtk.InfoBar
 	infoBarLabel     *gtk.Label
 	popup            *gtk.Menu
@@ -60,6 +62,7 @@ func (m *MainWindow) Open(app *gtk.Application) {
 	m.setupPopupMenu()
 
 	// Setup pages
+	m.setupProjectPage()
 	m.setupPackagePage()
 	m.setupInstallPage()
 	m.setupControlPage()

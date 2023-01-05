@@ -6,12 +6,15 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 
 	"github.com/hultan/deb-studio/internal/engine"
-	"github.com/hultan/deb-studio/internal/projectList"
+	"github.com/hultan/deb-studio/internal/packageList"
 )
+
+type pagePackage struct {
+}
 
 func (m *MainWindow) setupPackagePage() {
 	m.treeView = m.builder.GetObject("mainWindow_packageList").(*gtk.TreeView)
-	m.projectList = projectList.NewProjectList(m.treeView)
+	m.projectList = packageList.NewProjectList(m.treeView)
 	m.treeView.Connect("row_activated", m.setPackageAsCurrentClicked)
 	m.treeView.Connect("button-press-event", m.showPopupMenu)
 
@@ -38,7 +41,7 @@ func (m *MainWindow) setAsLatestVersionClicked() {
 	project.SetAsLatest(pkgName)
 
 	// Update some things
-	m.updateProjectPage()
+	m.projectPage.update()
 	m.listPackages()
 	m.updateInfoBar()
 }
@@ -52,7 +55,7 @@ func (m *MainWindow) setPackageAsCurrentClicked() {
 	project.SetAsCurrent(pkgName)
 
 	// Update some things
-	m.updateProjectPage()
+	m.projectPage.update()
 	m.listPackages()
 	m.updateInfoBar()
 }
