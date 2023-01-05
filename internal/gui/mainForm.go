@@ -18,6 +18,7 @@ type MainWindow struct {
 	window  *gtk.ApplicationWindow
 
 	// Pages
+	stackPages  *stackPages
 	projectPage *pageProject
 	packagePage *pagePackage
 	controlPage *pageControl
@@ -62,6 +63,7 @@ func (m *MainWindow) Open(app *gtk.Application) {
 	m.setupMenu()
 
 	// Setup pages
+	m.setupStackPages()
 	m.setupProjectPage()
 	m.setupPackagePage()
 	m.setupControlPage()
@@ -73,7 +75,7 @@ func (m *MainWindow) Open(app *gtk.Application) {
 	m.window.ShowAll()
 
 	// Disable pages until a project has been opened
-	m.enableDisableStackPages()
+	m.stackPages.enableDisable()
 
 	// Update info bar
 	m.packagePage.updateInfoBar()

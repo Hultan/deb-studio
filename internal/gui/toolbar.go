@@ -47,7 +47,7 @@ func (m *MainWindow) newButtonClicked() {
 	defer func() {
 		m.packagePage.listPackages()
 		m.packagePage.updateInfoBar()
-		m.enableDisableStackPages()
+		m.stackPages.enableDisable()
 	}()
 
 	// Open setup dialog
@@ -105,7 +105,7 @@ func (m *MainWindow) openButtonClicked() {
 
 		m.projectPage.update()
 		m.packagePage.update()
-		m.enableDisableStackPages()
+		m.stackPages.enableDisable()
 
 		// TODO : REMOVE
 		project.CurrentPackage.Source.Set("Maintainer", "Per Hultqvist")
