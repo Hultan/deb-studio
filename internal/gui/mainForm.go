@@ -19,6 +19,7 @@ type MainWindow struct {
 	projectPage   *pageProject
 	packagePage   *pagePackage
 	controlPage   *pageControl
+	scriptPage    *pageScript
 	addFileDialog *addFileDialog
 }
 
@@ -57,8 +58,9 @@ func (m *MainWindow) Open(app *gtk.Application) {
 	// Setup pages
 	m.setupProjectPage()
 	m.setupPackagePage()
-	m.setupInstallPage()
 	m.setupControlPage()
+	m.setupScriptPage()
+	m.setupInstallPage()
 
 	// Show the main window
 	m.window.ShowAll()
