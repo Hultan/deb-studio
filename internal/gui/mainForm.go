@@ -14,14 +14,18 @@ import (
 
 // MainWindow : Struct for the main form
 type MainWindow struct {
-	builder     *builder.Builder
-	window      *gtk.ApplicationWindow
+	builder *builder.Builder
+	window  *gtk.ApplicationWindow
+
+	// Pages
 	projectPage *pageProject
 	packagePage *pagePackage
 	controlPage *pageControl
 	scriptPage  *pageScript
+	installPage *pageInstall
+	textPage    *pageText
 
-	textPage      *pageText
+	// dialogs
 	addFileDialog *addFileDialog
 }
 
