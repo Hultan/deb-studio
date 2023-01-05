@@ -19,13 +19,13 @@ func main() {
 	// Create a new application
 	application, err := gtk.ApplicationNew(ApplicationId, ApplicationFlags)
 	if err != nil {
-		_,_ = fmt.Fprintln(os.Stderr,"failed to create GTK Application")
-		_,_ = fmt.Fprintln(os.Stderr,err)
+		_, _ = fmt.Fprintln(os.Stderr, "failed to create GTK Application")
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
 	// Create the main form
-	mainForm := debStudio.NewMainForm()
+	mainForm := debStudio.NewMainWindow()
 	application.Connect("activate", mainForm.Open)
 
 	// Start the application (and exit when it is done)

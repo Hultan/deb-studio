@@ -4,7 +4,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func (m *MainForm) enableDisableStackPages() {
+func (m *MainWindow) enableDisableStackPages() {
 	status := m.getInfoBarStatus()
 	haveOpenedProject := status > infoBarStatusNoProjectOpened
 	haveChosenPackage := status > infoBarStatusNoPackageSelected
@@ -15,7 +15,7 @@ func (m *MainForm) enableDisableStackPages() {
 	m.enableDisableStackPage("mainWindow_textPage", haveChosenPackage)
 }
 
-func (m *MainForm) enableDisableStackPage(name string, status bool) {
+func (m *MainWindow) enableDisableStackPage(name string, status bool) {
 	w := m.builder.GetObject(name)
 	switch item := w.(type) {
 	case *gtk.Box:

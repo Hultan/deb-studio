@@ -1,4 +1,4 @@
-package gui
+package builder
 
 import (
 	"fmt"
@@ -14,10 +14,10 @@ type Builder struct {
 	builder *gtk.Builder
 }
 
-// newBuilder: create a gtk builder, and wrap it in a Builder
-func newBuilder() *Builder {
+// NewBuilder: create a gtk builder, and wrap it in a Builder
+func NewBuilder(glade string) *Builder {
 	// Create a new builder
-	b, err := gtk.BuilderNewFromString(mainGlade)
+	b, err := gtk.BuilderNewFromString(glade)
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(common.ExitCodeGtkError)

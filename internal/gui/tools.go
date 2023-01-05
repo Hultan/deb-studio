@@ -3,8 +3,7 @@ package gui
 import (
 	"fmt"
 	"os"
-	"os/user"
-	"path"
+	"strings"
 
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
@@ -45,19 +44,7 @@ func getApplicationName() string {
 	)
 }
 
-// getConfigPath: Get path to the config file
-func getConfigPath() string {
-	home := getHomeDirectory()
-
-	return path.Join(home, "code/deb-studio/test.json")
-}
-
-// getHomeDirectory: Get current users home directory
-func getHomeDirectory() string {
-	u, err := user.Current()
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Failed to get user home directory : %s\n", err)
-		os.Exit(common.ExitCodeSetupError)
-	}
-	return u.HomeDir
+func isTraceMode() bool {
+	// TODO : Fix trace mode
+	return len(os.Args) >= 2 && strings.HasPrefix(os.Args[1], "-t")
 }

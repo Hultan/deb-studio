@@ -1,13 +1,15 @@
 package gui
 
 import (
+	"fmt"
+
 	"github.com/gotk3/gotk3/gtk"
 
 	"github.com/hultan/deb-studio/internal/engine"
 	"github.com/hultan/deb-studio/internal/projectList"
 )
 
-func (m *MainForm) setupPackagePage() {
+func (m *MainWindow) setupPackagePage() {
 	m.treeView = m.builder.GetObject("mainWindow_packageList").(*gtk.TreeView)
 	m.projectList = projectList.NewProjectList(m.treeView)
 	m.treeView.Connect("row_activated", m.setPackageAsCurrentClicked)
@@ -27,7 +29,63 @@ func (m *MainForm) setupPackagePage() {
 	m.showOnlyCheckBox.Connect("toggled", m.showOnlyCurrentAndLatestToggled)
 }
 
-func (m *MainForm) listPackages() {
+func (m *MainWindow) setAsLatestVersionClicked() {
+	// Set version as latest
+	pkgName := m.projectList.GetSelectedPackageName()
+	if pkgName == "" {
+		return
+	}
+	project.SetAsLatest(pkgName)
+
+	// Update some things
+	m.updateProjectPage()
+	m.listPackages()
+	m.updateInfoBar()
+}
+
+func (m *MainWindow) setPackageAsCurrentClicked() {
+	// Set package as current
+	pkgName := m.projectList.GetSelectedPackageName()
+	if pkgName == "" {
+		return
+	}
+	project.SetAsCurrent(pkgName)
+
+	// Update some things
+	m.updateProjectPage()
+	m.listPackages()
+	m.updateInfoBar()
+}
+
+func (m *MainWindow) addPackageClicked() {
+	fmt.Println("Add package clicked!")
+
+	dialog := m.builder.GetObject("addPackageDialog").(*gtk.Dialog)
+	// versionEntry := m.builder.GetObject("addInstallationDialog_versionNameEntry").(*gtk.Entry)
+	// architectureCombo := m.builder.GetObject("addInstallationDialog_architectureCombo").(*gtk.Dialog)
+	_, err := dialog.AddButton("Add", gtk.RESPONSE_ACCEPT)
+	if err != nil {
+		return
+	}
+	_, err = dialog.AddButton("Cancel", gtk.RESPONSE_CANCEL)
+	if err != nil {
+		return
+	}
+
+	// Show the dialog
+	responseId := dialog.Run()
+	if responseId == gtk.RESPONSE_ACCEPT {
+		// Add package
+	}
+
+	dialog.Hide()
+}
+
+func (m *MainWindow) removePackageClicked() {
+	fmt.Println("Remove package clicked!")
+}
+
+func (m *MainWindow) listPackages() {
 	if project == nil {
 		return
 	}
@@ -36,7 +94,7 @@ func (m *MainForm) listPackages() {
 	m.projectList.RefreshList(store)
 }
 
-func (m *MainForm) createPackageListRow(p *engine.Package) (*gtk.ListBoxRow, error) {
+func (m *MainWindow) createPackageListRow(p *engine.Package) (*gtk.ListBoxRow, error) {
 	row, err := gtk.ListBoxRowNew()
 	if err != nil {
 		log.Error.Printf("failed to create package list row")
@@ -70,4 +128,16 @@ func (m *MainForm) createPackageListRow(p *engine.Package) (*gtk.ListBoxRow, err
 	}
 	box.PackStart(label, false, true, 20)
 	return row, nil
+}
+
+func (m *MainWindow) updatePackagePage() {
+	if project.Config.ShowOnlyLatestVersion {
+		m.showOnlyCheckBox.SetActive(true)
+	}
+}
+
+func (m *MainWindow) showOnlyCurrentAndLatestToggled(check *gtk.CheckButton) {
+	checked := check.GetActive()
+	project.SetShowOnlyCurrentAndLatest(checked)
+	m.listPackages()
 }

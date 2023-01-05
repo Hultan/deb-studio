@@ -5,7 +5,7 @@ import (
 )
 
 // openSettingsDialog: Open the settings dialog
-func (m *MainForm) openSettingsDialog() {
+func (m *MainWindow) openSettingsDialog() {
 	// Get the dialog window from glade
 	dialog := m.builder.GetObject("settingsDialog").(*gtk.Dialog)
 

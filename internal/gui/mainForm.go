@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/gotk3/gotk3/gtk"
 
+	"github.com/hultan/deb-studio/internal/builder"
 	"github.com/hultan/deb-studio/internal/engine"
 	"github.com/hultan/deb-studio/internal/logger"
 	"github.com/hultan/deb-studio/internal/projectList"
 )
 
-// MainForm : Struct for the main form
-type MainForm struct {
-	builder          *Builder
+// MainWindow : Struct for the main form
+type MainWindow struct {
+	builder          *builder.Builder
 	window           *gtk.ApplicationWindow
 	addFileDialog    *addFileDialog
 	treeView         *gtk.TreeView
@@ -29,21 +29,21 @@ type MainForm struct {
 var project *engine.Project
 var log *logger.Logger
 
-// NewMainForm : Creates a new MainForm object
-func NewMainForm() *MainForm {
-	mainForm := new(MainForm)
+// NewMainWindow : Creates a new MainWindow object
+func NewMainWindow() *MainWindow {
+	mainForm := new(MainWindow)
 	return mainForm
 }
 
-// Open : Opens the MainForm window
-func (m *MainForm) Open(app *gtk.Application) {
+// Open : Opens the MainWindow window
+func (m *MainWindow) Open(app *gtk.Application) {
 	// TODO : Move log path to config
 	m.startLogging()
 
 	// Initialize gtk and create a builder
 	gtk.Init(&os.Args)
 
-	m.builder = newBuilder()
+	m.builder = builder.NewBuilder(mainGlade)
 
 	// Main window
 	m.window = m.builder.GetObject("mainWindow").(*gtk.ApplicationWindow)
@@ -74,7 +74,7 @@ func (m *MainForm) Open(app *gtk.Application) {
 	m.updateInfoBar()
 }
 
-func (m *MainForm) startLogging() {
+func (m *MainWindow) startLogging() {
 	logPath := "/home/per/.softteam/debstudio"
 	logFile := "debstudio.log"
 	fullLogPath := path.Join(logPath, logFile)
@@ -113,25 +113,8 @@ func (m *MainForm) startLogging() {
 	}
 }
 
-func isTraceMode() bool {
-	return len(os.Args) >= 2 && strings.HasPrefix(os.Args[1], "-t")
-}
-
-// shutDown : shuts down the application
-func (m *MainForm) shutDown() {
-	if project != nil {
-		project.Save()
-	}
-	if log != nil {
-		log.Close()
-	}
-	if m.window != nil {
-		m.window.Close()
-	}
-}
-
 // setupMenu: Set up the menu bar
-func (m *MainForm) setupMenu() {
+func (m *MainWindow) setupMenu() {
 	menuQuit := m.builder.GetObject("menu_FileQuit").(*gtk.MenuItem)
 	menuQuit.Connect("activate", m.window.Close)
 
@@ -150,42 +133,22 @@ func (m *MainForm) setupMenu() {
 	)
 }
 
-// setupToolbar: Set up the toolbar
-func (m *MainForm) setupToolbar() {
-	// Toolbar new button
-	btn := m.builder.GetObject("toolbar_newButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.newButtonClicked)
-	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(newIcon, "new"))
-
-	// Toolbar open button
-	btn = m.builder.GetObject("toolbar_openButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.openButtonClicked)
-	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(openIcon, "open"))
-
-	// Toolbar save button
-	btn = m.builder.GetObject("toolbar_saveButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.saveButtonClicked)
-	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(saveIcon, "saveButtonClicked"))
-
-	// Toolbar build button
-	btn = m.builder.GetObject("toolbar_buildButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.buildButtonClicked)
-	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(buildIcon, "build"))
-
-	// Toolbar quit button
-	btn = m.builder.GetObject("toolbar_quitButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.window.Close)
-	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(exitIcon, "quit"))
-}
-
 // setupStatusBar: Set up the status bar
-func (m *MainForm) setupStatusBar() {
+func (m *MainWindow) setupStatusBar() {
 	// Status bar
 	statusBar := m.builder.GetObject("mainWindow_StatusBar").(*gtk.Statusbar)
 	statusBar.Push(statusBar.GetContextId("debstudio"), getApplicationName())
+}
+
+// shutDown : shuts down the application
+func (m *MainWindow) shutDown() {
+	if project != nil {
+		project.Save()
+	}
+	if log != nil {
+		log.Close()
+	}
+	if m.window != nil {
+		m.window.Close()
+	}
 }

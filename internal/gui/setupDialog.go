@@ -12,7 +12,7 @@ type setup struct {
 }
 
 // openSetupDialog: Open the setup dialog
-func (m *MainForm) openSetupDialog() (*setup, error) {
+func (m *MainWindow) openSetupDialog() (*setup, error) {
 	var result *setup
 
 	// Get the dialog window from glade
@@ -50,7 +50,7 @@ func (m *MainForm) openSetupDialog() (*setup, error) {
 	}
 }
 
-func (m *MainForm) browseLocationButtonClicked() {
+func (m *MainWindow) browseLocationButtonClicked() {
 	dlg, err := gtk.FileChooserDialogNewWith2Buttons(
 		"Select folder...", m.window, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
 		"OK", gtk.RESPONSE_ACCEPT,

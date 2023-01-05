@@ -13,19 +13,13 @@ import (
 
 // See advanced control file example here: https://gist.github.com/citrusui/c3358f9661550e8cb849
 
-const emptyControlFile = `Section: 
-Package: 
-License: 
-Vendor: 
+const emptyControlFile = `Package: 
 Version: 
-Architecture: 
-Essential: no
-Priority: 
+Architecture:
+Priority: optional
 Depends: 
-Installed-Size: 
 Maintainer: 
-Description: 
-HomePage: `
+Description: `
 
 type Package struct {
 	*control.Control

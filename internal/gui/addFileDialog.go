@@ -6,12 +6,13 @@ import (
 
 	"github.com/gotk3/gotk3/gtk"
 
+	"github.com/hultan/deb-studio/internal/builder"
 	"github.com/hultan/deb-studio/internal/common"
 )
 
 // addFileDialog: Struct for the add file dialog
 type addFileDialog struct {
-	builder            *Builder
+	builder            *builder.Builder
 	dialog             *gtk.Dialog
 	filePath           *gtk.Entry
 	installPath        *gtk.Entry
@@ -22,7 +23,7 @@ type addFileDialog struct {
 }
 
 // newAddFileDialog: Constructor for the add file dialog
-func (m *MainForm) newAddFileDialog() *addFileDialog {
+func (m *MainWindow) newAddFileDialog() *addFileDialog {
 	d := &addFileDialog{builder: m.builder}
 
 	// Get the dialog window from glade

@@ -8,7 +8,7 @@ import (
 )
 
 // openAboutDialog: Opens the help/about dialog
-func (m *MainForm) openAboutDialog() {
+func (m *MainWindow) openAboutDialog() {
 	about := m.builder.GetObject("aboutDialog").(*gtk.AboutDialog)
 	about.SetDestroyWithParent(true)
 	about.SetTransientFor(m.window)

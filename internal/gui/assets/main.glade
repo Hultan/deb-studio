@@ -810,18 +810,6 @@
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Package : </property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">4</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
                     <property name="margin-start">10</property>
                     <property name="margin-end">10</property>
                     <property name="margin-bottom">10</property>
@@ -851,21 +839,6 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="mainWindow_packageEntry">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">The name of the binary package.
-
-Click the info button for more information.</property>
-                    <property name="hexpand">True</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">4</property>
-                    <property name="width">2</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkEntry" id="mainWindow_sourceEntry">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
@@ -878,32 +851,6 @@ Click the info button for more information.</property>
                     <property name="left-attach">1</property>
                     <property name="top-attach">5</property>
                     <property name="width">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkImage" id="imgPackage">
-                    <property name="width-request">20</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="tooltip-text" translatable="yes">The package name field is mandatory!</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">3</property>
-                    <property name="top-attach">4</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLinkButton">
-                    <property name="label" translatable="yes">Info</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <property name="relief">none</property>
-                    <property name="uri">https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-package</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">4</property>
-                    <property name="top-attach">4</property>
                   </packing>
                 </child>
                 <child>
@@ -1015,6 +962,7 @@ Click the info button for more information.</property>
                     <property name="tooltip-text" translatable="yes">This field represents how important it is that the user have the package installed.
 
 Click the info button for more information.</property>
+                    <property name="text" translatable="yes">To be removed, always optional...see section 2.5</property>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
@@ -1447,13 +1395,12 @@ Click the info button for more information.</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
-                    <property name="top-attach">2</property>
+                    <property name="top-attach">3</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkEntry" id="mainWindow_versionEntry">
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can-focus">True</property>
                     <property name="tooltip-text" translatable="yes">The version number of a package. The format is: [epoch:]upstream_version[-debian_revision].
 
@@ -1462,7 +1409,7 @@ Click the info button for more information.</property>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
-                    <property name="top-attach">2</property>
+                    <property name="top-attach">3</property>
                     <property name="width">2</property>
                   </packing>
                 </child>
@@ -1475,7 +1422,7 @@ Click the info button for more information.</property>
                   </object>
                   <packing>
                     <property name="left-attach">3</property>
-                    <property name="top-attach">2</property>
+                    <property name="top-attach">3</property>
                   </packing>
                 </child>
                 <child>
@@ -1489,7 +1436,7 @@ Click the info button for more information.</property>
                   </object>
                   <packing>
                     <property name="left-attach">4</property>
-                    <property name="top-attach">2</property>
+                    <property name="top-attach">3</property>
                   </packing>
                 </child>
                 <child>
@@ -1501,13 +1448,12 @@ Click the info button for more information.</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
-                    <property name="top-attach">3</property>
+                    <property name="top-attach">4</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkEntry" id="mainWindow_architectureEntry">
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can-focus">True</property>
                     <property name="tooltip-text" translatable="yes">Depending on context and the control file used, the Architecture field can include the following sets of values:
 
@@ -1523,7 +1469,7 @@ Click the info button for more information.</property>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
-                    <property name="top-attach">3</property>
+                    <property name="top-attach">4</property>
                     <property name="width">2</property>
                   </packing>
                 </child>
@@ -1536,7 +1482,7 @@ Click the info button for more information.</property>
                   </object>
                   <packing>
                     <property name="left-attach">3</property>
-                    <property name="top-attach">3</property>
+                    <property name="top-attach">4</property>
                   </packing>
                 </child>
                 <child>
@@ -1550,7 +1496,60 @@ Click the info button for more information.</property>
                   </object>
                   <packing>
                     <property name="left-attach">4</property>
-                    <property name="top-attach">3</property>
+                    <property name="top-attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Package : </property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="mainWindow_packageEntry">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="tooltip-text" translatable="yes">The name of the binary package.
+
+Click the info button for more information.</property>
+                    <property name="hexpand">True</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">2</property>
+                    <property name="width">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkImage" id="imgPackage">
+                    <property name="width-request">20</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="tooltip-text" translatable="yes">The package name field is mandatory!</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">3</property>
+                    <property name="top-attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLinkButton">
+                    <property name="label" translatable="yes">Info</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="relief">none</property>
+                    <property name="uri">https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-package</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">4</property>
+                    <property name="top-attach">2</property>
                   </packing>
                 </child>
               </object>

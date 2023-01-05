@@ -1,13 +1,15 @@
 package gui
 
 import (
+	"os/exec"
+
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 
 	"github.com/hultan/deb-studio/internal/common"
 )
 
-func (m *MainForm) setupPopupMenu() {
+func (m *MainWindow) setupPopupMenu() {
 	m.popup = m.builder.GetObject("mainWindow_popupPackageMenu").(*gtk.Menu)
 	menuItem := m.builder.GetObject("mainWindow_popupAddPackage").(*gtk.MenuItem)
 	menuItem.Connect("activate", m.addPackageClicked)
@@ -23,9 +25,30 @@ func (m *MainForm) setupPopupMenu() {
 	menuItem.Connect("activate", m.openPackageFolder)
 }
 
-func (m *MainForm) showPopupMenu(_ *gtk.ListBox, e *gdk.Event) {
+func (m *MainWindow) showPopupMenu(_ *gtk.ListBox, e *gdk.Event) {
 	ev := gdk.EventButtonNewFromEvent(e)
 	if ev.Button() == common.RightMouseButton {
 		m.popup.PopupAtPointer(e)
 	}
+}
+
+// openProjectFolder: Handler for the open project folder button clicked signal
+func (m *MainWindow) openProjectFolder() {
+	cmd := exec.Command("xdg-open", project.Path)
+	cmd.Run()
+}
+
+// openPackageFolder: Handler for the open package folder button clicked signal
+func (m *MainWindow) openPackageFolder() {
+	// Set version as latest
+	pkgName := m.projectList.GetSelectedPackageName()
+	if pkgName == "" {
+		return
+	}
+	pkg := project.GetPackageByName(pkgName)
+	if pkg == nil {
+		return
+	}
+	cmd := exec.Command("xdg-open", pkg.Path)
+	cmd.Run()
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func (m *MainForm) getInfoBarStatus() infoBarStatus {
+func (m *MainWindow) getInfoBarStatus() infoBarStatus {
 	if project == nil {
 		return infoBarStatusNoProjectOpened
 	} else if project.CurrentPackage == nil {
@@ -17,7 +17,7 @@ func (m *MainForm) getInfoBarStatus() infoBarStatus {
 	return infoBarStatusLatestVersion
 }
 
-func (m *MainForm) getInfoBarText() string {
+func (m *MainWindow) getInfoBarText() string {
 	switch m.getInfoBarStatus() {
 	case infoBarStatusNoProjectOpened:
 		return "You need to open or create a new project..."
@@ -39,7 +39,7 @@ func (m *MainForm) getInfoBarText() string {
 	}
 }
 
-func (m *MainForm) setInfoBarColor() {
+func (m *MainWindow) setInfoBarColor() {
 	switch m.getInfoBarStatus() {
 	case infoBarStatusNoProjectOpened:
 		m.infoBar.SetMessageType(gtk.MESSAGE_INFO)
@@ -54,7 +54,7 @@ func (m *MainForm) setInfoBarColor() {
 	}
 }
 
-func (m *MainForm) updateInfoBar() {
+func (m *MainWindow) updateInfoBar() {
 	m.infoBarLabel.SetMarkup(m.getInfoBarText())
 	m.setInfoBarColor()
 	m.window.QueueDraw()

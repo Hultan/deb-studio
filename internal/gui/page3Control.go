@@ -5,7 +5,7 @@ import (
 )
 
 // setupControlPage: Set up the control page
-func (m *MainForm) setupControlPage() {
+func (m *MainWindow) setupControlPage() {
 	m.setControlImage("imgPackage", imageTypeMandatory)
 	m.setControlImage("imgSource", imageTypeOptional)
 	m.setControlImage("imgVersion", imageTypeMandatory)
@@ -22,14 +22,14 @@ func (m *MainForm) setupControlPage() {
 }
 
 // setControlImage: Set a control tab image
-func (m *MainForm) setControlImage(imgName string, imgType imageType) {
+func (m *MainWindow) setControlImage(imgName string, imgType imageType) {
 	img := m.builder.GetObject(imgName).(*gtk.Image)
 	bytes := m.getControlIcon(imgType)
 	img.SetFromPixbuf(createPixBufFromBytes(bytes, imgName))
 }
 
 // getControlIcon: Get the icon bytes from an image type
-func (m *MainForm) getControlIcon(imgType imageType) []byte {
+func (m *MainWindow) getControlIcon(imgType imageType) []byte {
 	var bytes []byte
 	switch imgType {
 	case imageTypeMandatory:
@@ -41,4 +41,3 @@ func (m *MainForm) getControlIcon(imgType imageType) []byte {
 	}
 	return bytes
 }
-
