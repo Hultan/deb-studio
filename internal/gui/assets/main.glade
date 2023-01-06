@@ -840,6 +840,7 @@
                 </child>
                 <child>
                   <object class="GtkEntry" id="mainWindow_sourceEntry">
+                    <property name="name">Source</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="tooltip-text" translatable="yes">This field identifies the source package name.
@@ -881,6 +882,7 @@ Click the info button for more information.</property>
                 </child>
                 <child>
                   <object class="GtkEntry" id="mainWindow_sectionEntry">
+                    <property name="name">Section</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="tooltip-text" translatable="yes">This field specifies an application area into which the package has been classified.
@@ -957,6 +959,7 @@ Click the info button for more information.</property>
                 </child>
                 <child>
                   <object class="GtkEntry" id="mainWindow_priorityEntry">
+                    <property name="name">Priority</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="tooltip-text" translatable="yes">This field represents how important it is that the user have the package installed.
@@ -972,6 +975,7 @@ Click the info button for more information.</property>
                 </child>
                 <child>
                   <object class="GtkEntry" id="mainWindow_maintainerEntry">
+                    <property name="name">Maintainer</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="tooltip-text" translatable="yes">The package maintainer’s name and email address. The name must come first, then the email address inside angle brackets &lt;&gt; (in RFC822 format).
@@ -981,23 +985,6 @@ Click the info button for more information.</property>
                   <packing>
                     <property name="left-attach">1</property>
                     <property name="top-attach">11</property>
-                    <property name="width">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="mainWindow_descriptionEntry">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">In a source or binary control file, the Description field contains a description of the binary package, consisting of two parts, the synopsis or the short description, and the long description. It is a multiline field with the following format:
-
-Description: single line synopsis
- extended description over several lines
-
-Click the info button for more information.</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">12</property>
                     <property name="width">2</property>
                   </packing>
                 </child>
@@ -1152,8 +1139,9 @@ Click the info button for more information.</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="mainWindow_essentialCheckBox">
+                  <object class="GtkCheckButton" id="mainWindow_essentialCheckButton">
                     <property name="label" translatable="yes"> </property>
+                    <property name="name">Essential</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
@@ -1274,6 +1262,7 @@ Click the info button for more information.</property>
                 </child>
                 <child>
                   <object class="GtkEntry" id="mainWindow_dependsEntry">
+                    <property name="name">Depends</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="tooltip-text" translatable="yes">Packages can declare in their control file that they have certain relationships to other packages - for example, that they cannot be installed at the same time as certain other packages, and/or that they depend on the presence of others.
@@ -1290,6 +1279,7 @@ Click the info button for more information.</property>
                 </child>
                 <child>
                   <object class="GtkEntry" id="mainWindow_installedSizeEntry">
+                    <property name="name">Installed-Size</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="tooltip-text" translatable="yes">This field appears in the control files of binary packages, and in the Packages files. It gives an estimate of the total amount of disk space required to install the named package. Actual installed size may vary based on block size, file system properties, or actions taken by package maintainer scripts.
@@ -1306,6 +1296,7 @@ Click the info button for more information.</property>
                 </child>
                 <child>
                   <object class="GtkEntry" id="mainWindow_homePageEntry">
+                    <property name="name">Homepage</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="tooltip-text" translatable="yes">The URL of the web site for this package, preferably (when applicable) the site from which the original source can be obtained and any additional upstream documentation or information may be found. The content of this field is a simple URL without any surrounding characters such as &lt;&gt;.
@@ -1334,6 +1325,7 @@ Click the info button for more information.</property>
                 </child>
                 <child>
                   <object class="GtkEntry" id="mainWindow_builtUsingEntry">
+                    <property name="name">Built-using</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="tooltip-text" translatable="yes">Some binary packages incorporate parts of other packages when built but do not have to depend on those packages. Examples include linking with static libraries or incorporating source code from another package during the build. In this case, the source packages of those other packages are part of the complete source (the binary package is not reproducible without them).
@@ -1361,7 +1353,7 @@ Click the info button for more information.</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="mainWindow_calculateButton">
+                  <object class="GtkButton" id="mainWindow_installedSizeButton">
                     <property name="label" translatable="yes">Calculate</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
@@ -1400,6 +1392,7 @@ Click the info button for more information.</property>
                 </child>
                 <child>
                   <object class="GtkEntry" id="mainWindow_versionEntry">
+                    <property name="name">Version</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="tooltip-text" translatable="yes">The version number of a package. The format is: [epoch:]upstream_version[-debian_revision].
@@ -1453,6 +1446,7 @@ Click the info button for more information.</property>
                 </child>
                 <child>
                   <object class="GtkEntry" id="mainWindow_architectureEntry">
+                    <property name="name">Architecture</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="tooltip-text" translatable="yes">Depending on context and the control file used, the Architecture field can include the following sets of values:
@@ -1513,6 +1507,7 @@ Click the info button for more information.</property>
                 </child>
                 <child>
                   <object class="GtkEntry" id="mainWindow_packageEntry">
+                    <property name="name">Package</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="tooltip-text" translatable="yes">The name of the binary package.
@@ -1550,6 +1545,25 @@ Click the info button for more information.</property>
                   <packing>
                     <property name="left-attach">4</property>
                     <property name="top-attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="shadow-type">in</property>
+                    <child>
+                      <object class="GtkTextView" id="mainWindow_descriptionTextView">
+                        <property name="name">Description</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">12</property>
+                    <property name="width">2</property>
                   </packing>
                 </child>
               </object>
