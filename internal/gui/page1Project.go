@@ -45,7 +45,7 @@ func (p *pageProject) update() {
 	if project.CurrentPackage != nil {
 		current = fmt.Sprintf(
 			"%s (%s)",
-			project.CurrentPackage.Config.GetPackageName(),
+			project.CurrentPackage.Path,
 			project.Config.CurrentPackageId,
 		)
 	}

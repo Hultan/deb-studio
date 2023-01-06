@@ -22,7 +22,6 @@ const (
 	PackageListColumnFilter = iota
 	PackageListColumnIsCurrent
 	PackageListColumnIsLatest
-	PackageListColumnPackageName
 	PackageListColumnVersionName
 	PackageListColumnArchitectureName
 	PackageListColumnPackagePath

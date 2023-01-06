@@ -102,6 +102,7 @@ func (m *MainWindow) openButtonClicked() {
 		}
 
 		m.pages.controlPage.init()
+		m.pages.scriptPage.init()
 
 		// Update gui
 		if project.Config.ShowOnlyLatestVersion {

@@ -5,9 +5,11 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
 
 	"pault.ag/go/debian/control"
 
+	"github.com/hultan/deb-studio/internal/common"
 	"github.com/hultan/deb-studio/internal/config/packageConfig"
 )
 
@@ -28,26 +30,27 @@ type Package struct {
 }
 
 func newPackage(packagePath string, config *packageConfig.PackageConfig) (*Package, error) {
-	controlFile, err := control.ParseControlFile(config.GetControlFilePath(packagePath))
+	p := &Package{Config: config, Path: packagePath}
+
+	// Load control file
+	controlFilePath := path.Join(packagePath, p.GetPackageFolderName(), common.DebianFolderName, common.ControlFileName)
+	controlFile, err := control.ParseControlFile(controlFilePath)
 	if os.IsNotExist(err) {
 		// Control file does not exist, create an empty one
-		err = createEmptyControlFile(config.GetControlFilePath(packagePath))
+		err = createEmptyControlFile(controlFilePath)
 		if err != nil {
 			return nil, err
 		}
-		controlFile, err = control.ParseControlFile(config.GetControlFilePath(packagePath))
+		controlFile, err = control.ParseControlFile(controlFilePath)
 		if err != nil {
 			return nil, err
 		}
 	} else if err != nil {
 		return nil, err
 	}
+	p.Control = controlFile
 
-	return &Package{
-		Control: controlFile,
-		Path:    packagePath,
-		Config:  config,
-	}, nil
+	return p, nil
 }
 
 func createEmptyControlFile(controlPath string) error {
@@ -63,7 +66,8 @@ func createEmptyControlFile(controlPath string) error {
 }
 
 func (p *Package) SaveControlFile() error {
-	f, _ := os.OpenFile(p.Config.GetControlFilePath(p.Path), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
+	controlFilePath := path.Join(p.Path, common.DebianFolderName, common.ControlFileName)
+	f, _ := os.OpenFile(controlFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	err := p.Source.WriteTo(f)
 	if err != nil {
 		return err
@@ -95,6 +99,13 @@ func (p *Package) AddFile(fromPath, fileName, userToPath string, copy bool) erro
 
 	log.Info.Printf("successfully added file %s to %s...\n", fromFile, toFile)
 	return nil
+}
+
+func (p *Package) GetPackageFolderName() string {
+	return fmt.Sprintf(
+		"%s-%s-%s",
+		strings.ToLower(p.Config.Project), p.Config.Version, p.Config.Architecture,
+	)
 }
 
 func copyFile(src, dst string) (int64, error) {

@@ -2,12 +2,7 @@ package packageConfig
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
-	"path"
-	"strings"
-
-	"github.com/hultan/deb-studio/internal/common"
 )
 
 type PackageConfig struct {
@@ -83,26 +78,20 @@ func (c *PackageConfig) Save(path string) error {
 	return nil
 }
 
-func (c *PackageConfig) GetPackageName() string {
-	return fmt.Sprintf(
-		"%s-%s",
-		strings.ToLower(c.Version),
-		strings.ToLower(c.Architecture),
-	)
-}
-
-func (c *PackageConfig) GetPackageFolderName() string {
-	return fmt.Sprintf(
-		"%s-%s",
-		strings.ToLower(c.Project),
-		c.GetPackageName(),
-	)
-}
-
-func (c *PackageConfig) GetDebianFolderPath(packagePath string) string {
-	return path.Join(packagePath, c.GetPackageFolderName(), common.DebianFolderName)
-}
-
-func (c *PackageConfig) GetControlFilePath(packagePath string) string {
-	return path.Join(c.GetDebianFolderPath(packagePath), common.ControlFileName)
-}
+//
+// func (c *PackageConfig) GetPackageFolderName() string {
+// 	return fmt.Sprintf(
+// 		"%s-%s-%s",
+// 		strings.ToLower(c.Project),
+// 		strings.ToLower(c.Version),
+// 		strings.ToLower(c.Architecture),
+// 	)
+// }
+//
+// func (c *PackageConfig) GetDebianFolderPath(packagePath string) string {
+// 	return path.Join(packagePath, c.GetPackageFolderName(), common.DebianFolderName)
+// }
+//
+// func (c *PackageConfig) GetControlFilePath(packagePath string) string {
+// 	return path.Join(c.GetDebianFolderPath(packagePath), common.ControlFileName)
+// }

@@ -2,6 +2,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -81,12 +82,13 @@ func (p *Project) AddPackage(versionName, architectureName string) (*Package, er
 		Files:        nil,
 	}
 
-	packagePath := path.Join(p.Path, config.GetPackageFolderName())
+	packageFolderName := fmt.Sprintf("%s-%s-%s", config.Project, config.Version, config.Architecture)
+	packagePath := path.Join(p.Path, packageFolderName)
 	err := os.MkdirAll(packagePath, 0775)
 	if err != nil {
 		log.Error.Printf(
 			"Failed to create directory '%s' for package '%s': %s\n",
-			packagePath, config.GetPackageFolderName(), err,
+			packagePath, packageFolderName, err,
 		)
 		return nil, err
 	}
@@ -99,7 +101,7 @@ func (p *Project) AddPackage(versionName, architectureName string) (*Package, er
 	p.Packages = append(p.Packages, pkg)
 	p.Config.LatestVersion = versionName
 
-	log.Info.Printf("Created package %s...\n", config.GetPackageFolderName())
+	log.Info.Printf("Created package %s...\n", packageFolderName)
 
 	return pkg, nil
 }
@@ -156,7 +158,7 @@ func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModel
 	// Icon, Version name, Architecture name, package name
 	s, err := gtk.ListStoreNew(
 		glib.TYPE_BOOLEAN, gdk.PixbufGetType(), gdk.PixbufGetType(),
-		glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING,
+		glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING,
 	)
 	if err != nil {
 		log.Error.Printf("failed to create new list store: %s\n", err)
@@ -169,7 +171,7 @@ func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModel
 		iter := s.InsertAfter(nil)
 		data := []interface{}{
 			false, nil, nil,
-			pkg.Config.GetPackageName(), pkg.Config.Version, pkg.Config.Architecture,
+			pkg.Config.Version, pkg.Config.Architecture,
 			pkg.Path, pkg.Config.Id,
 		}
 		if pkg.Config.Version == p.Config.LatestVersion {
@@ -180,7 +182,7 @@ func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModel
 			data[common.PackageListColumnFilter] = true
 			data[common.PackageListColumnIsCurrent] = edit
 		}
-		_ = s.Set(iter, []int{0, 1, 2, 3, 4, 5, 6, 7}, data)
+		_ = s.Set(iter, []int{0, 1, 2, 3, 4, 5, 6}, data)
 	}
 
 	// Sorting
@@ -256,6 +258,7 @@ func (p *Project) scanForPackages() error {
 		config, err := packageConfig.Load(packageConfigPath)
 		if err != nil {
 			// TODO : Log and error handling
+			continue
 		}
 
 		// Add package

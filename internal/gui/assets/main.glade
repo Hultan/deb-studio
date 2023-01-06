@@ -1627,15 +1627,15 @@ Click the info button for more information.</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkComboBoxText">
+                      <object class="GtkComboBoxText" id="mainWindow_scriptCombo">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="active">0</property>
                         <items>
-                          <item id="0" translatable="yes">Pre-install</item>
-                          <item id="1" translatable="yes">Post-install</item>
-                          <item id="2" translatable="yes">Pre-remove</item>
-                          <item id="3" translatable="yes">Post-remove</item>
+                          <item id="1" translatable="yes">Pre-install</item>
+                          <item id="2" translatable="yes">Post-install</item>
+                          <item id="3" translatable="yes">Pre-remove</item>
+                          <item id="4" translatable="yes">Post-remove</item>
                         </items>
                       </object>
                       <packing>
@@ -1666,7 +1666,7 @@ Click the info button for more information.</property>
                     <property name="margin-bottom">10</property>
                     <property name="shadow-type">in</property>
                     <child>
-                      <object class="GtkTextView">
+                      <object class="GtkTextView" id="mainWindow_scriptTextView">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="margin-left">10</property>
@@ -1883,9 +1883,9 @@ Click the info button for more information.</property>
                         <property name="can-focus">False</property>
                         <property name="active">0</property>
                         <items>
-                          <item id="0" translatable="yes">Copyright</item>
-                          <item id="1" translatable="yes">Change log</item>
-                          <item id="2" translatable="yes">Readme</item>
+                          <item id="1" translatable="yes">Copyright</item>
+                          <item id="2" translatable="yes">Change log</item>
+                          <item id="3" translatable="yes">Readme</item>
                         </items>
                       </object>
                       <packing>
