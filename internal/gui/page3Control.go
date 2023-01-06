@@ -100,6 +100,23 @@ func (p *pageControl) update() {
 
 }
 
+func (p *pageControl) init() {
+	p.packageEntry.SetText(p.GetControlField("Package"))
+	p.versionEntry.SetText(p.GetControlField("Version"))
+	p.architectureEntry.SetText(p.GetControlField("Architecture"))
+	p.sourceEntry.SetText(p.GetControlField("Source"))
+	p.sectionEntry.SetText(p.GetControlField("Section"))
+	p.priorityEntry.SetText(p.GetControlField("Priority"))
+	active := p.GetControlField("Essential") == "yes"
+	p.essentialCheckButton.SetActive(active)
+	p.dependsEntry.SetText(p.GetControlField("Depends"))
+	p.installSizeEntry.SetText(p.GetControlField("Installed-Size"))
+	p.maintainerEntry.SetText(p.GetControlField("Maintainer"))
+	p.setDescriptionText(p.GetControlField("Description"))
+	p.homePageEntry.SetText(p.GetControlField("Homepage"))
+	p.builtUsingEntry.SetText(p.GetControlField("Built-using"))
+}
+
 func (p *pageControl) focusOut(obj glib.IObject) {
 	switch widget := obj.(type) {
 	case *gtk.Entry:
@@ -118,9 +135,6 @@ func (p *pageControl) focusOut(obj glib.IObject) {
 		}
 		p.SetControlField("Essential", text)
 	}
-
-	p.GetControlField("Maintainer")
-
 }
 
 func (p *pageControl) getEntryText(e *gtk.Entry) string {
@@ -162,11 +176,20 @@ func (p *pageControl) SetControlField(name, value string) {
 		// TODO : Log error
 		return
 	}
-	fmt.Printf("Set '%s' to '%s'\n", name, value)
+	// fmt.Printf("Set '%s' to '%s'\n", name, value)
 }
 
 func (p *pageControl) GetControlField(name string) string {
-	value := project.CurrentPackage.Source.Maintainer
+	value := project.CurrentPackage.Source.Get(name)
 	fmt.Printf("Set '%s' to '%s'\n", name, value)
 	return value
+}
+
+func (p *pageControl) setDescriptionText(text string) {
+	buffer, err := p.descriptionTextView.GetBuffer()
+	if err != nil {
+		// TODO : Log error
+		return
+	}
+	buffer.SetText(text)
 }

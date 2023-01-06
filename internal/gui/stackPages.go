@@ -7,6 +7,8 @@ import (
 type stackPages struct {
 	parent *MainWindow
 
+	stack *gtk.Stack
+
 	projectPage *pageProject
 	packagePage *pagePackage
 	controlPage *pageControl

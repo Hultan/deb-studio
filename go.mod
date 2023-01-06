@@ -2,6 +2,8 @@ module github.com/hultan/deb-studio
 
 go 1.19
 
+replace pault.ag/go/debian v0.12.0 => "/home/per/code/go-debian"
+
 require (
 	github.com/google/uuid v1.3.0
 	github.com/gotk3/gotk3 v0.6.1
