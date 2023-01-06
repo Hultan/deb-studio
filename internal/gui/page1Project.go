@@ -32,8 +32,10 @@ func (m *MainWindow) setupProjectPage() *pageProject {
 
 func (p *pageProject) update() {
 	if project == nil {
+		p.headerLabel.SetText("Please open or create a project...")
 		return
 	}
+
 	p.headerLabel.SetText(project.Config.Name)
 	p.subHeaderLabel.SetText("Project information")
 	p.projectNameLabel.SetMarkup("Project name: <b>" + project.Config.Name + "</b>")

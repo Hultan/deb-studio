@@ -16,9 +16,7 @@ type pagePackage struct {
 	parent *MainWindow
 
 	// General
-	projectList  *packageList.PackageList
-	infoBar      *gtk.InfoBar
-	infoBarLabel *gtk.Label
+	projectList *packageList.PackageList
 
 	// Toolbar
 	showOnlyCheckBox *gtk.CheckButton
@@ -35,8 +33,6 @@ func (m *MainWindow) setupPackagePage() *pagePackage {
 	treeView.Connect("row_activated", p.setPackageAsCurrentClicked)
 	treeView.Connect("button-press-event", p.showPopupMenu)
 	p.projectList = packageList.NewProjectList(treeView)
-	p.infoBar = m.builder.GetObject("mainWindow_infoBar").(*gtk.InfoBar)
-	p.infoBarLabel = m.builder.GetObject("mainWindow_infoBarLabel").(*gtk.Label)
 
 	// Toolbar
 	btn := m.builder.GetObject("mainWindow_addPackageButton").(*gtk.ToolButton)
@@ -62,6 +58,10 @@ func (m *MainWindow) setupPackagePage() *pagePackage {
 	tool.Connect("activate", p.openPackageFolder)
 
 	return p
+}
+
+func (p *pagePackage) update() {
+	p.listPackages()
 }
 
 func (p *pagePackage) setAsLatestVersionClicked() {
@@ -161,59 +161,10 @@ func (p *pagePackage) createPackageListRow(pkg *engine.Package) (*gtk.ListBoxRow
 	return row, nil
 }
 
-func (p *pagePackage) update() {
-	p.listPackages()
-	p.updateInfoBar()
-}
-
 func (p *pagePackage) showOnlyCurrentAndLatestToggled(check *gtk.CheckButton) {
 	checked := check.GetActive()
 	project.SetShowOnlyLatestVersion(checked)
 	p.parent.pages.update()
-}
-
-func (p *pagePackage) getInfoBarText() string {
-	switch getProjectStatus() {
-	case projectStatusNoProjectOpened:
-		return "You need to open or create a new project..."
-	case projectStatusNoPackageSelected:
-		return "You need to select or add a package to edit!"
-	case projectStatusNotLatestVersion:
-		return fmt.Sprintf(
-			"You are currently not editing the latest version! You are editing <b>version %s</b> and <b>architecture %s</b>.",
-			project.CurrentPackage.Config.Version, project.CurrentPackage.Config.Architecture,
-		)
-	case projectStatusLatestVersion:
-		return fmt.Sprintf(
-			"You are currently editing <b>version %s</b> and <b>architecture %s</b>.",
-			project.CurrentPackage.Config.Version, project.CurrentPackage.Config.Architecture,
-		)
-	default:
-		log.Error.Println("Invalid projectStatus in getInfoBarText()")
-		return ""
-	}
-}
-
-func (p *pagePackage) setInfoBarColor() {
-	switch getProjectStatus() {
-	case projectStatusNoProjectOpened:
-		p.infoBar.SetMessageType(gtk.MESSAGE_INFO)
-	case projectStatusNoPackageSelected:
-		p.infoBar.SetMessageType(gtk.MESSAGE_WARNING)
-	case projectStatusNotLatestVersion:
-		p.infoBar.SetMessageType(gtk.MESSAGE_WARNING)
-	case projectStatusLatestVersion:
-		p.infoBar.SetMessageType(gtk.MESSAGE_INFO)
-	default:
-		log.Error.Println("Invalid projectStatus in SetInfoBarColor()")
-	}
-}
-
-func (p *pagePackage) updateInfoBar() {
-	p.infoBarLabel.SetMarkup(p.getInfoBarText())
-	p.setInfoBarColor()
-	// Force a redraw to update the info bar
-	p.parent.window.QueueDraw()
 }
 
 func (p *pagePackage) showPopupMenu(_ *gtk.ListBox, e *gdk.Event) {

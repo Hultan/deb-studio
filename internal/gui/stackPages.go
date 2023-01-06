@@ -13,6 +13,8 @@ type stackPages struct {
 	scriptPage  *pageScript
 	installPage *pageInstall
 	textPage    *pageText
+
+	infoBar *infoBar
 }
 
 func (m *MainWindow) setupStackPages() {
@@ -25,19 +27,24 @@ func (m *MainWindow) setupStackPages() {
 	p.scriptPage = m.setupScriptPage()
 	p.installPage = m.setupInstallPage()
 	p.textPage = m.setupTextPage()
+
+	p.infoBar = m.setupInfoBar()
 }
 
 func (s *stackPages) update() {
-	s.enableDisable()
+	s.enableDisablePages()
+	s.infoBar.update()
+	s.projectPage.update()
+
+	if project == nil {
+		return
+	}
 
 	switch getProjectStatus() {
 	case projectStatusNoProjectOpened:
-		s.projectPage.update()
 	case projectStatusNoPackageSelected:
 		s.projectPage.update()
-		s.packagePage.update()
 	default:
-		s.projectPage.update()
 		s.packagePage.update()
 		s.controlPage.update()
 		s.scriptPage.update()
@@ -46,7 +53,7 @@ func (s *stackPages) update() {
 	}
 }
 
-func (s *stackPages) enableDisable() {
+func (s *stackPages) enableDisablePages() {
 	status := getProjectStatus()
 	haveOpenedProject := status > projectStatusNoProjectOpened
 	haveChosenPackage := status > projectStatusNoPackageSelected
