@@ -2,7 +2,6 @@ package gui
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/gotk3/gotk3/gtk"
 
@@ -11,6 +10,9 @@ import (
 
 // setupToolbar: Set up the toolbar
 func (m *MainWindow) setupToolbar() {
+	log.Trace.Println("Entering setupToolbar...")
+	defer log.Trace.Println("Exiting setupToolbar...")
+
 	// Toolbar new button
 	btn := m.builder.GetObject("toolbar_newButton").(*gtk.ToolButton)
 	btn.Connect("clicked", m.newButtonClicked)
@@ -22,12 +24,6 @@ func (m *MainWindow) setupToolbar() {
 	btn.Connect("clicked", m.openButtonClicked)
 	btn.SetIsImportant(true)
 	btn.SetIconWidget(createImageFromBytes(openIcon, "open"))
-
-	// Toolbar save button
-	btn = m.builder.GetObject("toolbar_saveButton").(*gtk.ToolButton)
-	btn.Connect("clicked", m.saveButtonClicked)
-	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(saveIcon, "saveButtonClicked"))
 
 	// Toolbar build button
 	btn = m.builder.GetObject("toolbar_buildButton").(*gtk.ToolButton)
@@ -44,6 +40,9 @@ func (m *MainWindow) setupToolbar() {
 
 // newButtonClicked: Handler for the newButtonClicked button clicked signal
 func (m *MainWindow) newButtonClicked() {
+	log.Trace.Println("Entering newButtonClicked...")
+	defer log.Trace.Println("Exiting newButtonClicked...")
+
 	defer func() {
 		m.pages.update()
 	}()
@@ -68,7 +67,11 @@ func (m *MainWindow) newButtonClicked() {
 
 // openButtonClicked: Handler for the openButtonClicked button clicked signal
 func (m *MainWindow) openButtonClicked() {
+	log.Trace.Println("Entering openButtonClicked...")
+	defer log.Trace.Println("Exiting openButtonClicked...")
+
 	// TODO : Handle if a project is already open
+
 	var err error
 	dlg, err := gtk.FileChooserDialogNewWith2Buttons(
 		"Select folder...", m.window, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
@@ -76,8 +79,8 @@ func (m *MainWindow) openButtonClicked() {
 		"Cancel", gtk.RESPONSE_CANCEL,
 	)
 	if err != nil {
-		showErrorDialog("Failed to open fileChooserDialog!", err)
 		log.Error.Printf("failed to create fileChooserDialog: %s\n", err)
+		showErrorDialog("Failed to open fileChooserDialog!", err)
 		return
 	}
 	dlg.SetCurrentFolder("/home/per/installs/softtube")
@@ -87,24 +90,23 @@ func (m *MainWindow) openButtonClicked() {
 	if response == gtk.RESPONSE_ACCEPT {
 		projectFolder, err := dlg.GetCurrentFolder()
 		if err != nil {
+			log.Error.Printf("failed to get folder from fileChooserDialog: %s\n", err)
 			msg := "Failed to get folder from fileChooserDialog!"
 			showErrorDialog(msg, err)
-			log.Error.Printf("failed to get folder from fileChooserDialog: %s\n", err)
 			return
 		}
 		project, err = engine.OpenProject(log, projectFolder)
 		// TODO: Handle if project.json does not exist
 		if err != nil {
+			log.Error.Printf("failure during opening of '%s': %s", projectFolder, err)
 			msg := fmt.Sprintf("failed to open project folder: %s", err)
 			showErrorDialog(msg, err)
-			log.Error.Printf("failure during opening of '%s': %s", projectFolder, err)
-			os.Exit(1)
+			return
 		}
 
+		// Update gui
 		m.pages.controlPage.init()
 		m.pages.scriptPage.init()
-
-		// Update gui
 		if project.Config.ShowOnlyLatestVersion {
 			m.pages.packagePage.showOnlyCheckBox.SetActive(true)
 		}
@@ -112,15 +114,10 @@ func (m *MainWindow) openButtonClicked() {
 	}
 }
 
-// saveButtonClicked: Handler for the saveButtonClicked button clicked signal
-// TODO : Do we even need a save button?
-func (m *MainWindow) saveButtonClicked() {
-	// TODO : saveButtonClicked project here
-	fmt.Println("SaveControlFile clicked")
-}
-
 // buildButtonClicked: Handler for the build button clicked signal
 func (m *MainWindow) buildButtonClicked() {
-	// TODO : build project here
+	log.Trace.Println("Entering buildButtonClicked...")
+	defer log.Trace.Println("Exiting buildButtonClicked...")
+
 	fmt.Println("Build clicked")
 }

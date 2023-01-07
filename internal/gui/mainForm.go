@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/gotk3/gotk3/gtk"
 
 	"github.com/hultan/deb-studio/internal/builder"
+	"github.com/hultan/deb-studio/internal/common"
 	"github.com/hultan/deb-studio/internal/engine"
 	"github.com/hultan/deb-studio/internal/logger"
 )
@@ -29,14 +31,15 @@ var log *logger.Logger
 
 // NewMainWindow : Creates a new MainWindow object
 func NewMainWindow() *MainWindow {
-	mainForm := new(MainWindow)
-	return mainForm
+	return &MainWindow{}
 }
 
 // Open : Opens the MainWindow window
 func (m *MainWindow) Open(app *gtk.Application) {
-	// TODO : Move log path to config
 	m.startLogging()
+
+	log.Trace.Println("Entering Open...")
+	defer log.Trace.Println("Exiting Open...")
 
 	// Initialize gtk and create a builder
 	gtk.Init(&os.Args)
@@ -67,17 +70,16 @@ func (m *MainWindow) Open(app *gtk.Application) {
 }
 
 func (m *MainWindow) startLogging() {
-	logPath := "/home/per/.softteam/debstudio"
-	logFile := "debstudio.log"
-	fullLogPath := path.Join(logPath, logFile)
+	// TODO : Move log file to debStudio config
+	fullLogPath := path.Join(common.FolderNameLog, common.FileNameLog)
 
 	var err error
 
 	// Create log path if it does not exist
-	if _, err = os.Stat(logPath); os.IsNotExist(err) {
-		err = os.MkdirAll(logPath, 0755)
+	if _, err = os.Stat(common.FolderNameLog); os.IsNotExist(err) {
+		err = os.MkdirAll(common.FolderNameLog, 0755)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "Failed to create log path at %s\n", logPath)
+			_, _ = fmt.Fprintf(os.Stderr, "Failed to create log path at %s\n", common.FolderNameLog)
 			_, _ = fmt.Fprintf(os.Stderr, "Continuing without logging...\n")
 			return
 		}
@@ -99,14 +101,21 @@ func (m *MainWindow) startLogging() {
 		log, err = logger.NewStandardLogger(fullLogPath)
 	}
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Failed to create log at %s\n", logPath)
+		_, _ = fmt.Fprintf(os.Stderr, "Failed to create log at %s\n", common.FolderNameLog)
 		_, _ = fmt.Fprintf(os.Stderr, "Continuing without logging...\n")
 		return
 	}
 }
 
+func isTraceMode() bool {
+	return len(os.Args) >= 2 && strings.Trim(os.Args[1], " \t") == "--trace"
+}
+
 // setupMenu: Set up the menu bar
 func (m *MainWindow) setupMenu() {
+	log.Trace.Println("Entering setupMenu...")
+	defer log.Trace.Println("Exiting setupMenu...")
+
 	menuQuit := m.builder.GetObject("menu_FileQuit").(*gtk.MenuItem)
 	menuQuit.Connect("activate", m.window.Close)
 
@@ -127,6 +136,9 @@ func (m *MainWindow) setupMenu() {
 
 // setupStatusBar: Set up the status bar
 func (m *MainWindow) setupStatusBar() {
+	log.Trace.Println("Entering setupStatusBar...")
+	defer log.Trace.Println("Exiting setupStatusBar...")
+
 	// Status bar
 	statusBar := m.builder.GetObject("mainWindow_StatusBar").(*gtk.Statusbar)
 	statusBar.Push(statusBar.GetContextId("debstudio"), getApplicationName())
@@ -134,8 +146,14 @@ func (m *MainWindow) setupStatusBar() {
 
 // shutDown : shuts down the application
 func (m *MainWindow) shutDown() {
+	log.Trace.Println("Entering shutdown...")
+	defer log.Trace.Println("Exiting shutdown...")
+
 	if project != nil {
-		project.Save()
+		err := project.Save()
+		if err != nil {
+			log.Error.Printf("failed to save project : %s\n", err)
+		}
 	}
 	if log != nil {
 		log.Close()

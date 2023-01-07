@@ -20,6 +20,9 @@ type stackPages struct {
 }
 
 func (m *MainWindow) setupStackPages() {
+	log.Trace.Println("Entering setupStackPage...")
+	defer log.Trace.Println("Exiting setupStackPage...")
+
 	p := &stackPages{parent: m}
 	m.pages = p
 
@@ -34,6 +37,9 @@ func (m *MainWindow) setupStackPages() {
 }
 
 func (s *stackPages) update() {
+	log.Trace.Println("Entering update...")
+	defer log.Trace.Println("Exiting update...")
+
 	s.enableDisablePages()
 	s.infoBar.update()
 	s.projectPage.update()
@@ -56,6 +62,9 @@ func (s *stackPages) update() {
 }
 
 func (s *stackPages) enableDisablePages() {
+	log.Trace.Println("Entering enableDisablePages...")
+	defer log.Trace.Println("Exiting enableDisablePages...")
+
 	status := getProjectStatus()
 	haveOpenedProject := status > projectStatusNoProjectOpened
 	haveChosenPackage := status > projectStatusNoPackageSelected
@@ -67,6 +76,9 @@ func (s *stackPages) enableDisablePages() {
 }
 
 func (s *stackPages) enableDisablePage(name string, status bool) {
+	log.Trace.Println("Entering enableDisablePage...")
+	defer log.Trace.Println("Exiting enableDisablePage...")
+
 	w := s.parent.builder.GetObject(name)
 	switch item := w.(type) {
 	case *gtk.Box:

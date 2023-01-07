@@ -29,13 +29,18 @@ type Project struct {
 
 func OpenProject(l *logger.Logger, projectPath string) (*Project, error) {
 	log = l
+
+	log.Trace.Println("Entering OpenProject...")
+	defer log.Trace.Println("Exiting OpenProject...")
+
 	if !isProjectFolder(projectPath) {
-		// TODO : Fix error handling
+		log.Warning.Println("missing project.json")
 		return nil, errors.New("missing project.json")
 	}
 
-	config, err := projectConfig.Load(path.Join(projectPath, common.ProjectJsonFileName))
+	config, err := projectConfig.Load(path.Join(projectPath, common.FileNameProjectJson))
 	if err != nil {
+		log.Error.Printf("failed to load project.json")
 		return nil, err
 	}
 
@@ -57,13 +62,17 @@ func OpenProject(l *logger.Logger, projectPath string) (*Project, error) {
 func NewProject(l *logger.Logger, projectPath, projectName string) (*Project, error) {
 	log = l
 
+	log.Trace.Println("Entering NewProject...")
+	defer log.Trace.Println("Exiting NewProject...")
+
 	// Create project and config
 	p := &Project{Path: projectPath}
 	p.Config = &projectConfig.ProjectConfig{Name: projectName}
 
 	// SaveControlFile config
-	err := p.Config.Save(path.Join(projectPath, common.ProjectJsonFileName))
+	err := p.Config.Save(path.Join(projectPath, common.FileNameProjectJson))
 	if err != nil {
+		log.Error.Printf("failed to save control file: %s\n", err)
 		return nil, err
 	}
 
@@ -96,6 +105,7 @@ func (p *Project) AddPackage(versionName, architectureName string) (*Package, er
 	// Add to version slice
 	pkg, err := newPackage(packagePath, config)
 	if err != nil {
+		log.Error.Printf("failed to create new package : %s\n", err)
 		return nil, err
 	}
 	p.Packages = append(p.Packages, pkg)
@@ -107,6 +117,9 @@ func (p *Project) AddPackage(versionName, architectureName string) (*Package, er
 }
 
 func (p *Project) IsWorkingWithLatestVersion() bool {
+	log.Trace.Println("Entering IsWorkingWithLatestVersion...")
+	defer log.Trace.Println("Exiting IsWorkingWithLatestVersion...")
+
 	if p.CurrentPackage == nil {
 		return false
 	}
@@ -114,6 +127,9 @@ func (p *Project) IsWorkingWithLatestVersion() bool {
 }
 
 func (p *Project) GetPackageById(id string) *Package {
+	log.Trace.Println("Entering GetPackageById...")
+	defer log.Trace.Println("Exiting GetPackageById...")
+
 	for i := range p.Packages {
 		pkg := p.Packages[i]
 		if pkg.Config.Id == id {
@@ -124,30 +140,50 @@ func (p *Project) GetPackageById(id string) *Package {
 }
 
 func (p *Project) SetAsCurrent(id string) {
+	log.Trace.Println("Entering SetAsCurrent...")
+	defer log.Trace.Println("Exiting SetAsCurrent...")
+
 	pkg := p.GetPackageById(id)
 	if pkg == nil {
-		// TODO : Error handling
+		log.Warning.Printf("no package with id '%s' found", id)
 		return
 	}
 	p.Config.CurrentPackageId = pkg.Config.Id
 	p.CurrentPackage = pkg
 }
 
-func (p *Project) SetAsLatest(id string) {
+func (p *Project) SetAsLatest(id string) error {
+	log.Trace.Println("Entering SetAsLatest...")
+	defer log.Trace.Println("Exiting SetAsLatest...")
+
 	pkg := p.GetPackageById(id)
 	if pkg == nil {
-		// TODO : Error handling
-		return
+		log.Error.Printf("failed to get package id\n")
+		return errors.New("failed to get package id")
 	}
 	p.Config.LatestVersion = pkg.Config.Version
+
+	return nil
 }
 
-func (p *Project) Save() {
-	configPath := path.Join(p.Path, common.ProjectJsonFileName)
-	p.Config.Save(configPath)
+func (p *Project) Save() error {
+	log.Trace.Println("Entering Save...")
+	defer log.Trace.Println("Exiting Save...")
+
+	configPath := path.Join(p.Path, common.FileNameProjectJson)
+	err := p.Config.Save(configPath)
+	if err != nil {
+		log.Error.Printf("failed to save project : %s\n", err)
+		return err
+	}
+
+	return nil
 }
 
 func (p *Project) SetShowOnlyLatestVersion(checked bool) {
+	log.Trace.Println("Entering SetShowOnlyLatestVersion...")
+	defer log.Trace.Println("Exiting SetShowOnlyLatestVersion...")
+
 	p.Config.ShowOnlyLatestVersion = checked
 }
 
@@ -209,6 +245,9 @@ func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModel
 }
 
 func (p *Project) filterFunc(model *gtk.TreeModel, iter *gtk.TreeIter) bool {
+	log.Trace.Println("Entering filterFunc...")
+	defer log.Trace.Println("Exiting filterFunc...")
+
 	if !p.Config.ShowOnlyLatestVersion {
 		return true
 	}
@@ -230,8 +269,8 @@ func (p *Project) filterFunc(model *gtk.TreeModel, iter *gtk.TreeIter) bool {
 }
 
 func (p *Project) scanForPackages() error {
-	log.Trace.Println("Entering scanForVersions...")
-	defer log.Trace.Println("Exiting scanForVersions...")
+	log.Trace.Println("Entering scanForPackages...")
+	defer log.Trace.Println("Exiting scanForPackages...")
 
 	// Open path to scan
 	f, err := os.Open(p.Path)
@@ -248,7 +287,7 @@ func (p *Project) scanForPackages() error {
 
 	for _, dir := range dirs {
 		packagePath := path.Join(p.Path, dir)
-		packageConfigPath := path.Join(packagePath, common.PackageJsonFileName)
+		packageConfigPath := path.Join(packagePath, common.FileNamePackageJson)
 
 		info, err := os.Stat(packageConfigPath)
 		if err != nil || info.IsDir() {
@@ -257,13 +296,14 @@ func (p *Project) scanForPackages() error {
 
 		config, err := packageConfig.Load(packageConfigPath)
 		if err != nil {
-			// TODO : Log and error handling
+			log.Error.Printf("failed to load package.json at '%s': %s", packageConfigPath, err)
 			continue
 		}
 
 		// Add package
 		pkg, err := newPackage(packagePath, config)
 		if err != nil {
+			log.Error.Printf("failed to create new package: %s", err)
 			return err
 		}
 		p.Packages = append(p.Packages, pkg)
@@ -273,7 +313,10 @@ func (p *Project) scanForPackages() error {
 }
 
 func isProjectFolder(projectPath string) bool {
-	info, err := os.Stat(path.Join(projectPath, common.ProjectJsonFileName))
+	log.Trace.Println("Entering isProjectFolder...")
+	defer log.Trace.Println("Exiting isProjectFolder...")
+
+	info, err := os.Stat(path.Join(projectPath, common.FileNameProjectJson))
 	if err != nil {
 		return false
 	}

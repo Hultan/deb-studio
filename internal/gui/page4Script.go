@@ -111,13 +111,13 @@ func (p *pageScript) getScriptPath(script scriptType) string {
 
 	switch script {
 	case scriptTypePreInstall:
-		fileName = "preinst"
+		fileName = common.FileNamePreInstall
 	case scriptTypePostInstall:
-		fileName = "postinst"
+		fileName = common.FileNamePostInstall
 	case scriptTypePreRemove:
-		fileName = "prerm"
+		fileName = common.FileNamePreRemove
 	case scriptTypePostRemove:
-		fileName = "postrm"
+		fileName = common.FileNamePostRemove
 	default:
 		log.Error.Printf("invalid script type in getScriptPath(): %d\n", int(script))
 		return ""
@@ -126,7 +126,7 @@ func (p *pageScript) getScriptPath(script scriptType) string {
 	return path.Join(
 		project.CurrentPackage.Path,
 		project.CurrentPackage.GetPackageFolderName(),
-		common.DebianFolderName,
+		common.FolderNameDebian,
 		fileName,
 	)
 }

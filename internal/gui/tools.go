@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
@@ -52,13 +51,6 @@ func getApplicationName() string {
 		common.ApplicationVersion,
 		common.ApplicationCopyRight,
 	)
-}
-
-func isTraceMode() bool {
-	log.Trace.Println("Entering isTraceMode...")
-	defer log.Trace.Println("Exiting isTraceMode...")
-
-	return len(os.Args) >= 2 && strings.Trim(os.Args[1], " \t") == "--trace"
 }
 
 func getProjectStatus() projectStatus {

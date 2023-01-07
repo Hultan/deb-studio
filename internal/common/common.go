@@ -3,18 +3,12 @@ package common
 // Application constants
 
 const ApplicationTitle = "Deb Studio"
-const ApplicationVersion = "v 0.2.1"
+const ApplicationVersion = "v 0.2.2"
 const ApplicationCopyRight = "©SoftTeam AB, 2022"
 
 // Exit codes
 
-const ExitCodeSetupError = 1
-const ExitCodeGtkError = 2
-
-// File names
-
-const PackageJsonFileName = "package.json"
-const ProjectJsonFileName = "project.json"
+const ExitCodeGtkError = 1
 
 // Package list columns
 
@@ -28,25 +22,26 @@ const (
 	PackageListColumnPackageId
 )
 
-// Script page
+// Folder names
 
 const (
-	ScriptPagePreInstall = iota
-	ScriptPagePostInstall
-	ScriptPagePreRemove
-	ScriptPagePostRemove
+	FolderNameDebian = "DEBIAN"
+	FolderNameLog    = "/home/per/.softteam/debstudio"
 )
 
-// TextPage
+// File names
 
 const (
-	TextPageCopyRight = iota
-	TextPageChangeLog
-	TextPageReadme
+	FileNameControl     = "control"
+	FileNamePackageJson = "package.json"
+	FileNameProjectJson = "project.json"
+	FileNamePreInstall  = "preinst"
+	FileNamePostInstall = "postinst"
+	FileNamePreRemove   = "prerm"
+	FileNamePostRemove  = "postrm"
+	FileNameLog         = "debstudio.log"
 )
 
 // Misc constants
 
 const RightMouseButton = 3
-const DebianFolderName = "DEBIAN"
-const ControlFileName = "control"
