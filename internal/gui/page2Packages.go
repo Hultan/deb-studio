@@ -26,6 +26,9 @@ type pagePackage struct {
 }
 
 func (m *MainWindow) setupPackagePage() *pagePackage {
+	log.Trace.Println("Entering setupPackagePage...")
+	defer log.Trace.Println("Exiting setupPackagePage...")
+
 	p := &pagePackage{parent: m}
 
 	// General
@@ -61,13 +64,20 @@ func (m *MainWindow) setupPackagePage() *pagePackage {
 }
 
 func (p *pagePackage) update() {
+	log.Trace.Println("Entering update...")
+	defer log.Trace.Println("Exiting update...")
+
 	p.listPackages()
 }
 
 func (p *pagePackage) setAsLatestVersionClicked() {
+	log.Trace.Println("Entering setAsLatestVersionClicked...")
+	defer log.Trace.Println("Exiting setAsLatestVersionClicked...")
+
 	// Set version as latest
 	id := p.projectList.GetSelectedPackageId()
 	if id == "" {
+		log.Warning.Println("no selected package found")
 		return
 	}
 	project.SetAsLatest(id)
@@ -77,9 +87,13 @@ func (p *pagePackage) setAsLatestVersionClicked() {
 }
 
 func (p *pagePackage) setPackageAsCurrentClicked() {
+	log.Trace.Println("Entering setPackageAsCurrentClicked...")
+	defer log.Trace.Println("Exiting setPackageAsCurrentClicked...")
+
 	// Set package as current
 	id := p.projectList.GetSelectedPackageId()
 	if id == "" {
+		log.Warning.Println("no selected package found")
 		return
 	}
 	project.SetAsCurrent(id)
@@ -89,6 +103,9 @@ func (p *pagePackage) setPackageAsCurrentClicked() {
 }
 
 func (p *pagePackage) addPackageClicked() {
+	log.Trace.Println("Entering addPackageClicked...")
+	defer log.Trace.Println("Exiting addPackageClicked...")
+
 	fmt.Println("Add package clicked!")
 
 	// dialog := p.builder.GetObject("addPackageDialog").(*gtk.Dialog)
@@ -113,10 +130,16 @@ func (p *pagePackage) addPackageClicked() {
 }
 
 func (p *pagePackage) removePackageClicked() {
+	log.Trace.Println("Entering removePackageClicked...")
+	defer log.Trace.Println("Exiting removePackageClicked...")
+
 	fmt.Println("Remove package clicked!")
 }
 
 func (p *pagePackage) listPackages() {
+	log.Trace.Println("Entering listPackages...")
+	defer log.Trace.Println("Exiting listPackages...")
+
 	if project == nil {
 		return
 	}
@@ -126,6 +149,9 @@ func (p *pagePackage) listPackages() {
 }
 
 func (p *pagePackage) createPackageListRow(pkg *engine.Package) (*gtk.ListBoxRow, error) {
+	log.Trace.Println("Entering createPackageListRow...")
+	defer log.Trace.Println("Exiting createPackageListRow...")
+
 	row, err := gtk.ListBoxRowNew()
 	if err != nil {
 		log.Error.Printf("failed to create package list row")
@@ -138,8 +164,6 @@ func (p *pagePackage) createPackageListRow(pkg *engine.Package) (*gtk.ListBoxRow
 		return nil, err
 	}
 	row.Add(box)
-	// TODO : Change to a map instead?
-	// row.SetName(pkg.Config.GetPackageFolderName())
 
 	// Add version label
 	label, err := gtk.LabelNew(pkg.Config.Version)
@@ -162,12 +186,18 @@ func (p *pagePackage) createPackageListRow(pkg *engine.Package) (*gtk.ListBoxRow
 }
 
 func (p *pagePackage) showOnlyCurrentAndLatestToggled(check *gtk.CheckButton) {
+	log.Trace.Println("Entering showOnlyCurrentAndLatestToggled...")
+	defer log.Trace.Println("Exiting showOnlyCurrentAndLatestToggled...")
+
 	checked := check.GetActive()
 	project.SetShowOnlyLatestVersion(checked)
 	p.parent.pages.update()
 }
 
 func (p *pagePackage) showPopupMenu(_ *gtk.ListBox, e *gdk.Event) {
+	log.Trace.Println("Entering showPopupMenu...")
+	defer log.Trace.Println("Exiting showPopupMenu...")
+
 	ev := gdk.EventButtonNewFromEvent(e)
 	if ev.Button() == common.RightMouseButton {
 		p.popup.PopupAtPointer(e)
@@ -176,12 +206,21 @@ func (p *pagePackage) showPopupMenu(_ *gtk.ListBox, e *gdk.Event) {
 
 // openProjectFolder: Handler for the open project folder button clicked signal
 func (p *pagePackage) openProjectFolder() {
+	log.Trace.Println("Entering openProjectFolder...")
+	defer log.Trace.Println("Exiting openProjectFolder...")
+
 	cmd := exec.Command("xdg-open", project.Path)
-	cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		log.Error.Printf("failed to open project folder: %s\n", err)
+	}
 }
 
 // openPackageFolder: Handler for the open package folder button clicked signal
 func (p *pagePackage) openPackageFolder() {
+	log.Trace.Println("Entering openPackageFolder...")
+	defer log.Trace.Println("Exiting openPackageFolder...")
+
 	// Set version as latest
 	id := p.projectList.GetSelectedPackageId()
 	if id == "" {
@@ -192,5 +231,8 @@ func (p *pagePackage) openPackageFolder() {
 		return
 	}
 	cmd := exec.Command("xdg-open", pkg.Path)
-	cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		log.Error.Printf("failed to open project folder: %s\n", err)
+	}
 }

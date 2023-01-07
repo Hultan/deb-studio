@@ -28,6 +28,9 @@ type pageControl struct {
 
 // setupControlPage: Set up the control page
 func (m *MainWindow) setupControlPage() *pageControl {
+	log.Trace.Println("Entering setupControlPage...")
+	defer log.Trace.Println("Exiting setupControlPage...")
+
 	p := &pageControl{parent: m}
 
 	p.packageEntry = m.builder.GetObject("mainWindow_packageEntry").(*gtk.Entry)
@@ -75,32 +78,15 @@ func (m *MainWindow) setupControlPage() *pageControl {
 	return p
 }
 
-// setControlImage: Set a control tab image
-func (p *pageControl) setControlImage(imgName string, imgType imageType) {
-	img := p.parent.builder.GetObject(imgName).(*gtk.Image)
-	bytes := p.getControlIcon(imgType)
-	img.SetFromPixbuf(createPixBufFromBytes(bytes, imgName))
-}
-
-// getControlIcon: Get the icon bytes from an image type
-func (p *pageControl) getControlIcon(imgType imageType) []byte {
-	var bytes []byte
-	switch imgType {
-	case imageTypeMandatory:
-		bytes = mandatoryIcon
-	case imageTypeRecommended:
-		bytes = recommendedIcon
-	case imageTypeOptional:
-		bytes = optionalIcon
-	}
-	return bytes
-}
-
 func (p *pageControl) update() {
-
+	log.Trace.Println("Entering update...")
+	defer log.Trace.Println("Exiting update...")
 }
 
 func (p *pageControl) init() {
+	log.Trace.Println("Entering init...")
+	defer log.Trace.Println("Exiting init...")
+
 	p.packageEntry.SetText(p.GetControlField("Package"))
 	p.versionEntry.SetText(p.GetControlField("Version"))
 	p.architectureEntry.SetText(p.GetControlField("Architecture"))
@@ -112,84 +98,110 @@ func (p *pageControl) init() {
 	p.dependsEntry.SetText(p.GetControlField("Depends"))
 	p.installSizeEntry.SetText(p.GetControlField("Installed-Size"))
 	p.maintainerEntry.SetText(p.GetControlField("Maintainer"))
-	p.setDescriptionText(p.GetControlField("Description"))
+	setTextViewText(p.descriptionTextView, p.GetControlField("Description"))
 	p.homePageEntry.SetText(p.GetControlField("Homepage"))
 	p.builtUsingEntry.SetText(p.GetControlField("Built-using"))
 }
 
 func (p *pageControl) focusOut(obj glib.IObject) {
+	log.Trace.Println("Entering focusOut...")
+	defer log.Trace.Println("Exiting focusOut...")
+
 	switch widget := obj.(type) {
 	case *gtk.Entry:
-		name := p.getEntryName(widget)
-		value := p.getEntryText(widget)
-		p.SetControlField(name, value)
+		name, err := getEntryName(widget)
+		if err != nil {
+			log.Error.Printf("failed to get name from entry (field: %s): %s\n", name, err)
+			msg := fmt.Sprintf("Failed to get name from entry (field: %s)", name)
+			showErrorDialog(msg, err)
+			return
+		}
+		value, err := getEntryText(widget)
+		if err != nil {
+			log.Error.Printf("failed to get text from entry (field: %s): %s\n", name, err)
+			msg := fmt.Sprintf("Failed to get text from entry (field: %s)", name)
+			showErrorDialog(msg, err)
+			return
+		}
+		err = p.SetControlField(name, value)
+		if err != nil {
+			log.Error.Printf("failed to save to control file (field: %s): %s\n", name, err)
+			msg := fmt.Sprintf("Failed to save to control file (field: %s)", name)
+			showErrorDialog(msg, err)
+			return
+		}
 	case *gtk.TextView:
 		// TODO : Replace description with an entry (short description) and a textview (long description)
-		value := p.getDescriptionText()
-		p.SetControlField("Description", value)
+		value, err := getTextViewText(p.descriptionTextView)
+		if err != nil {
+			log.Error.Printf("failed to get text from textview (field: Description): %s\n", err)
+			showErrorDialog("Failed to get text from textview (field: Description)", err)
+			return
+		}
+		err = p.SetControlField("Description", value)
+		if err != nil {
+			log.Error.Printf("failed to save to control file (field: Description): %s\n", err)
+			showErrorDialog("Failed to save to control file (field: Description)", err)
+			return
+		}
 	case *gtk.CheckButton:
 		value := widget.GetActive()
 		text := "no"
 		if value {
 			text = "yes"
 		}
-		p.SetControlField("Essential", text)
+		err := p.SetControlField("Essential", text)
+		if err != nil {
+			log.Error.Printf("failed to save to control file (field: Essential): %s\n", err)
+			showErrorDialog("Failed to save to control file (field: Essential)", err)
+			return
+		}
 	}
 }
 
-func (p *pageControl) getEntryText(e *gtk.Entry) string {
-	text, err := e.GetText()
-	if err != nil {
-		// TODO : Log error
-		return ""
-	}
-	return text
-}
+func (p *pageControl) SetControlField(name, value string) error {
+	log.Trace.Println("Entering SetControlField...")
+	defer log.Trace.Println("Exiting SetControlField...")
 
-func (p *pageControl) getEntryName(e *gtk.Entry) string {
-	name, err := e.GetName()
-	if err != nil {
-		// TODO : Log error
-		return ""
-	}
-	return name
-}
-
-func (p *pageControl) getDescriptionText() string {
-	buffer, err := p.descriptionTextView.GetBuffer()
-	if err != nil {
-		// TODO : Log error
-		return ""
-	}
-	text, err := buffer.GetText(buffer.GetStartIter(), buffer.GetEndIter(), true)
-	if err != nil {
-		// TODO : Log error
-		return ""
-	}
-	return text
-}
-
-func (p *pageControl) SetControlField(name, value string) {
 	project.CurrentPackage.Source.Set(name, value)
 	err := project.CurrentPackage.SaveControlFile()
 	if err != nil {
-		// TODO : Log error
-		return
+		log.Error.Printf("failed to set control field (field: %s, value: %s): %s\n", name, value, err)
+		return err
 	}
-	// fmt.Printf("Set '%s' to '%s'\n", name, value)
+	return nil
 }
 
 func (p *pageControl) GetControlField(name string) string {
-	value := project.CurrentPackage.Source.Get(name)
-	fmt.Printf("Set '%s' to '%s'\n", name, value)
-	return value
+	log.Trace.Println("Entering GetControlField...")
+	defer log.Trace.Println("Exiting GetControlField...")
+
+	return project.CurrentPackage.Source.Get(name)
 }
 
-func (p *pageControl) setDescriptionText(text string) {
-	buffer, err := p.descriptionTextView.GetBuffer()
-	if err != nil {
-		// TODO : Log error
-		return
+// setControlImage: Set a control tab image
+func (p *pageControl) setControlImage(imgName string, imgType imageType) {
+	log.Trace.Println("Entering setControlImage...")
+	defer log.Trace.Println("Exiting setControlImage...")
+
+	img := p.parent.builder.GetObject(imgName).(*gtk.Image)
+	bytes := p.getControlIconBytes(imgType)
+	img.SetFromPixbuf(createPixBufFromBytes(bytes, imgName))
+}
+
+// getControlIconBytes: Get the icon bytes from an image type
+func (p *pageControl) getControlIconBytes(imgType imageType) []byte {
+	log.Trace.Println("Entering getControlIconBytes...")
+	defer log.Trace.Println("Exiting getControlIconBytes...")
+
+	var bytes []byte
+	switch imgType {
+	case imageTypeMandatory:
+		bytes = mandatoryIcon
+	case imageTypeRecommended:
+		bytes = recommendedIcon
+	case imageTypeOptional:
+		bytes = optionalIcon
 	}
-	buffer.SetText(text)
+	return bytes
 }

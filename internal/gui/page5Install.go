@@ -12,6 +12,9 @@ type pageInstall struct {
 
 // setupInstallPage: Set up the install page
 func (m *MainWindow) setupInstallPage() *pageInstall {
+	log.Trace.Println("Entering setupInstallPage...")
+	defer log.Trace.Println("Exiting setupInstallPage...")
+
 	p := &pageInstall{parent: m}
 
 	// AddFileButton
@@ -21,7 +24,16 @@ func (m *MainWindow) setupInstallPage() *pageInstall {
 	return p
 }
 
+func (p *pageInstall) update() {
+	log.Trace.Println("Entering update...")
+	defer log.Trace.Println("Exiting update...")
+
+}
+
 func (p *pageInstall) addFileButtonClicked() {
+	log.Trace.Println("Entering addFileButtonClicked...")
+	defer log.Trace.Println("Exiting addFileButtonClicked...")
+
 	if p.parent.addFileDialog == nil {
 		p.parent.addFileDialog = p.parent.newAddFileDialog()
 	}
@@ -29,13 +41,15 @@ func (p *pageInstall) addFileButtonClicked() {
 }
 
 func (p *pageInstall) editFileButtonClicked() {
+	log.Trace.Println("Entering editFileButtonClicked...")
+	defer log.Trace.Println("Exiting editFileButtonClicked...")
+
 	fmt.Println("Edit file clicked!")
 }
 
 func (p *pageInstall) removeFileButtonClicked() {
+	log.Trace.Println("Entering removeFileButtonClicked...")
+	defer log.Trace.Println("Exiting removeFileButtonClicked...")
+
 	fmt.Println("Remove file clicked!")
-}
-
-func (p *pageInstall) update() {
-
 }

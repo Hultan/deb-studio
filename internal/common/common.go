@@ -3,7 +3,7 @@ package common
 // Application constants
 
 const ApplicationTitle = "Deb Studio"
-const ApplicationVersion = "v 0.2.0"
+const ApplicationVersion = "v 0.2.1"
 const ApplicationCopyRight = "©SoftTeam AB, 2022"
 
 // Exit codes

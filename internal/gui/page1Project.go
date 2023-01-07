@@ -18,6 +18,9 @@ type pageProject struct {
 }
 
 func (m *MainWindow) setupProjectPage() *pageProject {
+	log.Trace.Println("Entering setupProjectPage...")
+	defer log.Trace.Println("Exiting setupProjectPage...")
+
 	p := &pageProject{parent: m}
 
 	p.headerLabel = m.builder.GetObject("mainWindow_projectHeaderLabel").(*gtk.Label)
@@ -31,6 +34,9 @@ func (m *MainWindow) setupProjectPage() *pageProject {
 }
 
 func (p *pageProject) update() {
+	log.Trace.Println("Entering update...")
+	defer log.Trace.Println("Exiting update...")
+
 	if project == nil {
 		p.headerLabel.SetText("Please open or create a project...")
 		return

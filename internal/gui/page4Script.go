@@ -1,8 +1,7 @@
 package gui
 
 import (
-	"io"
-	"os"
+	"fmt"
 	"path"
 	"strconv"
 
@@ -29,6 +28,9 @@ const (
 )
 
 func (m *MainWindow) setupScriptPage() *pageScript {
+	log.Trace.Println("Entering setupScriptPage...")
+	defer log.Trace.Println("Exiting setupScriptPage...")
+
 	p := &pageScript{parent: m}
 
 	cmb := m.builder.GetObject("mainWindow_scriptCombo").(*gtk.ComboBoxText)
@@ -41,30 +43,44 @@ func (m *MainWindow) setupScriptPage() *pageScript {
 }
 
 func (p *pageScript) init() {
-	text, err := p.loadFile(p.getScriptPath(scriptTypePreInstall))
+	log.Trace.Println("Entering init...")
+	defer log.Trace.Println("Exiting init...")
+
+	text, err := readTextFile(p.getScriptPath(scriptTypePreInstall))
 	if err != nil {
-		// TODO : Log error
+		log.Error.Printf("failed to read text from text file '%s': %s\n", p.getScriptPath(scriptTypePreInstall), err)
+		msg := fmt.Sprintf("failed to read text from text file '%s'", p.getScriptPath(scriptTypePreInstall))
+		showErrorDialog(msg, err)
 		return
 	}
 	p.currentScript = scriptTypePreInstall
-	p.setScriptText(text)
+	setTextViewText(p.scriptTextView, text)
 }
 
-func (p *pageScript) update() {}
+func (p *pageScript) update() {
+	log.Trace.Println("Entering update...")
+	defer log.Trace.Println("Exiting update...")
+}
 
 func (p *pageScript) scriptChanged(cmb *gtk.ComboBoxText) {
+	log.Trace.Println("Entering scriptChanged...")
+	defer log.Trace.Println("Exiting scriptChanged...")
+
 	var err error
 
 	// Save previous script
-	content, err := p.getScriptText()
+	content, err := getTextViewText(p.scriptTextView)
 	if err != nil {
-		// TODO : Failed to retrieve text, notify user
+		log.Error.Printf("failed to get text from textview: %s\n", err)
+		showErrorDialog("Failed to get text from textview", err)
 		return
 
 	}
-	err = p.saveFile(p.getScriptPath(p.currentScript), content)
+	err = writeTextFile(p.getScriptPath(p.currentScript), content)
 	if err != nil {
-		// TODO : Log error, notify user
+		log.Error.Printf("failed to write text to file '%s': %s\n", p.getScriptPath(p.currentScript), err)
+		msg := fmt.Sprintf("failed to write text to file %s", p.getScriptPath(p.currentScript))
+		showErrorDialog(msg, err)
 		return
 	}
 
@@ -72,53 +88,25 @@ func (p *pageScript) scriptChanged(cmb *gtk.ComboBoxText) {
 	newIndexStr := cmb.GetActiveID()
 	newIndex, err := strconv.Atoi(newIndexStr)
 	if err != nil {
-		// TODO : Log error
+		log.Error.Printf("failed to get active id: %s\n", err)
+		showErrorDialog("failed to get active id", err)
 		return
 	}
-	text, err := p.loadFile(p.getScriptPath(scriptType(newIndex)))
+	text, err := readTextFile(p.getScriptPath(scriptType(newIndex)))
 	if err != nil {
-		// TODO : Log error, notify user
+		log.Error.Printf("failed to read text from text file '%s': %s\n", p.getScriptPath(scriptType(newIndex)), err)
+		msg := fmt.Sprintf("failed to read text from text file '%s'", p.getScriptPath(scriptType(newIndex)))
+		showErrorDialog(msg, err)
 		return
 	}
 	p.currentScript = scriptType(newIndex)
-	p.setScriptText(text)
-}
-
-func (p *pageScript) loadFile(path string) (string, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		// TODO : Log error
-		return "", err
-	}
-	text, err := io.ReadAll(f)
-	if err != nil {
-		// TODO : Log error
-		return "", err
-	}
-
-	return string(text), nil
-}
-
-func (p *pageScript) saveFile(path, content string) error {
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-	if err != nil {
-		// TODO : Log error
-		return err
-	}
-	n, err := io.WriteString(f, content)
-	if err != nil {
-		// TODO : Log error
-		return err
-	}
-	if n != len(content) {
-		// TODO : Log error
-		return err
-	}
-
-	return nil
+	setTextViewText(p.scriptTextView, text)
 }
 
 func (p *pageScript) getScriptPath(script scriptType) string {
+	log.Trace.Println("Entering getScriptPath...")
+	defer log.Trace.Println("Exiting getScriptPath...")
+
 	fileName := ""
 
 	switch script {
@@ -131,7 +119,7 @@ func (p *pageScript) getScriptPath(script scriptType) string {
 	case scriptTypePostRemove:
 		fileName = "postrm"
 	default:
-		// TODO : Error
+		log.Error.Printf("invalid script type in getScriptPath(): %d\n", int(script))
 		return ""
 	}
 
@@ -141,27 +129,4 @@ func (p *pageScript) getScriptPath(script scriptType) string {
 		common.DebianFolderName,
 		fileName,
 	)
-}
-
-func (p *pageScript) setScriptText(text string) {
-	buffer, err := p.scriptTextView.GetBuffer()
-	if err != nil {
-		// TODO : Log error
-		return
-	}
-	buffer.SetText(text)
-}
-
-func (p *pageScript) getScriptText() (string, error) {
-	buffer, err := p.scriptTextView.GetBuffer()
-	if err != nil {
-		// TODO : Log error
-		return "", err
-	}
-	text, err := buffer.GetText(buffer.GetStartIter(), buffer.GetEndIter(), true)
-	if err != nil {
-		// TODO : Log error
-		return "", err
-	}
-	return text, nil
 }
