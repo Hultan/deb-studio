@@ -3,6 +3,7 @@ module github.com/hultan/deb-studio
 go 1.19
 
 replace pault.ag/go/debian v0.12.0 => "/home/per/code/go-debian"
+replace github.com/hultan/dialog v1.0.1 => "/home/per/code/dialog"
 
 require (
 	github.com/google/uuid v1.3.0

@@ -44,7 +44,7 @@ func (m *MainWindow) Open(app *gtk.Application) {
 	// Initialize gtk and create a builder
 	gtk.Init(&os.Args)
 
-	m.builder = builder.NewBuilder(mainGlade)
+	m.builder = builder.NewBuilder(log, mainGlade)
 
 	// Main window
 	m.window = m.builder.GetObject("mainWindow").(*gtk.ApplicationWindow)

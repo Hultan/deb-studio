@@ -3,7 +3,7 @@ package common
 // Application constants
 
 const ApplicationTitle = "Deb Studio"
-const ApplicationVersion = "v 0.2.2"
+const ApplicationVersion = "v 0.2.3"
 const ApplicationCopyRight = "©SoftTeam AB, 2022"
 
 // Exit codes
@@ -40,6 +40,9 @@ const (
 	FileNamePreRemove   = "prerm"
 	FileNamePostRemove  = "postrm"
 	FileNameLog         = "debstudio.log"
+	FileNameCopyRight   = "copyright"
+	FileNameChangeLog   = "changelog"
+	FileNameReadme      = "README.debian"
 )
 
 // Misc constants

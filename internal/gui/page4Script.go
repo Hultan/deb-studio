@@ -13,8 +13,8 @@ import (
 type pageScript struct {
 	parent *MainWindow
 
-	scriptTextView *gtk.TextView
-	currentScript  scriptType
+	textView      *gtk.TextView
+	currentScript scriptType
 }
 
 type scriptType int
@@ -36,7 +36,7 @@ func (m *MainWindow) setupScriptPage() *pageScript {
 	cmb := m.builder.GetObject("mainWindow_scriptCombo").(*gtk.ComboBoxText)
 	cmb.Connect("changed", p.scriptChanged)
 
-	p.scriptTextView = m.builder.GetObject("mainWindow_scriptTextView").(*gtk.TextView)
+	p.textView = m.builder.GetObject("mainWindow_scriptTextView").(*gtk.TextView)
 	p.currentScript = scriptTypeNone
 
 	return p
@@ -54,7 +54,7 @@ func (p *pageScript) init() {
 		return
 	}
 	p.currentScript = scriptTypePreInstall
-	setTextViewText(p.scriptTextView, text)
+	setTextViewText(p.textView, text)
 }
 
 func (p *pageScript) update() {
@@ -69,17 +69,18 @@ func (p *pageScript) scriptChanged(cmb *gtk.ComboBoxText) {
 	var err error
 
 	// Save previous script
-	content, err := getTextViewText(p.scriptTextView)
+	content, err := getTextViewText(p.textView)
 	if err != nil {
 		log.Error.Printf("failed to get text from textview: %s\n", err)
 		showErrorDialog("Failed to get text from textview", err)
 		return
 
 	}
-	err = writeTextFile(p.getScriptPath(p.currentScript), content)
+	scriptPath := p.getScriptPath(p.currentScript)
+	err = writeTextFile(scriptPath, content)
 	if err != nil {
-		log.Error.Printf("failed to write text to file '%s': %s\n", p.getScriptPath(p.currentScript), err)
-		msg := fmt.Sprintf("failed to write text to file %s", p.getScriptPath(p.currentScript))
+		log.Error.Printf("failed to write text to file '%s': %s\n", scriptPath, err)
+		msg := fmt.Sprintf("failed to write text to file %s", scriptPath)
 		showErrorDialog(msg, err)
 		return
 	}
@@ -92,15 +93,16 @@ func (p *pageScript) scriptChanged(cmb *gtk.ComboBoxText) {
 		showErrorDialog("failed to get active id", err)
 		return
 	}
-	text, err := readTextFile(p.getScriptPath(scriptType(newIndex)))
+	scriptPath = p.getScriptPath(scriptType(newIndex))
+	text, err := readTextFile(scriptPath)
 	if err != nil {
-		log.Error.Printf("failed to read text from text file '%s': %s\n", p.getScriptPath(scriptType(newIndex)), err)
-		msg := fmt.Sprintf("failed to read text from text file '%s'", p.getScriptPath(scriptType(newIndex)))
+		log.Error.Printf("failed to read text from text file '%s': %s\n", scriptPath, err)
+		msg := fmt.Sprintf("failed to read text from text file '%s'", scriptPath)
 		showErrorDialog(msg, err)
 		return
 	}
 	p.currentScript = scriptType(newIndex)
-	setTextViewText(p.scriptTextView, text)
+	setTextViewText(p.textView, text)
 }
 
 func (p *pageScript) getScriptPath(script scriptType) string {

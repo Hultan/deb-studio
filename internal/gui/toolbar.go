@@ -107,6 +107,7 @@ func (m *MainWindow) openButtonClicked() {
 		// Update gui
 		m.pages.controlPage.init()
 		m.pages.scriptPage.init()
+		m.pages.textPage.init()
 		if project.Config.ShowOnlyLatestVersion {
 			m.pages.packagePage.showOnlyCheckBox.SetActive(true)
 		}
