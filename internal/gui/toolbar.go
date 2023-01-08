@@ -73,46 +73,49 @@ func (m *MainWindow) openButtonClicked() {
 	// TODO : Handle if a project is already open
 
 	var err error
-	dlg, err := gtk.FileChooserDialogNewWith2Buttons(
-		"Select folder...", m.window, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
-		"OK", gtk.RESPONSE_ACCEPT,
-		"Cancel", gtk.RESPONSE_CANCEL,
-	)
+	// dlg, err := gtk.FileChooserDialogNewWith2Buttons(
+	// 	"Select folder...", m.window, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+	// 	"OK", gtk.RESPONSE_ACCEPT,
+	// 	"Cancel", gtk.RESPONSE_CANCEL,
+	// )
+	// if err != nil {
+	// 	log.Error.Printf("failed to create fileChooserDialog: %s\n", err)
+	// 	showErrorDialog("Failed to open fileChooserDialog!", err)
+	// 	return
+	// }
+	// dlg.SetCurrentFolder("/home/per/installs/softtube")
+	//
+	// response := dlg.Run()
+	// dlg.Hide()
+	// if response != gtk.RESPONSE_ACCEPT {
+	// 	return
+	// }
+
+	projectFolder := "/home/per/installs/softtube"
+	// projectFolder, err := dlg.GetCurrentFolder()
+	// if err != nil {
+	// 	log.Error.Printf("failed to get folder from fileChooserDialog: %s\n", err)
+	// 	msg := "Failed to get folder from fileChooserDialog!"
+	// 	showErrorDialog(msg, err)
+	// 	return
+	// }
+	project, err = engine.OpenProject(log, projectFolder)
+	// TODO: Handle if project.json does not exist
 	if err != nil {
-		log.Error.Printf("failed to create fileChooserDialog: %s\n", err)
-		showErrorDialog("Failed to open fileChooserDialog!", err)
+		log.Error.Printf("failure during opening of '%s': %s", projectFolder, err)
+		msg := fmt.Sprintf("failed to open project folder: %s", err)
+		showErrorDialog(msg, err)
 		return
 	}
-	dlg.SetCurrentFolder("/home/per/installs/softtube")
 
-	response := dlg.Run()
-	dlg.Hide()
-	if response == gtk.RESPONSE_ACCEPT {
-		projectFolder, err := dlg.GetCurrentFolder()
-		if err != nil {
-			log.Error.Printf("failed to get folder from fileChooserDialog: %s\n", err)
-			msg := "Failed to get folder from fileChooserDialog!"
-			showErrorDialog(msg, err)
-			return
-		}
-		project, err = engine.OpenProject(log, projectFolder)
-		// TODO: Handle if project.json does not exist
-		if err != nil {
-			log.Error.Printf("failure during opening of '%s': %s", projectFolder, err)
-			msg := fmt.Sprintf("failed to open project folder: %s", err)
-			showErrorDialog(msg, err)
-			return
-		}
-
-		// Update gui
-		m.pages.controlPage.init()
-		m.pages.scriptPage.init()
-		m.pages.textPage.init()
-		if project.Config.ShowOnlyLatestVersion {
-			m.pages.packagePage.showOnlyCheckBox.SetActive(true)
-		}
-		m.pages.update()
+	// Update gui
+	m.pages.controlPage.init()
+	m.pages.scriptPage.init()
+	m.pages.textPage.init()
+	if project.Config.ShowOnlyLatestVersion {
+		m.pages.packagePage.showOnlyCheckBox.SetActive(true)
 	}
+	m.pages.update()
 }
 
 // buildButtonClicked: Handler for the build button clicked signal

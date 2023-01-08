@@ -34,6 +34,10 @@ func (m *MainWindow) setupControlPage() *pageControl {
 	p := &pageControl{parent: m}
 
 	p.packageEntry = m.builder.GetObject("mainWindow_packageEntry").(*gtk.Entry)
+	// secondaryIcon, _ := gdk.PixbufNewFromBytesOnly(optionalIcon)
+	// p.packageEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_SECONDARY, secondaryIcon)
+	// p.packageEntry.SetIconTooltipText(gtk.ENTRY_ICON_SECONDARY, "Detta är ett test")
+	// p.packageEntry.Connect("icon-press", test)
 	p.packageEntry.Connect("focus-out-event", p.focusOut)
 	p.versionEntry = m.builder.GetObject("mainWindow_versionEntry").(*gtk.Entry)
 	p.versionEntry.Connect("focus-out-event", p.focusOut)
@@ -204,4 +208,8 @@ func (p *pageControl) getControlIconBytes(imgType imageType) []byte {
 		bytes = optionalIcon
 	}
 	return bytes
+}
+
+func test() {
+	fmt.Println("test")
 }
