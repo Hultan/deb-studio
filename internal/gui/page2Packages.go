@@ -144,7 +144,7 @@ func (p *pagePackage) listPackages() {
 		return
 	}
 
-	store := project.GetPackageListStore(checkIcon, editIcon)
+	store := project.GetPackageListStore()
 	p.projectList.RefreshList(store)
 }
 

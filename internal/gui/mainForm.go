@@ -1,6 +1,7 @@
 package gui
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"path"
@@ -11,13 +12,18 @@ import (
 	"github.com/hultan/deb-studio/internal/builder"
 	"github.com/hultan/deb-studio/internal/common"
 	"github.com/hultan/deb-studio/internal/engine"
+	"github.com/hultan/deb-studio/internal/iconFactory"
 	"github.com/hultan/deb-studio/internal/logger"
 )
+
+//go:embed assets/main.glade
+var mainGlade string
 
 // MainWindow : Struct for the main form
 type MainWindow struct {
 	builder *builder.Builder
 	window  *gtk.ApplicationWindow
+	image   *iconFactory.ImageFactory
 
 	// Pages
 	pages *stackPages
@@ -45,10 +51,11 @@ func (m *MainWindow) Open(app *gtk.Application) {
 	gtk.Init(&os.Args)
 
 	m.builder = builder.NewBuilder(log, mainGlade)
+	m.image = iconFactory.NewImageFactory()
 
 	// Main window
 	m.window = m.builder.GetObject("mainWindow").(*gtk.ApplicationWindow)
-	m.window.SetIcon(createPixBufFromBytes(applicationIcon, "application"))
+	m.window.SetIcon(m.image.GetPixBuf(iconFactory.ImageApplication))
 	m.window.SetApplication(app)
 	m.window.SetTitle(getApplicationName())
 	m.window.SetPosition(gtk.WIN_POS_CENTER)

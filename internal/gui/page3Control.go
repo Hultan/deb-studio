@@ -5,6 +5,8 @@ import (
 
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
+
+	"github.com/hultan/deb-studio/internal/iconFactory"
 )
 
 type pageControl struct {
@@ -65,19 +67,19 @@ func (m *MainWindow) setupControlPage() *pageControl {
 	p.builtUsingEntry = m.builder.GetObject("mainWindow_builtUsingEntry").(*gtk.Entry)
 	p.builtUsingEntry.Connect("focus-out-event", p.focusOut)
 
-	p.setControlImage("imgPackage", imageTypeMandatory)
-	p.setControlImage("imgSource", imageTypeOptional)
-	p.setControlImage("imgVersion", imageTypeMandatory)
-	p.setControlImage("imgSection", imageTypeRecommended)
-	p.setControlImage("imgPriority", imageTypeRecommended)
-	p.setControlImage("imgArchitecture", imageTypeMandatory)
-	p.setControlImage("imgEssential", imageTypeOptional)
-	p.setControlImage("imgDepends", imageTypeOptional)
-	p.setControlImage("imgInstalledSize", imageTypeOptional)
-	p.setControlImage("imgMaintainer", imageTypeMandatory)
-	p.setControlImage("imgDescription", imageTypeMandatory)
-	p.setControlImage("imgHomePage", imageTypeOptional)
-	p.setControlImage("imgBuiltUsing", imageTypeOptional)
+	p.setControlImage("imgPackage", iconFactory.ImageMandatory)
+	p.setControlImage("imgSource", iconFactory.ImageOptional)
+	p.setControlImage("imgVersion", iconFactory.ImageMandatory)
+	p.setControlImage("imgSection", iconFactory.ImageRecommended)
+	p.setControlImage("imgPriority", iconFactory.ImageRecommended)
+	p.setControlImage("imgArchitecture", iconFactory.ImageMandatory)
+	p.setControlImage("imgEssential", iconFactory.ImageOptional)
+	p.setControlImage("imgDepends", iconFactory.ImageOptional)
+	p.setControlImage("imgInstalledSize", iconFactory.ImageOptional)
+	p.setControlImage("imgMaintainer", iconFactory.ImageMandatory)
+	p.setControlImage("imgDescription", iconFactory.ImageMandatory)
+	p.setControlImage("imgHomePage", iconFactory.ImageOptional)
+	p.setControlImage("imgBuiltUsing", iconFactory.ImageOptional)
 
 	return p
 }
@@ -184,32 +186,11 @@ func (p *pageControl) GetControlField(name string) string {
 }
 
 // setControlImage: Set a control tab image
-func (p *pageControl) setControlImage(imgName string, imgType imageType) {
+func (p *pageControl) setControlImage(imgName string, imgType iconFactory.Image) {
 	log.Trace.Println("Entering setControlImage...")
 	defer log.Trace.Println("Exiting setControlImage...")
 
 	img := p.parent.builder.GetObject(imgName).(*gtk.Image)
-	bytes := p.getControlIconBytes(imgType)
-	img.SetFromPixbuf(createPixBufFromBytes(bytes, imgName))
-}
-
-// getControlIconBytes: Get the icon bytes from an image type
-func (p *pageControl) getControlIconBytes(imgType imageType) []byte {
-	log.Trace.Println("Entering getControlIconBytes...")
-	defer log.Trace.Println("Exiting getControlIconBytes...")
-
-	var bytes []byte
-	switch imgType {
-	case imageTypeMandatory:
-		bytes = mandatoryIcon
-	case imageTypeRecommended:
-		bytes = recommendedIcon
-	case imageTypeOptional:
-		bytes = optionalIcon
-	}
-	return bytes
-}
-
-func test() {
-	fmt.Println("test")
+	pix := p.parent.image.GetPixBuf(imgType)
+	img.SetFromPixbuf(pix)
 }

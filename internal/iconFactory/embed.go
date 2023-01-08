@@ -1,14 +1,14 @@
-package gui
+package iconFactory
 
 import _ "embed"
 
 // TODO : Switch buildIcon to package (see aboutDialog)
 
-//go:embed assets/main.glade
-var mainGlade string
-
-//go:embed assets/debstudio_256.png
+//go:embed assets/application.png
 var applicationIcon []byte
+
+//go:embed assets/debstudio.png
+var debStudioIcon []byte
 
 //go:embed assets/mandatory.png
 var mandatoryIcon []byte

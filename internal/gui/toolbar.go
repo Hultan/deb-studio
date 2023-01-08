@@ -6,6 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 
 	"github.com/hultan/deb-studio/internal/engine"
+	"github.com/hultan/deb-studio/internal/iconFactory"
 )
 
 // setupToolbar: Set up the toolbar
@@ -17,25 +18,25 @@ func (m *MainWindow) setupToolbar() {
 	btn := m.builder.GetObject("toolbar_newButton").(*gtk.ToolButton)
 	btn.Connect("clicked", m.newButtonClicked)
 	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(newIcon, "new"))
+	btn.SetIconWidget(m.image.GetImage(iconFactory.ImageNew))
 
 	// Toolbar open button
 	btn = m.builder.GetObject("toolbar_openButton").(*gtk.ToolButton)
 	btn.Connect("clicked", m.openButtonClicked)
 	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(openIcon, "open"))
+	btn.SetIconWidget(m.image.GetImage(iconFactory.ImageOpen))
 
 	// Toolbar build button
 	btn = m.builder.GetObject("toolbar_buildButton").(*gtk.ToolButton)
 	btn.Connect("clicked", m.buildButtonClicked)
 	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(buildIcon, "build"))
+	btn.SetIconWidget(m.image.GetImage(iconFactory.ImageBuild))
 
 	// Toolbar quit button
 	btn = m.builder.GetObject("toolbar_quitButton").(*gtk.ToolButton)
 	btn.Connect("clicked", m.window.Close)
 	btn.SetIsImportant(true)
-	btn.SetIconWidget(createImageFromBytes(exitIcon, "quit"))
+	btn.SetIconWidget(m.image.GetImage(iconFactory.ImageExit))
 }
 
 // newButtonClicked: Handler for the newButtonClicked button clicked signal

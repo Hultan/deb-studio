@@ -15,6 +15,7 @@ import (
 	"github.com/hultan/deb-studio/internal/common"
 	"github.com/hultan/deb-studio/internal/config/packageConfig"
 	"github.com/hultan/deb-studio/internal/config/projectConfig"
+	"github.com/hultan/deb-studio/internal/iconFactory"
 	"github.com/hultan/deb-studio/internal/logger"
 )
 
@@ -187,7 +188,7 @@ func (p *Project) SetShowOnlyLatestVersion(checked bool) {
 	p.Config.ShowOnlyLatestVersion = checked
 }
 
-func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModelFilter {
+func (p *Project) GetPackageListStore() *gtk.TreeModelFilter {
 	log.Trace.Println("Entering GetPackageListStore...")
 	defer log.Trace.Println("Exiting GetPackageListStore...")
 
@@ -201,8 +202,10 @@ func (p *Project) GetPackageListStore(checkIcon, editIcon []byte) *gtk.TreeModel
 		return nil
 	}
 
-	check, _ := gdk.PixbufNewFromBytesOnly(checkIcon)
-	edit, _ := gdk.PixbufNewFromBytesOnly(editIcon)
+	// Get images
+	fac := iconFactory.NewImageFactory()
+	check := fac.GetPixBuf(iconFactory.ImageCheck)
+	edit := fac.GetPixBuf(iconFactory.ImageEdit)
 	for _, pkg := range p.Packages {
 		iter := s.InsertAfter(nil)
 		data := []interface{}{
